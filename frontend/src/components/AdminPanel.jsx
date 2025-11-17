@@ -346,6 +346,21 @@ const AdminPanel = () => {
           </CardContent>
         </Card>
 
+        {/* Sponsor Management - ADMIN ONLY */}
+        <Card className="mb-6 border-2 border-purple-400">
+          <CardHeader>
+            <CardTitle className="text-purple-800">🎨 Sponsor Logo Management</CardTitle>
+            <CardDescription>Upload and manage sponsor logos (Admin Only)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1, 2, 3].map((num) => (
+                <SponsorUploadAdmin key={num} slotNumber={num} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Members List */}
         <Card>
           <CardHeader>
