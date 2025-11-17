@@ -261,7 +261,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
               </p>
               <p className="text-lg font-bold text-red-700">{localProfile.name}</p>
               <p className="text-sm text-gray-600">
-                {localProfile.age}, {localProfile.sex}
+                {localProfile.age}, {localProfile.sex} {localProfile.sexualOrientation ? `• ${localProfile.sexualOrientation}` : ''}
               </p>
               <p className="text-xs italic text-gray-500">
                 Last Updated: {formatDate(localProfile.lastUpdated)}
