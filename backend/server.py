@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
@@ -27,44 +27,142 @@ api_router = APIRouter(prefix="/api")
 
 
 # Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
+class Reference(BaseModel):
+    membershipId: str
+    name: str
+    addedOn: str
+
+class DonorProfile(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    membershipId: str
+    name: str
+    photo: Optional[str] = ""
+    references: List[Reference] = []
+    createdAt: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updatedAt: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class ProfileCreate(BaseModel):
+    name: str
+    photo: Optional[str] = ""
 
-# Add your routes to the router instead of directly to app
+class ReferenceAdd(BaseModel):
+    membershipId: str
+    name: str
+
+# Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Clean Check API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
+@api_router.post("/profiles")
+async def create_or_update_profile(profile: ProfileCreate):
+    """
+    Create a new profile with auto-generated membership ID or update existing
+    """
+    membership_id = str(uuid.uuid4())
     
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
+    profile_doc = {
+        "membershipId": membership_id,
+        "name": profile.name,
+        "photo": profile.photo or "",
+        "references": [],
+        "createdAt": datetime.now(timezone.utc).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat()
+    }
     
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+    await db.profiles.insert_one(profile_doc)
+    
+    return {
+        "membershipId": membership_id,
+        "name": profile.name,
+        "photo": profile.photo
+    }
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
+@api_router.get("/profiles/{membership_id}")
+async def get_profile(membership_id: str):
+    """
+    Get profile by membership ID
+    """
+    profile = await db.profiles.find_one({"membershipId": membership_id}, {"_id": 0})
     
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
     
-    return status_checks
+    return profile
+
+@api_router.put("/profiles/{membership_id}")
+async def update_profile(membership_id: str, profile: ProfileCreate):
+    """
+    Update profile name and photo
+    """
+    existing = await db.profiles.find_one({"membershipId": membership_id})
+    
+    if not existing:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    update_data = {
+        "name": profile.name,
+        "photo": profile.photo or "",
+        "updatedAt": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.profiles.update_one(
+        {"membershipId": membership_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Profile updated", "membershipId": membership_id}
+
+@api_router.post("/profiles/{membership_id}/references")
+async def add_reference(membership_id: str, reference: ReferenceAdd):
+    """
+    Add a reference to user's profile
+    """
+    profile = await db.profiles.find_one({"membershipId": membership_id})
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    # Check if reference exists
+    ref_profile = await db.profiles.find_one({"membershipId": reference.membershipId})
+    if not ref_profile:
+        raise HTTPException(status_code=404, detail="Referenced profile not found")
+    
+    # Check if already added
+    existing_refs = profile.get('references', [])
+    if any(ref['membershipId'] == reference.membershipId for ref in existing_refs):
+        raise HTTPException(status_code=400, detail="Reference already exists")
+    
+    new_reference = {
+        "membershipId": reference.membershipId,
+        "name": reference.name,
+        "addedOn": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.profiles.update_one(
+        {"membershipId": membership_id},
+        {"$push": {"references": new_reference}}
+    )
+    
+    return {"message": "Reference added", "reference": new_reference}
+
+@api_router.delete("/profiles/{membership_id}/references/{ref_id}")
+async def remove_reference(membership_id: str, ref_id: str):
+    """
+    Remove a reference from user's profile
+    """
+    profile = await db.profiles.find_one({"membershipId": membership_id})
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    await db.profiles.update_one(
+        {"membershipId": membership_id},
+        {"$pull": {"references": {"membershipId": ref_id}}}
+    )
+    
+    return {"message": "Reference removed"}
 
 # Include the router in the main app
 app.include_router(api_router)
