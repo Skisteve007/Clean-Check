@@ -241,7 +241,7 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
     return (
       <Card className="border-2 border-green-400 bg-green-50" data-testid="document-upload-card">
         <CardHeader>
-          <CardTitle className="text-green-800">✅ Payment Approved!</CardTitle>
+          <CardTitle className="text-green-800">✅ Payment Confirmed!</CardTitle>
           <CardDescription>Upload your health document to unlock QR code</CardDescription>
         </CardHeader>
         <CardContent>
