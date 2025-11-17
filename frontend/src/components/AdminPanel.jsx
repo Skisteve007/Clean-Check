@@ -16,6 +16,7 @@ const AdminPanel = () => {
   const [profiles, setProfiles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [pendingPayments, setPendingPayments] = useState([]);
 
   useEffect(() => {
     // Check if already logged in (stored in session)
