@@ -56,7 +56,7 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
         ...paymentForm
       });
 
-      toast.success('Payment confirmation submitted! Admin will review shortly.');
+      toast.success('Payment confirmation submitted! Awaiting admin confirmation.');
       loadStatus();
       setPaymentForm({ paymentMethod: '', amount: '', transactionId: '', notes: '' });
     } catch (error) {
