@@ -640,44 +640,6 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      {/* Relationship Status */}
-      <div>
-        <Label>Relationship Status (Select all that apply)</Label>
-        <div className="flex flex-wrap gap-4 p-2 bg-gray-100 rounded-lg mt-1">
-          {['Single', 'Married', 'Poly'].map((status) => (
-            <div key={status} className="flex items-center space-x-2">
-              <Checkbox
-                id={`rel-${status}`}
-                checked={(profileForm.relationshipStatus || []).includes(status)}
-                onCheckedChange={() => toggleArrayValue('relationshipStatus', status)}
-              />
-              <Label htmlFor={`rel-${status}`} className="text-sm">
-                {status}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Sexual Orientation */}
-      <div>
-        <Label>Sexual Orientation (Select all that apply)</Label>
-        <div className="flex flex-wrap gap-4 p-2 bg-gray-100 rounded-lg mt-1">
-          {['Gay', 'Bi', 'Straight'].map((orientation) => (
-            <div key={orientation} className="flex items-center space-x-2">
-              <Checkbox
-                id={`orient-${orientation}`}
-                checked={(profileForm.sexualOrientation || []).includes(orientation)}
-                onCheckedChange={() => toggleArrayValue('sexualOrientation', orientation)}
-              />
-              <Label htmlFor={`orient-${orientation}`} className="text-sm">
-                {orientation}
-              </Label>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Acknowledged STDs */}
       <div>
         <Label htmlFor="acknowledgedStds" className="font-bold text-red-700">
