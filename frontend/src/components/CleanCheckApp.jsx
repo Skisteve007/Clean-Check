@@ -12,6 +12,11 @@ const CleanCheckApp = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Track site visit
+    axios.post(`${API}/track-visit`, { page: window.location.pathname }).catch(err => {
+      console.log('Failed to track visit:', err);
+    });
+
     // Check if we have a membership ID in localStorage
     const storedId = localStorage.getItem('cleanCheckMembershipId');
     
