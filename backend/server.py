@@ -117,7 +117,7 @@ async def get_admin_stats(password: str):
 
 # Admin - Get All Profiles
 @api_router.get("/admin/profiles")
-async def get_all_profiles(password: str, search: str = ""):
+async def get_all_profiles(password: str, search: str = "", limit: int = 100, skip: int = 0):
     verify_admin(password)
     
     query = {}
@@ -127,7 +127,8 @@ async def get_all_profiles(password: str, search: str = ""):
             {"membershipId": {"$regex": search, "$options": "i"}}
         ]}
     
-    profiles = await db.profiles.find(query, {"_id": 0}).sort("createdAt", -1).to_list(1000)
+    # Add pagination for better performance
+    profiles = await db.profiles.find(query, {"_id": 0}).sort("createdAt", -1).skip(skip).limit(limit).to_list(limit)
     return profiles
 
 # Admin - Delete Profile
