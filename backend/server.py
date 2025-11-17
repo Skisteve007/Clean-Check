@@ -160,7 +160,7 @@ async def approve_payment(membership_id: str, password: str):
         }}
     )
     
-    return {"message": "Payment approved. User can now upload documents."}
+    return {"message": "Payment confirmed. User can now upload documents."}
 
 # Admin - Reject Payment
 @api_router.post("/admin/payments/reject/{membership_id}")
