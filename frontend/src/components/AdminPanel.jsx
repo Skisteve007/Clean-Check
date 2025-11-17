@@ -415,4 +415,89 @@ const AdminPanel = () => {
   );
 };
 
+// Sponsor Upload Component - ADMIN ONLY
+const SponsorUploadAdmin = ({ slotNumber }) => {
+  const [logoSrc, setLogoSrc] = React.useState(null);
+  const [uploading, setUploading] = React.useState(false);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem(`sponsorLogo${slotNumber}`);
+    if (saved) {
+      setLogoSrc(saved);
+    }
+  }, [slotNumber]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target.result;
+      setLogoSrc(base64);
+      localStorage.setItem(`sponsorLogo${slotNumber}`, base64);
+      setUploading(false);
+      toast.success(`Sponsor Logo ${slotNumber} updated!`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemove = () => {
+    if (window.confirm('Remove this sponsor logo?')) {
+      localStorage.removeItem(`sponsorLogo${slotNumber}`);
+      setLogoSrc(null);
+      toast.success(`Sponsor Logo ${slotNumber} removed`);
+    }
+  };
+
+  const colors = [
+    'bg-yellow-50 border-yellow-300',
+    'bg-green-50 border-green-300',
+    'bg-blue-50 border-blue-300'
+  ];
+
+  return (
+    <div className="flex flex-col items-center space-y-2">
+      <p className="text-sm font-semibold text-gray-700">Sponsor Slot {slotNumber}</p>
+      <div className={`w-32 h-16 border-2 ${colors[slotNumber - 1]} rounded-lg overflow-hidden flex items-center justify-center`}>
+        {logoSrc ? (
+          <img src={logoSrc} alt={`Sponsor ${slotNumber}`} className="w-full h-full object-contain" />
+        ) : (
+          <p className="text-xs text-gray-400">No Logo</p>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <Button
+          onClick={() => document.getElementById(`adminSponsorUpload${slotNumber}`).click()}
+          variant="outline"
+          size="sm"
+          disabled={uploading}
+          data-testid={`admin-sponsor-upload-btn-${slotNumber}`}
+        >
+          {uploading ? 'Uploading...' : logoSrc ? 'Change' : 'Upload'}
+        </Button>
+        {logoSrc && (
+          <Button
+            onClick={handleRemove}
+            variant="destructive"
+            size="sm"
+            data-testid={`admin-sponsor-remove-btn-${slotNumber}`}
+          >
+            Remove
+          </Button>
+        )}
+      </div>
+      <input
+        type="file"
+        id={`adminSponsorUpload${slotNumber}`}
+        className="hidden"
+        accept="image/jpeg, image/png"
+        onChange={handleFileChange}
+      />
+    </div>
+  );
+};
+
 export default AdminPanel;
