@@ -461,7 +461,7 @@ const SponsorUploadAdmin = ({ slotNumber }) => {
   return (
     <div className="flex flex-col items-center space-y-2">
       <p className="text-sm font-semibold text-gray-700">Sponsor Slot {slotNumber}</p>
-      <div className={`w-32 h-16 border-2 ${colors[slotNumber - 1]} rounded-lg overflow-hidden flex items-center justify-center`}>
+      <div className={`w-48 h-24 border-2 ${colors[slotNumber - 1]} rounded-lg overflow-hidden flex items-center justify-center`}>
         {logoSrc ? (
           <img src={logoSrc} alt={`Sponsor ${slotNumber}`} className="w-full h-full object-contain" />
         ) : (
