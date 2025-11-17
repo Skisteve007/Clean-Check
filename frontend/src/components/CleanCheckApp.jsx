@@ -165,10 +165,10 @@ const SponsorSlot = ({ slotNumber }) => {
         data-testid={`sponsor-slot-${slotNumber}`}
       >
         <img
-          src={logoSrc || `https://placehold.co/100x40/${slotNumber === 1 ? 'fef3c7/a16207' : slotNumber === 2 ? 'd1fae5/065f46' : 'e0e7ff/3730a3'}?text=Logo+${slotNumber}`}
+          src={logoSrc || `https://placehold.co/150x60/${slotNumber === 1 ? 'fef3c7/a16207' : slotNumber === 2 ? 'd1fae5/065f46' : 'e0e7ff/3730a3'}?text=Logo+${slotNumber}`}
           alt={`Sponsor ${slotNumber} Logo`}
           onError={(e) => {
-            e.target.src = `https://placehold.co/100x40/cccccc/666666?text=Logo+${slotNumber}`;
+            e.target.src = `https://placehold.co/150x60/cccccc/666666?text=Logo+${slotNumber}`;
           }}
         />
       </div>
