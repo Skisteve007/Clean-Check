@@ -96,14 +96,17 @@ async def get_admin_stats(password: str):
     verify_admin(password)
     
     total_users = await db.profiles.count_documents({})
-    total_references = await db.profiles.aggregate([
-        {"$unwind": {"path": "$references", "preserveNullAndEmptyArrays": True}},
-        {"$group": {"_id": None, "count": {"$sum": 1}}}
+    
+    # Count only actual references (optimized)
+    total_references_result = await db.profiles.aggregate([
+        {"$match": {"references": {"$exists": True, "$ne": []}}},
+        {"$unwind": "$references"},
+        {"$count": "total"}
     ]).to_list(1)
     
     total_visits = await db.site_visits.count_documents({})
     
-    ref_count = total_references[0]['count'] if total_references and total_references[0]['_id'] is not None else 0
+    ref_count = total_references_result[0]['total'] if total_references_result else 0
     
     return {
         "totalUsers": total_users,
