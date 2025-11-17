@@ -265,7 +265,7 @@ const AdminPanel = () => {
           <Card className="mb-6 border-2 border-yellow-400">
             <CardHeader>
               <CardTitle className="text-yellow-800">🔔 Pending Payment Confirmations</CardTitle>
-              <CardDescription>Review and approve user payment confirmations</CardDescription>
+              <CardDescription>Review and confirm user payments</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
