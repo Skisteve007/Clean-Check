@@ -919,7 +919,7 @@ const PaymentSection = () => (
       <strong>Zelle:</strong> pitbossent@gmail.com
     </p>
     <p className="mt-2 text-xs text-gray-600">
-      After payment, use the payment confirmation form above to notify admin for approval.
+      After payment, use the payment confirmation form above to notify admin for confirmation.
     </p>
   </div>
 );
