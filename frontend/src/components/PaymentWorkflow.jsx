@@ -181,21 +181,21 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
     );
   }
 
-  // Status: Pending Approval - Waiting for admin
+  // Status: Pending Confirmation - Waiting for admin
   if (status.paymentStatus === 'pending_approval') {
     return (
       <Card className="border-2 border-blue-400 bg-blue-50" data-testid="payment-pending-approval-card">
         <CardHeader>
-          <CardTitle className="text-blue-800">⏳ Awaiting Admin Approval</CardTitle>
+          <CardTitle className="text-blue-800">⏳ Awaiting Admin Confirmation</CardTitle>
           <CardDescription>
-            Your payment confirmation has been submitted. Admin will review and approve shortly.
+            Your payment confirmation has been submitted. Admin will review and confirm shortly.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Please wait for admin approval...</p>
+              <p className="text-gray-600">Please wait for admin confirmation...</p>
               <Button
                 onClick={loadStatus}
                 variant="outline"
