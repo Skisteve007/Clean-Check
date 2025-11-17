@@ -99,6 +99,37 @@ const AdminPanel = () => {
     }
   };
 
+  const handleApprovePayment = async (membershipId, name) => {
+    if (!window.confirm(`Approve payment for ${name}?`)) {
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/admin/payments/approve/${membershipId}?password=${adminPassword}`);
+      toast.success(`Payment approved for ${name}! User can now upload documents.`);
+      loadData(adminPassword);
+    } catch (error) {
+      toast.error('Failed to approve payment');
+    }
+  };
+
+  const handleRejectPayment = async (membershipId, name) => {
+    const reason = prompt(`Reject payment for ${name}? Enter reason (optional):`);
+    if (reason === null) return; // Cancelled
+
+    try {
+      await axios.post(
+        `${API}/admin/payments/reject/${membershipId}?password=${adminPassword}&reason=${encodeURIComponent(
+          reason
+        )}`
+      );
+      toast.success(`Payment rejected for ${name}`);
+      loadData(adminPassword);
+    } catch (error) {
+      toast.error('Failed to reject payment');
+    }
+  };
+
   const handleLogout = () => {
     sessionStorage.removeItem('adminPassword');
     setIsLoggedIn(false);
