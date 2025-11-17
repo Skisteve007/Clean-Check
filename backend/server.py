@@ -197,7 +197,7 @@ async def upload_document(doc: DocumentUpload):
         raise HTTPException(status_code=404, detail="Profile not found")
     
     if profile.get("paymentStatus") != "confirmed":
-        raise HTTPException(status_code=403, detail="Payment must be approved before uploading documents")
+        raise HTTPException(status_code=403, detail="Payment must be confirmed before uploading documents")
     
     # Update profile with document
     await db.profiles.update_one(
