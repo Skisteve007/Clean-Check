@@ -416,15 +416,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
 
 // Profile Modal Component
 const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleProfileSubmit }) => {
-  const toggleArrayValue = (field, value) => {
-    const current = profileForm[field] || [];
-    if (current.includes(value)) {
-      setProfileForm({ ...profileForm, [field]: current.filter((v) => v !== value) });
-    } else {
-      setProfileForm({ ...profileForm, [field]: [...current, value] });
-    }
-  };
-
   return (
     <form onSubmit={handleProfileSubmit} className="space-y-4">
       <DialogHeader>
