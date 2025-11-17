@@ -212,7 +212,7 @@ const AdminPanel = () => {
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Total Users</CardDescription>
@@ -248,7 +248,77 @@ const AdminPanel = () => {
                 <div className="text-4xl font-bold text-green-600">{stats.qrCodesGenerated}</div>
               </CardContent>
             </Card>
+
+            <Card className={pendingPayments.length > 0 ? 'border-2 border-yellow-500' : ''}>
+              <CardHeader className="pb-2">
+                <CardDescription>Pending Payments</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-yellow-600">{stats.pendingPayments || 0}</div>
+              </CardContent>
+            </Card>
           </div>
+        )}
+
+        {/* Pending Payments Section */}
+        {pendingPayments.length > 0 && (
+          <Card className="mb-6 border-2 border-yellow-400">
+            <CardHeader>
+              <CardTitle className="text-yellow-800">🔔 Pending Payment Confirmations</CardTitle>
+              <CardDescription>Review and approve user payment confirmations</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {pendingPayments.map((payment) => (
+                  <div
+                    key={payment.membershipId}
+                    className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50"
+                    data-testid="pending-payment-item"
+                  >
+                    <div>
+                      <h3 className="font-bold text-lg">{payment.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        <strong>Method:</strong> {payment.paymentMethod} | <strong>Amount:</strong>{' '}
+                        {payment.amount}
+                      </p>
+                      {payment.transactionId && (
+                        <p className="text-sm text-gray-600">
+                          <strong>Transaction ID:</strong> {payment.transactionId}
+                        </p>
+                      )}
+                      {payment.notes && (
+                        <p className="text-sm text-gray-600">
+                          <strong>Notes:</strong> {payment.notes}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500">
+                        Submitted: {formatDate(payment.submittedAt)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleApprovePayment(payment.membershipId, payment.name)}
+                        variant="default"
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        data-testid="approve-payment-btn"
+                      >
+                        ✓ Approve
+                      </Button>
+                      <Button
+                        onClick={() => handleRejectPayment(payment.membershipId, payment.name)}
+                        variant="destructive"
+                        size="sm"
+                        data-testid="reject-payment-btn"
+                      >
+                        ✗ Reject
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Search Bar */}
