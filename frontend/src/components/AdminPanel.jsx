@@ -100,16 +100,16 @@ const AdminPanel = () => {
   };
 
   const handleApprovePayment = async (membershipId, name) => {
-    if (!window.confirm(`Approve payment for ${name}?`)) {
+    if (!window.confirm(`Confirm payment for ${name}?`)) {
       return;
     }
 
     try {
       await axios.post(`${API}/admin/payments/approve/${membershipId}?password=${adminPassword}`);
-      toast.success(`Payment approved for ${name}! User can now upload documents.`);
+      toast.success(`Payment confirmed for ${name}! User can now upload documents.`);
       loadData(adminPassword);
     } catch (error) {
-      toast.error('Failed to approve payment');
+      toast.error('Failed to confirm payment');
     }
   };
 
