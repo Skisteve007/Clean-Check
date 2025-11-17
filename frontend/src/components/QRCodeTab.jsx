@@ -17,6 +17,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [isPartnerView, setIsPartnerView] = useState(false);
   const [partnerProfile, setPartnerProfile] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null);
   const fileInputRef = useRef(null);
 
   // Profile form state
