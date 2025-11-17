@@ -285,7 +285,7 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
         <CardHeader>
           <CardTitle className="text-purple-800">🎉 All Set!</CardTitle>
           <CardDescription>
-            Your payment is approved and document is uploaded. QR code is ready!
+            Your payment is confirmed and document is uploaded. QR code is ready!
           </CardDescription>
         </CardHeader>
         <CardContent>
