@@ -460,36 +460,102 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      {/* Age & Sex */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="donorAge">Age *</Label>
-          <Input
-            id="donorAge"
-            type="number"
-            min="18"
-            max="120"
-            value={profileForm.age}
-            onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
-            required
-          />
+      {/* Age */}
+      <div>
+        <Label htmlFor="donorAge">Age *</Label>
+        <Input
+          id="donorAge"
+          type="number"
+          min="18"
+          max="120"
+          value={profileForm.age}
+          onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
+          required
+        />
+      </div>
+
+      {/* Gender Identity - Buttons */}
+      <div>
+        <Label>I Identify As *</Label>
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          {['Male', 'Female', 'Transgender'].map((gender) => (
+            <Button
+              key={gender}
+              type="button"
+              variant={profileForm.sex === gender ? 'default' : 'outline'}
+              className={profileForm.sex === gender ? 'bg-red-600' : ''}
+              onClick={() => setProfileForm({ ...profileForm, sex: gender })}
+            >
+              {gender}
+            </Button>
+          ))}
         </div>
-        <div>
-          <Label htmlFor="donorSex">Identifying Sex *</Label>
-          <Select
-            value={profileForm.sex}
-            onValueChange={(value) => setProfileForm({ ...profileForm, sex: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-              <SelectItem value="Non-Binary">Non-Binary</SelectItem>
-              <SelectItem value="Prefer Not to Say">Prefer Not to Say</SelectItem>
-            </SelectContent>
-          </Select>
+      </div>
+
+      {/* Sexual Orientation - Buttons */}
+      <div>
+        <Label>Sexual Orientation *</Label>
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          {['Gay', 'Bi', 'Straight'].map((orientation) => (
+            <Button
+              key={orientation}
+              type="button"
+              variant={profileForm.sexualOrientation === orientation ? 'default' : 'outline'}
+              className={profileForm.sexualOrientation === orientation ? 'bg-red-600' : ''}
+              onClick={() => setProfileForm({ ...profileForm, sexualOrientation: orientation })}
+            >
+              {orientation}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Relationship Status - Dropdown */}
+      <div>
+        <Label htmlFor="relationshipStatus">Relationship Status *</Label>
+        <Select
+          value={profileForm.relationshipStatus}
+          onValueChange={(value) => setProfileForm({ ...profileForm, relationshipStatus: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select status..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Single">Single</SelectItem>
+            <SelectItem value="Married">Married</SelectItem>
+            <SelectItem value="Separated">Separated</SelectItem>
+            <SelectItem value="Open">Open</SelectItem>
+            <SelectItem value="Poly">Poly</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Partner Preferences - Checkboxes */}
+      <div>
+        <Label>I Prefer (Select all that apply)</Label>
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          {['Couples', 'Females', 'Males'].map((pref) => (
+            <div key={pref} className="flex items-center space-x-2 p-2 border rounded">
+              <Checkbox
+                id={`pref-${pref}`}
+                checked={(profileForm.partnerPreferences || []).includes(pref)}
+                onCheckedChange={(checked) => {
+                  const current = profileForm.partnerPreferences || [];
+                  if (checked) {
+                    setProfileForm({ ...profileForm, partnerPreferences: [...current, pref] });
+                  } else {
+                    setProfileForm({
+                      ...profileForm,
+                      partnerPreferences: current.filter((p) => p !== pref)
+                    });
+                  }
+                }}
+              />
+              <Label htmlFor={`pref-${pref}`} className="text-sm cursor-pointer">
+                {pref}
+              </Label>
+            </div>
+          ))}
         </div>
       </div>
 
