@@ -62,6 +62,10 @@ const AdminPanel = () => {
       // Load profiles
       const profilesResponse = await axios.get(`${API}/admin/profiles?password=${pwd}`);
       setProfiles(profilesResponse.data);
+
+      // Load pending payments
+      const paymentsResponse = await axios.get(`${API}/admin/payments/pending?password=${pwd}`);
+      setPendingPayments(paymentsResponse.data);
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load data');
