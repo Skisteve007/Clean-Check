@@ -312,6 +312,14 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         intimacy.**
       </p>
 
+      {/* Payment Workflow */}
+      {membershipId && (
+        <PaymentWorkflow
+          membershipId={membershipId}
+          onStatusChange={(status) => setPaymentStatus(status)}
+        />
+      )}
+
       {/* Security Seals */}
       <SecuritySeals />
 
