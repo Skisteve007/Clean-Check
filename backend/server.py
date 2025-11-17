@@ -270,6 +270,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def create_indexes():
+    """Create database indexes for optimal performance"""
+    try:
+        # Index on createdAt for sorting
+        await db.profiles.create_index([("createdAt", -1)])
+        # Index on membershipId for fast lookups
+        await db.profiles.create_index([("membershipId", 1)], unique=True)
+        # Index on name for search
+        await db.profiles.create_index([("name", 1)])
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.warning(f"Index creation warning (may already exist): {e}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
