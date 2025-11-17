@@ -367,8 +367,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </p>
       </div>
 
-      {/* QR Code Display */}
-      {qrCodeDataUrl && (
+      {/* QR Code Display - Only show if approved and document uploaded */}
+      {paymentStatus?.qrCodeEnabled && qrCodeDataUrl && (
         <div className="flex flex-col items-center space-y-4">
           <div className="p-4 bg-white border border-gray-200 rounded-lg qr-code-container">
             <img src={qrCodeDataUrl} alt="QR Code" data-testid="qr-code-image" />
@@ -400,9 +400,13 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </div>
       )}
 
-      {!qrCodeDataUrl && (
+      {!paymentStatus?.qrCodeEnabled && !qrCodeDataUrl && (
         <div className="p-8 text-center text-gray-500 text-sm border border-gray-200 rounded-lg">
-          Please enter a secure exam link and save your profile to generate a QR code.
+          {!membershipId
+            ? 'Please set your profile to get started.'
+            : !paymentStatus
+            ? 'Loading payment status...'
+            : 'Complete payment verification and document upload to generate QR code.'}
         </div>
       )}
     </div>
