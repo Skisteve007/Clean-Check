@@ -303,7 +303,7 @@ const AdminPanel = () => {
                         className="bg-green-600 hover:bg-green-700"
                         data-testid="approve-payment-btn"
                       >
-                        ✓ Approve
+                        ✓ Confirm
                       </Button>
                       <Button
                         onClick={() => handleRejectPayment(payment.membershipId, payment.name)}
