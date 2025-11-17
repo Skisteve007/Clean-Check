@@ -881,51 +881,45 @@ const PaymentSection = () => (
       This is a **Clean Check Membership** with a **recurring charge of $39 every 30 days** per
       donor to cover secure hosting and verification processing.
       <br />
-      Membership can **only be canceled** by clicking the link below.
+      Membership can **only be canceled** by contacting support.
     </p>
-
-    <div className="mb-4">
-      <a
-        href="https://your-cancellation-portal.com/cancel"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm font-bold text-red-600 hover:text-red-700 underline"
-      >
-        Click Here to Manage/Cancel Membership
-      </a>
-    </div>
 
     <div className="flex flex-col space-y-3">
       <a
-        href="https://paypal.me/YOUR_PAYPAL_USERNAME"
+        href="https://paypal.me/pitbossent/39"
         target="_blank"
         rel="noopener noreferrer"
         className="w-full p-3 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex items-center justify-center"
+        data-testid="paypal-single-btn"
       >
-        Single Contribution (PayPal)
+        💳 Single Contribution ($39 via PayPal)
       </a>
 
       <a
-        href="https://paypal.me/YOUR_PAYPAL_USERNAME/69"
+        href="https://paypal.me/pitbossent/69"
         target="_blank"
         rel="noopener noreferrer"
         className="w-full p-3 font-semibold rounded-lg text-white bg-red-600 hover:bg-red-700 flex items-center justify-center"
+        data-testid="paypal-joint-btn"
       >
-        Joint/Companion Contribution ($69 via PayPal)
+        💕 Joint/Companion Contribution ($69 via PayPal)
       </a>
 
-      <button className="w-full p-3 font-semibold rounded-lg text-red-800 bg-red-200 hover:bg-red-300">
-        Zelle: Single ($39) or Joint ($69)
-      </button>
+      <a
+        href="mailto:pitbossent@gmail.com?subject=Zelle Payment for Clean Check&body=I have sent payment via Zelle to pitbossent@gmail.com"
+        className="w-full p-3 font-semibold rounded-lg text-red-800 bg-red-200 hover:bg-red-300 flex items-center justify-center"
+        data-testid="zelle-btn"
+      >
+        📱 Zelle: Single ($39) or Joint ($69)
+      </a>
     </div>
 
     <p className="mt-3 text-xs font-medium text-gray-700">
-      For Zelle (Manual Entry): Please use the recipient identifier:{' '}
-      <span className="font-bold text-red-800">[YOUR ZELLE EMAIL/PHONE]</span>
+      <strong>PayPal:</strong> paypal.me/pitbossent<br />
+      <strong>Zelle:</strong> pitbossent@gmail.com
     </p>
-    <p className="mt-1 text-xs text-red-600 italic">
-      **ACTION REQUIRED:** Replace all placeholder links and Zelle identifier with your actual
-      payment information, including the **cancellation link**.
+    <p className="mt-2 text-xs text-gray-600">
+      After payment, use the payment confirmation form above to notify admin for approval.
     </p>
   </div>
 );
