@@ -120,13 +120,13 @@ async def confirm_payment(payment: PaymentConfirmation):
     
     await db.payment_confirmations.insert_one(confirmation)
     
-    # Update profile status to waiting for admin approval
+    # Update profile status to waiting for admin confirmation
     await db.profiles.update_one(
         {"membershipId": payment.membershipId},
         {"$set": {"paymentStatus": "pending_approval", "updatedAt": datetime.now(timezone.utc).isoformat()}}
     )
     
-    return {"message": "Payment confirmation submitted. Waiting for admin approval.", "status": "pending_approval"}
+    return {"message": "Payment confirmation submitted. Waiting for admin confirmation.", "status": "pending_approval"}
 
 # Admin - Get Pending Payment Confirmations
 @api_router.get("/admin/payments/pending")
