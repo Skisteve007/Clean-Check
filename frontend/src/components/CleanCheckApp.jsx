@@ -141,7 +141,7 @@ const CleanCheckApp = () => {
   );
 };
 
-// Sponsor Slot Component
+// Sponsor Slot Component - READ ONLY for users
 const SponsorSlot = ({ slotNumber }) => {
   const [logoSrc, setLogoSrc] = useState(null);
 
@@ -152,19 +152,6 @@ const SponsorSlot = ({ slotNumber }) => {
     }
   }, [slotNumber]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target.result;
-      setLogoSrc(base64);
-      localStorage.setItem(`sponsorLogo${slotNumber}`, base64);
-    };
-    reader.readAsDataURL(file);
-  };
-
   const colors = [
     'bg-yellow-50 border-yellow-300',
     'bg-green-50 border-green-300',
@@ -173,16 +160,8 @@ const SponsorSlot = ({ slotNumber }) => {
 
   return (
     <div className="w-1/3 p-1 flex justify-center">
-      <input
-        type="file"
-        id={`sponsorUpload${slotNumber}`}
-        className="hidden"
-        accept="image/jpeg, image/png"
-        onChange={handleFileChange}
-      />
       <div
         className={`sponsor-slot border ${colors[slotNumber - 1]}`}
-        onClick={() => document.getElementById(`sponsorUpload${slotNumber}`).click()}
         data-testid={`sponsor-slot-${slotNumber}`}
       >
         <img
@@ -192,7 +171,6 @@ const SponsorSlot = ({ slotNumber }) => {
             e.target.src = `https://placehold.co/100x40/cccccc/666666?text=Logo+${slotNumber}`;
           }}
         />
-        <div className="upload-overlay">UPLOAD LOGO</div>
       </div>
     </div>
   );
