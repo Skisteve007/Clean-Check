@@ -763,14 +763,16 @@ const PartnerView = ({ profile, examLink }) => {
         <div className="mt-4 border-t border-red-200 pt-3">
           <p className="text-sm font-semibold text-gray-700 mb-1">Relationship Status:</p>
           <p className="text-sm text-gray-600 italic mb-2">
-            {profile.relationshipStatus && profile.relationshipStatus.length > 0
-              ? profile.relationshipStatus.join(', ')
-              : 'Not specified'}
+            {profile.relationshipStatus || 'Not specified'}
           </p>
           <p className="text-sm font-semibold text-gray-700 mb-1">Sexual Orientation:</p>
           <p className="text-sm text-gray-600 italic mb-2">
-            {profile.sexualOrientation && profile.sexualOrientation.length > 0
-              ? profile.sexualOrientation.join(', ')
+            {profile.sexualOrientation || 'Not specified'}
+          </p>
+          <p className="text-sm font-semibold text-gray-700 mb-1">Partner Preferences:</p>
+          <p className="text-sm text-gray-600 italic mb-2">
+            {profile.partnerPreferences && profile.partnerPreferences.length > 0
+              ? profile.partnerPreferences.join(', ')
               : 'Not specified'}
           </p>
         </div>
