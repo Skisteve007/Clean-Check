@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -11,6 +11,7 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 import secrets
+import base64
 
 
 ROOT_DIR = Path(__file__).parent
@@ -46,6 +47,10 @@ class DonorProfile(BaseModel):
     name: str
     photo: Optional[str] = ""
     references: List[Reference] = []
+    paymentStatus: str = "pending"  # pending, confirmed, rejected
+    documentUploaded: bool = False
+    documentData: Optional[str] = ""
+    qrCodeEnabled: bool = False
     createdAt: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updatedAt: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
@@ -64,6 +69,18 @@ class SiteVisit(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     page: str = "/"
 
+class PaymentConfirmation(BaseModel):
+    membershipId: str
+    paymentMethod: str
+    amount: str
+    transactionId: Optional[str] = ""
+    notes: Optional[str] = ""
+
+class DocumentUpload(BaseModel):
+    membershipId: str
+    documentData: str  # base64 encoded
+    documentType: str
+
 # Admin verification
 def verify_admin(password: str):
     if not secrets.compare_digest(password, ADMIN_PASSWORD):
@@ -80,6 +97,134 @@ async def root():
 async def track_visit(visit: SiteVisit):
     await db.site_visits.insert_one(visit.model_dump())
     return {"status": "tracked"}
+
+# Payment Confirmation - User submits
+@api_router.post("/payment/confirm")
+async def confirm_payment(payment: PaymentConfirmation):
+    # Check if profile exists
+    profile = await db.profiles.find_one({"membershipId": payment.membershipId})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    # Create payment confirmation record
+    confirmation = {
+        "membershipId": payment.membershipId,
+        "name": profile.get("name", "Unknown"),
+        "paymentMethod": payment.paymentMethod,
+        "amount": payment.amount,
+        "transactionId": payment.transactionId,
+        "notes": payment.notes,
+        "status": "pending",
+        "submittedAt": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.payment_confirmations.insert_one(confirmation)
+    
+    # Update profile status to waiting for admin approval
+    await db.profiles.update_one(
+        {"membershipId": payment.membershipId},
+        {"$set": {"paymentStatus": "pending_approval", "updatedAt": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Payment confirmation submitted. Waiting for admin approval.", "status": "pending_approval"}
+
+# Admin - Get Pending Payment Confirmations
+@api_router.get("/admin/payments/pending")
+async def get_pending_payments(password: str):
+    verify_admin(password)
+    
+    pending = await db.payment_confirmations.find(
+        {"status": "pending"},
+        {"_id": 0}
+    ).sort("submittedAt", -1).to_list(100)
+    
+    return pending
+
+# Admin - Approve Payment
+@api_router.post("/admin/payments/approve/{membership_id}")
+async def approve_payment(membership_id: str, password: str):
+    verify_admin(password)
+    
+    # Update payment confirmation
+    await db.payment_confirmations.update_one(
+        {"membershipId": membership_id, "status": "pending"},
+        {"$set": {"status": "approved", "approvedAt": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Update profile to confirmed
+    await db.profiles.update_one(
+        {"membershipId": membership_id},
+        {"$set": {
+            "paymentStatus": "confirmed",
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Payment approved. User can now upload documents."}
+
+# Admin - Reject Payment
+@api_router.post("/admin/payments/reject/{membership_id}")
+async def reject_payment(membership_id: str, password: str, reason: str = ""):
+    verify_admin(password)
+    
+    # Update payment confirmation
+    await db.payment_confirmations.update_one(
+        {"membershipId": membership_id, "status": "pending"},
+        {"$set": {
+            "status": "rejected",
+            "rejectedAt": datetime.now(timezone.utc).isoformat(),
+            "rejectionReason": reason
+        }}
+    )
+    
+    # Update profile to rejected
+    await db.profiles.update_one(
+        {"membershipId": membership_id},
+        {"$set": {
+            "paymentStatus": "rejected",
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Payment rejected."}
+
+# User - Upload Document
+@api_router.post("/document/upload")
+async def upload_document(doc: DocumentUpload):
+    # Check if profile exists and payment is confirmed
+    profile = await db.profiles.find_one({"membershipId": doc.membershipId})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    if profile.get("paymentStatus") != "confirmed":
+        raise HTTPException(status_code=403, detail="Payment must be approved before uploading documents")
+    
+    # Update profile with document
+    await db.profiles.update_one(
+        {"membershipId": doc.membershipId},
+        {"$set": {
+            "documentUploaded": True,
+            "documentData": doc.documentData,
+            "documentType": doc.documentType,
+            "qrCodeEnabled": True,  # Enable QR code after document upload
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Document uploaded successfully. QR code is now available.", "qrCodeEnabled": True}
+
+# User - Get Profile Status
+@api_router.get("/profile/status/{membership_id}")
+async def get_profile_status(membership_id: str):
+    profile = await db.profiles.find_one({"membershipId": membership_id}, {"_id": 0})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    return {
+        "paymentStatus": profile.get("paymentStatus", "pending"),
+        "documentUploaded": profile.get("documentUploaded", False),
+        "qrCodeEnabled": profile.get("qrCodeEnabled", False)
+    }
 
 # Admin Login
 @api_router.post("/admin/login")
@@ -105,6 +250,7 @@ async def get_admin_stats(password: str):
     ]).to_list(1)
     
     total_visits = await db.site_visits.count_documents({})
+    pending_payments = await db.payment_confirmations.count_documents({"status": "pending"})
     
     ref_count = total_references_result[0]['total'] if total_references_result else 0
     
@@ -112,7 +258,8 @@ async def get_admin_stats(password: str):
         "totalUsers": total_users,
         "totalReferences": ref_count,
         "totalVisits": total_visits,
-        "qrCodesGenerated": total_users  # Assuming each user generates a QR code
+        "qrCodesGenerated": total_users,
+        "pendingPayments": pending_payments
     }
 
 # Admin - Get All Profiles
@@ -155,6 +302,9 @@ async def create_or_update_profile(profile: ProfileCreate):
         "name": profile.name,
         "photo": profile.photo or "",
         "references": [],
+        "paymentStatus": "pending",
+        "documentUploaded": False,
+        "qrCodeEnabled": False,
         "createdAt": datetime.now(timezone.utc).isoformat(),
         "updatedAt": datetime.now(timezone.utc).isoformat()
     }
@@ -280,6 +430,8 @@ async def create_indexes():
         await db.profiles.create_index([("membershipId", 1)], unique=True)
         # Index on name for search
         await db.profiles.create_index([("name", 1)])
+        # Index on payment status
+        await db.profiles.create_index([("paymentStatus", 1)])
         logger.info("Database indexes created successfully")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
