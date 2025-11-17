@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,6 +10,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+import secrets
 
 
 ROOT_DIR = Path(__file__).parent
@@ -19,12 +21,17 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Admin password
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
+
 # Create the main app without a prefix
 app = FastAPI()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Security
+security = HTTPBasic()
 
 # Define Models
 class Reference(BaseModel):
@@ -50,10 +57,87 @@ class ReferenceAdd(BaseModel):
     membershipId: str
     name: str
 
+class AdminLogin(BaseModel):
+    password: str
+
+class SiteVisit(BaseModel):
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    page: str = "/"
+
+# Admin verification
+def verify_admin(password: str):
+    if not secrets.compare_digest(password, ADMIN_PASSWORD):
+        raise HTTPException(status_code=401, detail="Invalid admin password")
+    return True
+
 # Routes
 @api_router.get("/")
 async def root():
     return {"message": "Clean Check API"}
+
+# Track site visit
+@api_router.post("/track-visit")
+async def track_visit(visit: SiteVisit):
+    await db.site_visits.insert_one(visit.model_dump())
+    return {"status": "tracked"}
+
+# Admin Login
+@api_router.post("/admin/login")
+async def admin_login(credentials: AdminLogin):
+    try:
+        verify_admin(credentials.password)
+        return {"success": True, "message": "Login successful"}
+    except HTTPException:
+        return {"success": False, "message": "Invalid password"}
+
+# Admin Stats
+@api_router.get("/admin/stats")
+async def get_admin_stats(password: str):
+    verify_admin(password)
+    
+    total_users = await db.profiles.count_documents({})
+    total_references = await db.profiles.aggregate([
+        {"$unwind": {"path": "$references", "preserveNullAndEmptyArrays": True}},
+        {"$group": {"_id": None, "count": {"$sum": 1}}}
+    ]).to_list(1)
+    
+    total_visits = await db.site_visits.count_documents({})
+    
+    ref_count = total_references[0]['count'] if total_references and total_references[0]['_id'] is not None else 0
+    
+    return {
+        "totalUsers": total_users,
+        "totalReferences": ref_count,
+        "totalVisits": total_visits,
+        "qrCodesGenerated": total_users  # Assuming each user generates a QR code
+    }
+
+# Admin - Get All Profiles
+@api_router.get("/admin/profiles")
+async def get_all_profiles(password: str, search: str = ""):
+    verify_admin(password)
+    
+    query = {}
+    if search:
+        query = {"$or": [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"membershipId": {"$regex": search, "$options": "i"}}
+        ]}
+    
+    profiles = await db.profiles.find(query, {"_id": 0}).sort("createdAt", -1).to_list(1000)
+    return profiles
+
+# Admin - Delete Profile
+@api_router.delete("/admin/profiles/{membership_id}")
+async def delete_profile(membership_id: str, password: str):
+    verify_admin(password)
+    
+    result = await db.profiles.delete_one({"membershipId": membership_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    return {"message": "Profile deleted successfully"}
 
 @api_router.post("/profiles")
 async def create_or_update_profile(profile: ProfileCreate):
