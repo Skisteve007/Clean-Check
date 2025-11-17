@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
+import PaymentWorkflow from './PaymentWorkflow';
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
   const [urlInput, setUrlInput] = useState('');
