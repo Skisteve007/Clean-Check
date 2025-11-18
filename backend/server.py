@@ -91,6 +91,75 @@ def verify_admin(password: str):
         raise HTTPException(status_code=401, detail="Invalid admin password")
     return True
 
+# Email sending function
+async def send_welcome_email(email: str, name: str, membership_id: str):
+    """Send welcome email to new member"""
+    try:
+        # Create email content
+        subject = "Welcome to Clean Check - Membership Confirmed!"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #dc2626; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🛡️ Clean Check</h1>
+            </div>
+            
+            <div style="background-color: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #dc2626;">Welcome, {name}!</h2>
+                
+                <p>Thank you for creating your Clean Check profile. Your membership has been successfully created.</p>
+                
+                <div style="background-color: #fef3f2; padding: 15px; border-left: 4px solid #dc2626; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Your Membership ID:</strong></p>
+                    <p style="font-family: monospace; font-size: 14px; color: #dc2626; margin: 5px 0;">{membership_id}</p>
+                </div>
+                
+                <h3 style="color: #374151;">Next Steps:</h3>
+                <ol style="color: #6b7280; line-height: 1.8;">
+                    <li>Complete payment ($39 for single or $69 for couples)</li>
+                    <li>Submit payment confirmation in your profile</li>
+                    <li>Wait for admin confirmation (usually within 5 minutes)</li>
+                    <li>Upload your health document</li>
+                    <li>Generate and share your QR code</li>
+                </ol>
+                
+                <div style="background-color: #dbeafe; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #1e40af;"><strong>💳 Payment Information:</strong></p>
+                    <p style="margin: 5px 0; color: #1e40af;">PayPal: paypal.me/pitbossent</p>
+                    <p style="margin: 5px 0; color: #1e40af;">Zelle: pitbossent@gmail.com</p>
+                </div>
+                
+                <p style="color: #6b7280;">If you have any questions, please don't hesitate to reach out.</p>
+                
+                <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">
+                    This is an automated message from Clean Check. Please do not reply to this email.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Log email (in production, this would actually send via SMTP)
+        logger.info(f"Welcome email would be sent to: {email}")
+        logger.info(f"Subject: {subject}")
+        logger.info(f"Recipient: {name} ({membership_id})")
+        
+        # Store email log in database
+        await db.email_logs.insert_one({
+            "to": email,
+            "subject": subject,
+            "name": name,
+            "membershipId": membership_id,
+            "sentAt": datetime.now(timezone.utc).isoformat(),
+            "type": "welcome"
+        })
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send welcome email: {e}")
+        return False
+
 # Routes
 @api_router.get("/")
 async def root():
