@@ -160,6 +160,79 @@ async def send_welcome_email(email: str, name: str, membership_id: str):
         logger.error(f"Failed to send welcome email: {e}")
         return False
 
+async def send_admin_payment_notification(name: str, email: str, membership_id: str, payment_method: str, amount: str, transaction_id: str, notes: str):
+    """Send payment notification to admin"""
+    try:
+        admin_email = "pitbossent@gmail.com"
+        subject = f"🔔 New Payment Confirmation - {name}"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #f59e0b; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🔔 Payment Confirmation Alert</h1>
+            </div>
+            
+            <div style="background-color: #fffbeb; padding: 30px; border: 1px solid #fde68a; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #92400e;">New Payment Submitted</h2>
+                
+                <p style="color: #78350f;">A member has submitted a payment confirmation and is waiting for your review.</p>
+                
+                <div style="background-color: #ffffff; padding: 20px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+                    <h3 style="color: #92400e; margin-top: 0;">Member Details:</h3>
+                    <p style="margin: 5px 0;"><strong>Name:</strong> {name}</p>
+                    <p style="margin: 5px 0;"><strong>Email:</strong> {email}</p>
+                    <p style="margin: 5px 0;"><strong>Membership ID:</strong> <code style="background: #fef3f2; padding: 2px 6px; border-radius: 3px;">{membership_id}</code></p>
+                </div>
+                
+                <div style="background-color: #ffffff; padding: 20px; border-left: 4px solid #10b981; margin: 20px 0;">
+                    <h3 style="color: #065f46; margin-top: 0;">Payment Information:</h3>
+                    <p style="margin: 5px 0;"><strong>Method:</strong> {payment_method}</p>
+                    <p style="margin: 5px 0;"><strong>Amount:</strong> {amount}</p>
+                    {f'<p style="margin: 5px 0;"><strong>Transaction ID:</strong> {transaction_id}</p>' if transaction_id else ''}
+                    {f'<p style="margin: 5px 0;"><strong>Notes:</strong> {notes}</p>' if notes else ''}
+                    <p style="margin: 5px 0; color: #6b7280;"><strong>Submitted:</strong> {datetime.now(timezone.utc).strftime('%B %d, %Y at %I:%M %p UTC')}</p>
+                </div>
+                
+                <div style="background-color: #dbeafe; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+                    <p style="margin: 0; color: #1e40af;"><strong>⚡ Action Required</strong></p>
+                    <p style="margin: 10px 0; color: #1e40af;">Log in to the admin panel to confirm or reject this payment.</p>
+                    <a href="https://healthshare-5.preview.emergentagent.com/admin" 
+                       style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+                        Go to Admin Panel
+                    </a>
+                </div>
+                
+                <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">
+                    This is an automated notification from Clean Check Admin System.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Log email
+        logger.info(f"Admin payment notification would be sent to: {admin_email}")
+        logger.info(f"Subject: {subject}")
+        logger.info(f"Payment from: {name} ({membership_id}) - {amount} via {payment_method}")
+        
+        # Store email log in database
+        await db.email_logs.insert_one({
+            "to": admin_email,
+            "subject": subject,
+            "name": name,
+            "membershipId": membership_id,
+            "paymentMethod": payment_method,
+            "amount": amount,
+            "sentAt": datetime.now(timezone.utc).isoformat(),
+            "type": "admin_payment_notification"
+        })
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send admin payment notification: {e}")
+        return False
+
 # Routes
 @api_router.get("/")
 async def root():
