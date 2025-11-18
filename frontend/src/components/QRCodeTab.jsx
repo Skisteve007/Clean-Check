@@ -478,18 +478,69 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      {/* Age */}
+      {/* Birthday 🎂 */}
       <div>
-        <Label htmlFor="donorAge">Age *</Label>
-        <Input
-          id="donorAge"
-          type="number"
-          min="18"
-          max="120"
-          value={profileForm.age}
-          onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
-          required
-        />
+        <Label className="flex items-center space-x-2">
+          <span>🎂 Birthday *</span>
+        </Label>
+        <div className="grid grid-cols-3 gap-3 mt-2">
+          <div>
+            <Label htmlFor="birthdayDay" className="text-xs text-gray-600">Day</Label>
+            <Select
+              value={profileForm.birthdayDay}
+              onValueChange={(value) => setProfileForm({ ...profileForm, birthdayDay: value })}
+            >
+              <SelectTrigger id="birthdayDay">
+                <SelectValue placeholder="Day" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                  <SelectItem key={day} value={String(day)}>
+                    {day}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="birthdayMonth" className="text-xs text-gray-600">Month</Label>
+            <Select
+              value={profileForm.birthdayMonth}
+              onValueChange={(value) => setProfileForm({ ...profileForm, birthdayMonth: value })}
+            >
+              <SelectTrigger id="birthdayMonth">
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month, idx) => (
+                  <SelectItem key={month} value={String(idx + 1)}>
+                    {month}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="birthdayYear" className="text-xs text-gray-600">Year</Label>
+            <Select
+              value={profileForm.birthdayYear}
+              onValueChange={(value) => setProfileForm({ ...profileForm, birthdayYear: value })}
+            >
+              <SelectTrigger id="birthdayYear">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 83 }, (_, i) => 2006 - i).map((year) => (
+                  <SelectItem key={year} value={String(year)}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {/* Gender Identity - Buttons */}
