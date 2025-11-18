@@ -723,12 +723,17 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      {/* Recent References - Searchable Members */}
-      <ReferencesSearch 
-        profileForm={profileForm}
-        setProfileForm={setProfileForm}
-        currentMembershipId={membershipId}
-      />
+      {/* Recent References */}
+      <div>
+        <Label htmlFor="recentReferences">Recent References (Optional for Verification)</Label>
+        <Textarea
+          id="recentReferences"
+          rows={2}
+          value={profileForm.recentReferences}
+          onChange={(e) => setProfileForm({ ...profileForm, recentReferences: e.target.value })}
+          placeholder="e.g., Contact information for 1-2 character references..."
+        />
+      </div>
 
       {/* Sexual Preferences */}
       <div>
