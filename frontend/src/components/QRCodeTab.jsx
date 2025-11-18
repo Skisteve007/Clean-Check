@@ -688,9 +688,24 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      <Button type="submit" variant="destructive" className="w-full" data-testid="save-profile-btn">
-        Save Profile and Update QR Code
-      </Button>
+      <div className="grid grid-cols-2 gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={(e) => {
+            e.preventDefault();
+            saveLocalProfile(profileForm);
+            toast.success('Progress saved! You can continue editing.');
+          }}
+          data-testid="save-progress-btn"
+        >
+          💾 Save Progress
+        </Button>
+        <Button type="submit" variant="destructive" className="w-full" data-testid="save-profile-btn">
+          ✅ Save & Close
+        </Button>
+      </div>
     </form>
   );
 };
