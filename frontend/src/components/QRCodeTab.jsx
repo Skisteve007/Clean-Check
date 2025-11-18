@@ -452,6 +452,19 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
+      {/* Email */}
+      <div>
+        <Label htmlFor="donorEmail">Email Address *</Label>
+        <Input
+          id="donorEmail"
+          type="email"
+          value={profileForm.email}
+          onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+          placeholder="your.email@example.com"
+          required
+        />
+      </div>
+
       {/* Age */}
       <div>
         <Label htmlFor="donorAge">Age *</Label>
