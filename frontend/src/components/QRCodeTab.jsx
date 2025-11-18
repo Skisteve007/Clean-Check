@@ -723,16 +723,40 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      {/* Recent References */}
-      <div>
-        <Label htmlFor="recentReferences">Recent References (Optional for Verification)</Label>
-        <Textarea
-          id="recentReferences"
-          rows={2}
-          value={profileForm.recentReferences}
-          onChange={(e) => setProfileForm({ ...profileForm, recentReferences: e.target.value })}
-          placeholder="e.g., Contact information for 1-2 character references..."
+      {/* Recent References - Search Active Members */}
+      <div className="border border-purple-300 p-4 rounded-lg bg-purple-50">
+        <Label className="text-purple-800 font-bold">🔍 Search Active Members for References</Label>
+        <p className="text-xs text-gray-600 mb-3">Search and add active Clean Check members as your references</p>
+        
+        <MemberReferenceSearch 
+          profileForm={profileForm}
+          setProfileForm={setProfileForm}
+          currentMembershipId={membershipId}
         />
+        
+        {/* Display Selected References */}
+        {profileForm.memberReferences && profileForm.memberReferences.length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-gray-700 mb-2">Selected References:</p>
+            <div className="space-y-2">
+              {profileForm.memberReferences.map((ref, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-white rounded border">
+                  <span className="text-sm font-medium">{ref.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = profileForm.memberReferences.filter((_, i) => i !== idx);
+                      setProfileForm({ ...profileForm, memberReferences: updated });
+                    }}
+                    className="text-red-500 hover:text-red-700 text-lg"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Sexual Preferences */}
