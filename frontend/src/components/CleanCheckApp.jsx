@@ -28,10 +28,11 @@ const CleanCheckApp = () => {
     }
   }, []);
 
-  const createMembershipId = async (name, photo) => {
+  const createMembershipId = async (name, email, photo) => {
     try {
       const response = await axios.post(`${API}/profiles`, {
         name: name,
+        email: email,
         photo: photo || ''
       });
       
