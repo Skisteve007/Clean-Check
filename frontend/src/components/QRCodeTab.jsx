@@ -434,16 +434,23 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         </p>
       </DialogHeader>
 
-      {/* Photo */}
-      <div className="flex items-center space-x-4">
+      {/* Photo - REQUIRED */}
+      <div className="flex items-center space-x-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg">
         <img
-          src={profileForm.photo || 'https://placehold.co/96x96/f87171/ffffff?text=Add+Photo'}
+          src={profileForm.photo || 'https://placehold.co/96x96/f87171/ffffff?text=Required'}
           alt="Profile Preview"
           className="profile-pic-preview"
         />
         <div className="flex-grow">
-          <Label>Profile Photo (Optional)</Label>
-          <Input type="file" accept="image/*" onChange={handlePhotoUpload} className="mt-1" />
+          <Label className="text-red-700 font-bold">Profile Photo *REQUIRED</Label>
+          <Input 
+            type="file" 
+            accept="image/*" 
+            onChange={handlePhotoUpload} 
+            className="mt-1 border-red-400" 
+            required 
+          />
+          <p className="text-xs text-red-600 mt-1">📸 You must upload a profile photo to continue</p>
         </div>
       </div>
 
