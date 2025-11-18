@@ -364,7 +364,7 @@ async def delete_profile(membership_id: str, password: str):
     return {"message": "Profile deleted successfully"}
 
 @api_router.post("/profiles")
-async def create_or_update_profile(profile: ProfileCreate):
+async def create_or_update_profile(profile: ProfileCreate, background_tasks: BackgroundTasks):
     """
     Create a new profile with auto-generated membership ID or update existing
     """
@@ -373,6 +373,7 @@ async def create_or_update_profile(profile: ProfileCreate):
     profile_doc = {
         "membershipId": membership_id,
         "name": profile.name,
+        "email": profile.email,
         "photo": profile.photo or "",
         "references": [],
         "paymentStatus": "pending",
@@ -384,9 +385,13 @@ async def create_or_update_profile(profile: ProfileCreate):
     
     await db.profiles.insert_one(profile_doc)
     
+    # Send welcome email in background
+    background_tasks.add_task(send_welcome_email, profile.email, profile.name, membership_id)
+    
     return {
         "membershipId": membership_id,
         "name": profile.name,
+        "email": profile.email,
         "photo": profile.photo
     }
 
