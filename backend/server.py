@@ -200,7 +200,7 @@ async def send_admin_payment_notification(name: str, email: str, membership_id: 
                 <div style="background-color: #dbeafe; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
                     <p style="margin: 0; color: #1e40af;"><strong>⚡ Action Required</strong></p>
                     <p style="margin: 10px 0; color: #1e40af;">Log in to the admin panel to confirm or reject this payment.</p>
-                    <a href="https://healthshare-5.preview.emergentagent.com/admin" 
+                    <a href="{FRONTEND_URL}/admin" 
                        style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
                         Go to Admin Panel
                     </a>
