@@ -100,13 +100,13 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(profile));
     setLocalProfile(profile);
 
-    // Sync to database
-    if (membershipId) {
+    // **Sync to database and create membership if needed**
+    if (membershipId && profile.name && profile.email) {
       await updateMembershipProfile(profile.name, profile.photo);
-    } else if (profile.name) {
-      const newId = await createMembershipId(profile.name, profile.photo);
+    } else if (profile.name && profile.email) {
+      const newId = await createMembershipId(profile.name, profile.email, profile.photo);
       if (newId) {
-        toast.success('Membership ID created!');
+        toast.success('✉️ Welcome email sent! Check your inbox.');
       }
     }
 
