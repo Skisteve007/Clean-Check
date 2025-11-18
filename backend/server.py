@@ -246,7 +246,7 @@ async def track_visit(visit: SiteVisit):
 
 # Payment Confirmation - User submits
 @api_router.post("/payment/confirm")
-async def confirm_payment(payment: PaymentConfirmation):
+async def confirm_payment(payment: PaymentConfirmation, background_tasks: BackgroundTasks):
     # Check if profile exists
     profile = await db.profiles.find_one({"membershipId": payment.membershipId})
     if not profile:
@@ -256,6 +256,7 @@ async def confirm_payment(payment: PaymentConfirmation):
     confirmation = {
         "membershipId": payment.membershipId,
         "name": profile.get("name", "Unknown"),
+        "email": profile.get("email", ""),
         "paymentMethod": payment.paymentMethod,
         "amount": payment.amount,
         "transactionId": payment.transactionId,
@@ -270,6 +271,18 @@ async def confirm_payment(payment: PaymentConfirmation):
     await db.profiles.update_one(
         {"membershipId": payment.membershipId},
         {"$set": {"paymentStatus": "pending_approval", "updatedAt": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Send admin notification email in background
+    background_tasks.add_task(
+        send_admin_payment_notification,
+        profile.get("name", "Unknown"),
+        profile.get("email", ""),
+        payment.membershipId,
+        payment.paymentMethod,
+        payment.amount,
+        payment.transactionId or "",
+        payment.notes or ""
     )
     
     return {"message": "Payment confirmation submitted. Waiting for admin confirmation.", "status": "pending_approval"}
