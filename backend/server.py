@@ -424,6 +424,27 @@ async def get_admin_stats(password: str):
         "pendingPayments": pending_payments
     }
 
+# Search Active Members (for references)
+@api_router.get("/members/search")
+async def search_active_members(search: str = "", limit: int = 10):
+    """
+    Search for active members (confirmed payment status) for references
+    """
+    query = {
+        "paymentStatus": "confirmed",  # Only active/paid members
+        "$or": [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"membershipId": {"$regex": search, "$options": "i"}}
+        ]
+    } if search else {"paymentStatus": "confirmed"}
+    
+    members = await db.profiles.find(
+        query, 
+        {"_id": 0, "name": 1, "membershipId": 1, "photo": 1}
+    ).limit(limit).to_list(limit)
+    
+    return members
+
 # Admin - Get All Profiles
 @api_router.get("/admin/profiles")
 async def get_all_profiles(password: str, search: str = "", limit: int = 100, skip: int = 0):
