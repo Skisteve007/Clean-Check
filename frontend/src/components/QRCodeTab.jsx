@@ -565,7 +565,7 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
       <div>
         <Label>Sexual Orientation *</Label>
         <div className="grid grid-cols-3 gap-2 mt-2">
-          {['Gay', 'Bi', 'Straight'].map((orientation) => (
+          {['Gay', 'Bi', 'Straight', 'Pansexual', 'Asexual'].map((orientation) => (
             <Button
               key={orientation}
               type="button"
