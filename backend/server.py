@@ -59,6 +59,7 @@ class DonorProfile(BaseModel):
 
 class ProfileCreate(BaseModel):
     name: str
+    email: EmailStr
     photo: Optional[str] = ""
 
 class ReferenceAdd(BaseModel):
