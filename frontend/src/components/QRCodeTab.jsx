@@ -213,8 +213,13 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const handleProfileSubmit = (e) => {
     e.preventDefault();
 
-    if (!profileForm.name || !profileForm.age || !profileForm.sex) {
-      toast.error('Please fill out all required fields (Name, Age, Sex).');
+    if (!profileForm.name || !profileForm.email || !profileForm.age || !profileForm.sex) {
+      toast.error('Please fill out all required fields (Name, Email, Age, Identity).');
+      return;
+    }
+
+    if (!profileForm.sexualOrientation || !profileForm.relationshipStatus) {
+      toast.error('Please select your sexual orientation and relationship status.');
       return;
     }
 
