@@ -215,24 +215,23 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const handleProfileSubmit = (e) => {
     e.preventDefault();
 
-    if (!profileForm.name || !profileForm.email || !profileForm.age || !profileForm.sex) {
-      toast.error('Please fill out all required fields (Name, Email, Age, Identity).');
+    if (!profileForm.name || !profileForm.email || !profileForm.sex) {
+      toast.error('Please fill out all required fields (Name, Email, Identity).');
+      return;
+    }
+
+    if (!profileForm.photo) {
+      toast.error('Profile photo is required. Please upload a photo.');
+      return;
+    }
+
+    if (!profileForm.birthdayDay || !profileForm.birthdayMonth || !profileForm.birthdayYear) {
+      toast.error('Please enter your complete birthday (Day, Month, Year).');
       return;
     }
 
     if (!profileForm.sexualOrientation || !profileForm.relationshipStatus) {
       toast.error('Please select your sexual orientation and relationship status.');
-      return;
-    }
-
-    if (
-      !profileForm.instagramUrl ||
-      !profileForm.tiktokUrl ||
-      !profileForm.facebookUrl ||
-      !profileForm.onlyFansUrl ||
-      !profileForm.xUrl
-    ) {
-      toast.error('Please provide all social media links.');
       return;
     }
 
