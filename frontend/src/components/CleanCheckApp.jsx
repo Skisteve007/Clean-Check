@@ -14,8 +14,13 @@ const CleanCheckApp = () => {
   const [membershipId, setMembershipId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasConsented, setHasConsented] = useState(false);
+  const { isSupported, authenticateWithBiometric } = useBiometricAuth();
 
   useEffect(() => {
+    initializeApp();
+  }, []);
+
+  const initializeApp = async () => {
     // Check if user has already consented
     const consentGiven = localStorage.getItem('cleanCheckAgeConsent');
     if (consentGiven === 'true') {
@@ -27,7 +32,21 @@ const CleanCheckApp = () => {
       console.log('Failed to track visit:', err);
     });
 
-    // Check if we have a membership ID in localStorage
+    // Try biometric authentication first if supported and enabled
+    if (isSupported) {
+      try {
+        const biometricId = await authenticateWithBiometric();
+        if (biometricId) {
+          setMembershipId(biometricId);
+          setLoading(false);
+          return;
+        }
+      } catch (error) {
+        console.log('Biometric auth skipped or failed:', error);
+      }
+    }
+
+    // Fallback to regular localStorage check
     const storedId = localStorage.getItem('cleanCheckMembershipId');
     
     if (storedId) {
@@ -36,7 +55,7 @@ const CleanCheckApp = () => {
     } else {
       setLoading(false);
     }
-  }, []);
+  };
 
   // Show age consent screen first
   if (!hasConsented) {
