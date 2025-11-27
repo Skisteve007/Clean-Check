@@ -305,12 +305,39 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </div>
       )}
 
-      {!localProfile && (
-        <div className="text-center">
+      {/* Tagline */}
+      <p className="text-center text-gray-700 text-sm">
+        **Confidently share verified health status information for mutual safety and informed
+        intimacy.**
+      </p>
+
+      {/* Payment Workflow - Show if membershipId exists */}
+      {membershipId && (
+        <PaymentWorkflow
+          membershipId={membershipId}
+          onStatusChange={(status) => setPaymentStatus(status)}
+        />
+      )}
+
+      {/* Security Seals */}
+      <SecuritySeals />
+
+      {/* Payment Section - Always show if no payment confirmed yet */}
+      {!paymentStatus || paymentStatus.paymentStatus !== 'confirmed' ? (
+        <PaymentSection />
+      ) : null}
+
+      {/* Profile Creation - Only show after payment is confirmed */}
+      {!localProfile && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
+        <div className="text-center mt-4">
+          <div className="p-4 bg-green-50 border-2 border-green-400 rounded-lg mb-4">
+            <p className="text-green-800 font-bold mb-2">🎉 Payment Confirmed!</p>
+            <p className="text-sm text-green-700">You can now create your donor profile to get started.</p>
+          </div>
           <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
             <DialogTrigger asChild>
-              <Button variant="destructive" data-testid="set-profile-btn">
-                Set Profile to Get Started
+              <Button variant="destructive" data-testid="set-profile-btn" className="w-full max-w-md">
+                Create Your Donor Profile
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[80vh] overflow-y-auto">
@@ -324,26 +351,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           </Dialog>
         </div>
       )}
-
-      {/* Tagline */}
-      <p className="text-center text-gray-700 text-sm">
-        **Confidently share verified health status information for mutual safety and informed
-        intimacy.**
-      </p>
-
-      {/* Payment Workflow */}
-      {membershipId && (
-        <PaymentWorkflow
-          membershipId={membershipId}
-          onStatusChange={(status) => setPaymentStatus(status)}
-        />
-      )}
-
-      {/* Security Seals */}
-      <SecuritySeals />
-
-      {/* Payment Section */}
-      <PaymentSection />
 
       {/* Only show document upload and QR code generation if payment is confirmed */}
       {paymentStatus && paymentStatus.paymentStatus === 'confirmed' && paymentStatus.qrCodeEnabled && (
