@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import QRCodeTab from './QRCodeTab';
 import ProfileManagementTab from './ProfileManagementTab';
+import AgeConsent from './AgeConsent';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -10,8 +11,15 @@ const API = `${BACKEND_URL}/api`;
 const CleanCheckApp = () => {
   const [membershipId, setMembershipId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasConsented, setHasConsented] = useState(false);
 
   useEffect(() => {
+    // Check if user has already consented
+    const consentGiven = localStorage.getItem('cleanCheckAgeConsent');
+    if (consentGiven === 'true') {
+      setHasConsented(true);
+    }
+
     // Track site visit
     axios.post(`${API}/track-visit`, { page: window.location.pathname }).catch(err => {
       console.log('Failed to track visit:', err);
@@ -27,6 +35,11 @@ const CleanCheckApp = () => {
       setLoading(false);
     }
   }, []);
+
+  // Show age consent screen first
+  if (!hasConsented) {
+    return <AgeConsent onConsent={() => setHasConsented(true)} />;
+  }
 
   const createMembershipId = async (name, email, photo) => {
     try {
