@@ -153,6 +153,9 @@ const ProfileManagementTab = ({ membershipId, createMembershipId }) => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-red-600">Profile & Membership</h2>
 
+      {/* Biometric Authentication Setup */}
+      {membershipId && <BiometricSetup membershipId={membershipId} />}
+
       {/* Complete Donor Profile Display */}
       {donorProfile && (
         <div className="p-6 bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-lg shadow-lg">
