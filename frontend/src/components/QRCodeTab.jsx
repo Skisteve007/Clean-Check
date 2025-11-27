@@ -277,6 +277,11 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     return <PartnerView profile={partnerProfile} examLink={urlInput} />;
   }
 
+  // Show Waiting Screen if user status is In_Review (Status 2)
+  if (membershipId && userStatus === 2) {
+    return <WaitingScreen membershipId={membershipId} userEmail={userEmail} />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Donor Summary */}
