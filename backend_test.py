@@ -113,14 +113,19 @@ class CleanCheckAPITester:
         )
         return success
 
-    def test_update_profile(self, membership_id, name="Updated User", photo="updated_photo.jpg"):
+    def test_update_profile(self, membership_id, name="Updated User", email="updated@test.com", password="newpass123", photo="updated_photo.jpg"):
         """Test profile update"""
         success, response = self.run_test(
             "Update Profile",
             "PUT",
             f"profiles/{membership_id}",
             200,
-            data={"name": name, "photo": photo}
+            data={
+                "name": name, 
+                "email": email,
+                "password": password,
+                "photo": photo
+            }
         )
         return success
 
