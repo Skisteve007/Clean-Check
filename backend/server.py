@@ -322,26 +322,42 @@ async def get_pending_payments(password: str):
     return pending
 
 # Admin - Approve Payment
-@api_router.post("/admin/payments/approve/{membership_id}")
-async def approve_payment(membership_id: str, password: str):
+@api_router.post("/admin/payments/approve")
+async def approve_payment(approval: AdminApproval, password: str, background_tasks: BackgroundTasks):
     verify_admin(password)
+    
+    # Get profile
+    profile = await db.profiles.find_one({"membershipId": approval.membershipId})
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
     
     # Update payment confirmation
     await db.payment_confirmations.update_one(
-        {"membershipId": membership_id, "status": "pending"},
+        {"membershipId": approval.membershipId, "status": "pending"},
         {"$set": {"status": "approved", "approvedAt": datetime.now(timezone.utc).isoformat()}}
     )
     
-    # Update profile to confirmed
+    # Update profile to Status 3: Approved - Can now build profile
     await db.profiles.update_one(
-        {"membershipId": membership_id},
+        {"membershipId": approval.membershipId},
         {"$set": {
+            "userStatus": 3,  # Status 3: Approved
             "paymentStatus": "confirmed",
+            "assignedMemberId": approval.assignedMemberId,
+            "qrCodeEnabled": True,  # Enable QR code generation
             "updatedAt": datetime.now(timezone.utc).isoformat()
         }}
     )
     
-    return {"message": "Payment confirmed. User can now upload documents."}
+    # Send approval notification email to user
+    background_tasks.add_task(
+        send_user_approval_notification,
+        profile.get("name", "Member"),
+        profile.get("email", ""),
+        approval.assignedMemberId
+    )
+    
+    return {"message": f"Payment confirmed. User approved with Member ID: {approval.assignedMemberId}. Notification sent."}
 
 # Admin - Reject Payment
 @api_router.post("/admin/payments/reject/{membership_id}")
