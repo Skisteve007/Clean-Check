@@ -251,6 +251,84 @@ async def send_admin_payment_notification(name: str, email: str, membership_id: 
         logger.error(f"Failed to send admin payment notification: {e}")
         return False
 
+
+
+async def send_user_approval_notification(name: str, email: str, assigned_member_id: str):
+    """Send approval notification to user"""
+    try:
+        subject = f"✅ Payment Confirmed - Welcome to Clean Check!"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #10b981; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">🎉 You're Approved!</h1>
+            </div>
+            
+            <div style="background-color: #f0fdf4; padding: 30px; border: 1px solid #86efac; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #065f46;">Welcome to Clean Check, {name}!</h2>
+                
+                <p style="color: #064e3b; font-size: 16px;">Great news! Your payment has been confirmed and your membership is now active.</p>
+                
+                <div style="background-color: #ffffff; padding: 25px; border-left: 4px solid #10b981; margin: 25px 0; text-align: center;">
+                    <p style="color: #6b7280; margin: 0; font-size: 14px;">Your Official Member ID</p>
+                    <h1 style="color: #dc2626; margin: 10px 0; font-size: 32px; font-weight: bold;">{assigned_member_id}</h1>
+                    <p style="color: #9ca3af; margin: 0; font-size: 12px;">Save this ID for your records</p>
+                </div>
+                
+                <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                    <h3 style="color: #1e40af; margin-top: 0;">✨ Next Steps:</h3>
+                    <ol style="color: #1e40af; line-height: 1.8;">
+                        <li>Log in to your account</li>
+                        <li>Complete your donor profile with your photo</li>
+                        <li>Upload your health documents</li>
+                        <li>Generate your personalized QR code</li>
+                        <li>Start sharing safely!</li>
+                    </ol>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{FRONTEND_URL}" 
+                       style="display: inline-block; background-color: #dc2626; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                        Complete Your Profile Now
+                    </a>
+                </div>
+                
+                <div style="background-color: #fff7ed; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #9a3412; font-size: 14px;">
+                        <strong>💡 Pro Tip:</strong> Complete your profile within the next 48 hours to get listed in our verified members directory!
+                    </p>
+                </div>
+                
+                <p style="color: #9ca3af; font-size: 12px; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                    Questions? Contact support at pitbossent@gmail.com<br>
+                    This is an automated notification from Clean Check.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Log email
+        logger.info(f"User approval notification would be sent to: {email}")
+        logger.info(f"Subject: {subject}")
+        logger.info(f"Member {name} approved with ID: {assigned_member_id}")
+        
+        # Store email log in database
+        await db.email_logs.insert_one({
+            "to": email,
+            "subject": subject,
+            "name": name,
+            "assignedMemberId": assigned_member_id,
+            "sentAt": datetime.now(timezone.utc).isoformat(),
+            "type": "user_approval_notification"
+        })
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send user approval notification: {str(e)}")
+        return False
+
 # Routes
 @api_router.get("/")
 async def root():
