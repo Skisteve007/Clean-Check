@@ -29,6 +29,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     birthdayYear: '',
     sex: '',
     photo: '',
+    galleryPhotos: [],
     relationshipStatus: '',
     sexualOrientation: '',
     partnerPreferences: [],
