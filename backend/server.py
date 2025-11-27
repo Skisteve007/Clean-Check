@@ -288,7 +288,11 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
     # Update profile status to In_Review (Status 2) - waiting for admin confirmation
     await db.profiles.update_one(
         {"membershipId": payment.membershipId},
-        {"$set": {"paymentStatus": "pending_approval", "updatedAt": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {
+            "userStatus": 2,  # Status 2: In_Review
+            "paymentStatus": "in_review", 
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }}
     )
     
     # Send admin notification email in background
