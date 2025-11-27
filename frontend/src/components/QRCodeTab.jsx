@@ -360,10 +360,10 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         />
       </div>
 
-      {/* File Upload */}
-      <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <Label className="block text-sm font-medium text-gray-700 mb-2">
-          Generate Shareable Link (Optional)
+      {/* File Upload - Generate QR Code */}
+      <div className="p-4 border-2 border-red-400 rounded-lg bg-red-50">
+        <Label className="block text-sm font-bold text-red-700 mb-2">
+          📄 Upload Health Document to Generate QR Code
         </Label>
         <input
           type="file"
@@ -375,41 +375,119 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         <Button
           onClick={handleFileUpload}
           variant="destructive"
-          className="w-full"
+          className="w-full text-lg py-6"
           data-testid="upload-btn"
         >
-          Upload & Get Link
+          📤 Upload Document & Generate QR Code
         </Button>
-        <p className="mt-2 text-xs text-gray-500 italic">
-          *Note: This feature simulates a successful upload and link generation.*
+        <p className="mt-2 text-xs text-gray-600 italic text-center">
+          Upload your health document to instantly create your shareable QR code
         </p>
       </div>
 
-      {/* QR Code Display - Only show if approved and document uploaded */}
-      {paymentStatus?.qrCodeEnabled && qrCodeDataUrl && (
-        <QRCodeDisplay
-          qrCodeDataUrl={qrCodeDataUrl}
-          healthColor={localProfile?.healthStatusColor || 'green'}
-          onColorChange={(color) => {
-            const updated = { ...localProfile, healthStatusColor: color };
-            setLocalProfile(updated);
-            localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
-            if (urlInput) {
-              updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
-            }
-            toast.success(`QR Code color changed to ${color.toUpperCase()}`);
-          }}
-          onShare={handleShareLink}
-        />
-      )}
+      {/* QR Code Display with Color Selection */}
+      {qrCodeDataUrl && (
+        <div className="space-y-4">
+          {/* Health Status Color Selector */}
+          <div className="p-4 bg-gray-50 border-2 border-gray-300 rounded-lg">
+            <Label className="block text-sm font-bold text-gray-800 mb-3">
+              🎨 Choose Your Health Status Color
+            </Label>
+            <div className="grid grid-cols-3 gap-3">
+              <Button
+                type="button"
+                onClick={() => {
+                  const color = 'red';
+                  const updated = { ...localProfile, healthStatusColor: color };
+                  setLocalProfile(updated);
+                  localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
+                  if (urlInput) {
+                    updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
+                  }
+                  toast.success('QR Code set to RED - STD Warning');
+                }}
+                className="flex flex-col items-center p-4 bg-red-500 hover:bg-red-600 text-white"
+                data-testid="qr-color-red"
+              >
+                <span className="text-3xl mb-1">🛑</span>
+                <span className="text-sm font-bold">RED</span>
+                <span className="text-xs">STD Alert</span>
+              </Button>
 
-      {!paymentStatus?.qrCodeEnabled && !qrCodeDataUrl && (
-        <div className="p-8 text-center text-gray-500 text-sm border border-gray-200 rounded-lg">
-          {!membershipId
-            ? 'Please set your profile to get started.'
-            : !paymentStatus
-            ? 'Loading payment status...'
-            : 'Complete payment verification and document upload to generate QR code.'}
+              <Button
+                type="button"
+                onClick={() => {
+                  const color = 'yellow';
+                  const updated = { ...localProfile, healthStatusColor: color };
+                  setLocalProfile(updated);
+                  localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
+                  if (urlInput) {
+                    updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
+                  }
+                  toast.success('QR Code set to YELLOW - Caution');
+                }}
+                className="flex flex-col items-center p-4 bg-yellow-500 hover:bg-yellow-600 text-white"
+                data-testid="qr-color-yellow"
+              >
+                <span className="text-3xl mb-1">⚠️</span>
+                <span className="text-sm font-bold">YELLOW</span>
+                <span className="text-xs">Caution</span>
+              </Button>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  const color = 'green';
+                  const updated = { ...localProfile, healthStatusColor: color };
+                  setLocalProfile(updated);
+                  localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
+                  if (urlInput) {
+                    updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
+                  }
+                  toast.success('QR Code set to GREEN - All Clear');
+                }}
+                className="flex flex-col items-center p-4 bg-green-500 hover:bg-green-600 text-white"
+                data-testid="qr-color-green"
+              >
+                <span className="text-3xl mb-1">✅</span>
+                <span className="text-sm font-bold">GREEN</span>
+                <span className="text-xs">All Clear</span>
+              </Button>
+            </div>
+            <p className="text-xs text-gray-600 mt-3 text-center">
+              Current: <span className="font-bold uppercase">{localProfile?.healthStatusColor || 'GREEN'}</span>
+            </p>
+          </div>
+
+          {/* QR Code Display */}
+          <div className="flex flex-col items-center space-y-4 p-6 bg-white border-4 rounded-lg" style={{borderColor: localProfile?.healthStatusColor === 'red' ? '#dc2626' : localProfile?.healthStatusColor === 'yellow' ? '#f59e0b' : '#10b981'}}>
+            <h3 className="text-xl font-bold text-gray-800">Your Shareable QR Code</h3>
+            <div className="p-4 bg-white border-2 border-gray-300 rounded-lg qr-code-container">
+              <img src={qrCodeDataUrl} alt="QR Code" data-testid="qr-code-image" />
+            </div>
+            <div className="flex items-center space-x-2 px-4 py-2 rounded-full" style={{backgroundColor: localProfile?.healthStatusColor === 'red' ? '#fee2e2' : localProfile?.healthStatusColor === 'yellow' ? '#fef3c7' : '#d1fae5'}}>
+              <span className="text-2xl">
+                {localProfile?.healthStatusColor === 'red' ? '🛑' : localProfile?.healthStatusColor === 'yellow' ? '⚠️' : '✅'}
+              </span>
+              <span className="font-bold text-sm" style={{color: localProfile?.healthStatusColor === 'red' ? '#991b1b' : localProfile?.healthStatusColor === 'yellow' ? '#92400e' : '#065f46'}}>
+                {localProfile?.healthStatusColor === 'red' ? 'STOP - STD Warning' : localProfile?.healthStatusColor === 'yellow' ? 'CAUTION - Proceed Carefully' : 'ALL CLEAR - 100% Clean'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600 text-center max-w-sm">
+              Partners can scan this QR code to view your health verification and profile information
+            </p>
+            <Button
+              onClick={handleShareLink}
+              variant="destructive"
+              className="w-full max-w-xs"
+              data-testid="share-btn"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.88 12.753 9 12.175 9 11.5c0-1.415-.221-2.812-.647-4.103M19 11.5a7.5 7.5 0 01-15 0M4.5 11.5h15" />
+              </svg>
+              Share QR Code Link
+            </Button>
+          </div>
         </div>
       )}
     </div>
