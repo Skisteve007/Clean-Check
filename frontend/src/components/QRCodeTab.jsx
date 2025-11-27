@@ -1152,13 +1152,30 @@ const PaymentSection = () => (
         💕 Joint/Companion Contribution ($69 via PayPal)
       </a>
 
-      <a
-        href="mailto:pitbossent@gmail.com?subject=Zelle Payment for Clean Check&body=I have sent payment via Zelle to pitbossent@gmail.com"
+      <button
+        onClick={() => {
+          // Try to open Zelle in banking app
+          const zelleEmail = 'pitbossent@gmail.com';
+          
+          // Attempt to open Zelle through various methods
+          const tryOpenZelle = () => {
+            // Method 1: Try Zelle universal link
+            window.location.href = `https://enroll.zellepay.com/qr-codes?data={"token":"${btoa(zelleEmail)}","action":"payment"}`;
+            
+            // Fallback: Open mailto after a short delay if app doesn't open
+            setTimeout(() => {
+              window.location.href = `mailto:${zelleEmail}?subject=Zelle Payment for Clean Check&body=Please send $39 (single) or $69 (joint) via Zelle to ${zelleEmail}`;
+            }, 1500);
+          };
+          
+          tryOpenZelle();
+          toast.info('Opening Zelle... If app doesn\'t open, use: pitbossent@gmail.com');
+        }}
         className="w-full p-3 font-semibold rounded-lg text-red-800 bg-red-200 hover:bg-red-300 flex items-center justify-center"
         data-testid="zelle-btn"
       >
         📱 Zelle: Single ($39) or Joint ($69)
-      </a>
+      </button>
     </div>
 
     <p className="mt-3 text-xs font-medium text-gray-700">
