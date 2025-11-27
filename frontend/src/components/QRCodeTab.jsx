@@ -345,46 +345,51 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       {/* Payment Section */}
       <PaymentSection />
 
-      {/* URL Input */}
-      <div>
-        <Label htmlFor="urlInput" className="block text-sm font-medium text-gray-700 mb-2">
-          Secure Link to Exam Results
-        </Label>
-        <Input
-          id="urlInput"
-          type="text"
-          value={urlInput}
-          onChange={handleUrlChange}
-          placeholder="Paste the secure link to your recent lab results here..."
-          className="border-red-400"
-          data-testid="url-input"
-        />
-      </div>
+      {/* Only show document upload and QR code generation if payment is confirmed */}
+      {paymentStatus && paymentStatus.paymentStatus === 'confirmed' && paymentStatus.qrCodeEnabled && (
+        <>
+          {/* URL Input */}
+          <div>
+            <Label htmlFor="urlInput" className="block text-sm font-medium text-gray-700 mb-2">
+              Secure Link to Exam Results
+            </Label>
+            <Input
+              id="urlInput"
+              type="text"
+              value={urlInput}
+              onChange={handleUrlChange}
+              placeholder="Paste the secure link to your recent lab results here..."
+              className="border-red-400"
+              data-testid="url-input"
+            />
+          </div>
 
-      {/* File Upload - Generate QR Code */}
-      <div className="p-4 border-2 border-red-400 rounded-lg bg-red-50">
-        <Label className="block text-sm font-bold text-red-700 mb-2">
-          📄 Upload Health Document
-        </Label>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".pdf,.png,.jpg,.jpeg"
-          className="hidden"
-        />
-        <Button
-          onClick={handleFileUpload}
-          variant="destructive"
-          className="w-full text-sm py-3"
-          data-testid="upload-btn"
-        >
-          📤 Upload & Create QR Code
-        </Button>
-        <p className="mt-2 text-xs text-gray-600 italic text-center">
-          Upload document to generate your QR code
-        </p>
-      </div>
+          {/* File Upload - Generate QR Code */}
+          <div className="p-4 border-2 border-red-400 rounded-lg bg-red-50">
+            <Label className="block text-sm font-bold text-red-700 mb-2">
+              📄 Upload Health Document
+            </Label>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".pdf,.png,.jpg,.jpeg"
+              className="hidden"
+            />
+            <Button
+              onClick={handleFileUpload}
+              variant="destructive"
+              className="w-full text-sm py-3"
+              data-testid="upload-btn"
+            >
+              📤 Upload & Create QR Code
+            </Button>
+            <p className="mt-2 text-xs text-gray-600 italic text-center">
+              Upload document to generate your QR code
+            </p>
+          </div>
+        </>
+      )}
 
       {/* QR Code Display with Color Selection */}
       {qrCodeDataUrl && (
