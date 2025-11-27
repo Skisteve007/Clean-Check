@@ -197,3 +197,31 @@ agent_communication:
     -message: "Implemented two major features: 1) Searchable member reference system allowing users to search and select active members as references, 2) Payment confirmation access control to prevent document upload and QR generation until admin confirms payment. Please test: Payment workflow (ensure locked until confirmed), ReferencesSearch (search, selection, display), Profile creation with references, and Partner view showing references properly."
     -agent: "testing"
     -message: "✅ BACKEND TESTING COMPLETE: All backend APIs are working perfectly! Payment confirmation access control is fully functional - users cannot upload documents until admin approves payment. Searchable member reference system works correctly - only confirmed members appear in search results. All CRUD operations for profiles and references working. Admin functionality (login, approve payments, view pending) all operational. 39/39 tests passed (100% success rate). Ready for frontend integration testing."
+
+  - task: "Payment Options - Remove Zelle, Keep PayPal and Venmo"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/QRCodeTab.jsx, /app/frontend/src/components/PaymentWorkflow.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Removed Zelle button and references completely. Updated PaymentSection to show PayPal (single $39, joint $69) and Venmo buttons. Updated PaymentWorkflow dropdown to remove Zelle option. Payment links: PayPal - paypal.me/pitbossent, Venmo - @pitbossent."
+
+  - task: "Biometric Authentication (Face ID/Touch ID)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/hooks/useBiometricAuth.js, /app/frontend/src/components/BiometricSetup.jsx, /app/frontend/src/components/CleanCheckApp.jsx, /app/frontend/src/components/ProfileManagementTab.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Implemented Web Authentication API for biometric login. Created useBiometricAuth hook for setup/authentication. BiometricSetup component added to Profile tab. On app load, attempts biometric auth before falling back to localStorage. Supports Face ID, Touch ID, and fingerprint sensors."
+
+agent_communication:
+    -agent: "main"
+    -message: "Additional features implemented: 1) Removed Zelle payment option completely, keeping only PayPal and Venmo with correct payment links. 2) Added biometric authentication (Face ID/Touch ID/Fingerprint) for quicker member sign-in. Ready for comprehensive frontend testing."
