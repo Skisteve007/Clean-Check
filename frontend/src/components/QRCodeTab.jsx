@@ -502,7 +502,7 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
 
       {/* Second Home */}
       <div>
-        <Label htmlFor="secondHome">🌍 Second Home: Where are you from?</Label>
+        <Label htmlFor="secondHome">🌍 Second Home</Label>
         <Input
           id="secondHome"
           type="text"
