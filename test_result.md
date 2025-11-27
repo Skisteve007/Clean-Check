@@ -221,15 +221,18 @@ agent_communication:
 
   - task: "Biometric Authentication (Face ID/Touch ID)"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/hooks/useBiometricAuth.js, /app/frontend/src/components/BiometricSetup.jsx, /app/frontend/src/components/CleanCheckApp.jsx, /app/frontend/src/components/ProfileManagementTab.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
         -comment: "Implemented Web Authentication API for biometric login. Created useBiometricAuth hook for setup/authentication. BiometricSetup component added to Profile tab. On app load, attempts biometric auth before falling back to localStorage. Supports Face ID, Touch ID, and fingerprint sensors."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ FRONTEND ISSUE: BiometricSetup card NOT found in Profile tab. The component exists in code but is not rendering. Issue: BiometricSetup component is conditionally rendered only when membershipId exists, but during testing no membershipId was created because profile creation requires photo upload which cannot be automated. Need to fix conditional rendering or ensure membershipId is available."
 
 agent_communication:
     -agent: "main"
