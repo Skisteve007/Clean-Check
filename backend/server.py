@@ -29,7 +29,7 @@ db = client[os.environ['DB_NAME']]
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 
 # Frontend URL for email links
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://healthshare-5.preview.emergentagent.com')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', os.environ.get('REACT_APP_BACKEND_URL', ''))
 
 # Create the main app without a prefix
 app = FastAPI()
