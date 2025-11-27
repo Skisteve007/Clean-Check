@@ -390,10 +390,10 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         <div className="space-y-4">
           {/* Health Status Color Selector */}
           <div className="p-4 bg-gray-50 border-2 border-gray-300 rounded-lg">
-            <Label className="block text-sm font-bold text-gray-800 mb-3">
+            <Label className="block text-sm font-bold text-gray-800 mb-6">
               🎨 Choose Your Health Status Color
             </Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3 mt-4">
               <Button
                 type="button"
                 onClick={() => {
