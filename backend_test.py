@@ -298,34 +298,113 @@ class CleanCheckAPITester:
         else:
             self.log_test("Profile Update Verification", False, "Profile name not updated correctly")
 
+        # === PAYMENT CONFIRMATION ACCESS CONTROL TESTS (HIGHEST PRIORITY) ===
+        print("\n🔒 Testing Payment Confirmation Access Control...")
+        
+        # Test 8: Check initial profile status (should be pending)
+        success, status = self.test_profile_status(profile1_id)
+        if success and status.get('paymentStatus') == 'pending':
+            self.log_test("Initial Payment Status Check", True, "Payment status is pending as expected")
+        else:
+            self.log_test("Initial Payment Status Check", False, f"Expected pending, got {status.get('paymentStatus') if success else 'error'}")
+
+        # Test 9: Try to upload document without payment (should fail)
+        self.test_document_upload_without_payment(profile1_id)
+
+        # Test 10: Submit payment confirmation
+        success, payment_response = self.test_payment_confirmation(profile1_id)
+        
+        # Test 11: Check status after payment submission (should be pending_approval)
+        success, status_after_payment = self.test_profile_status(profile1_id)
+        if success and status_after_payment.get('paymentStatus') == 'pending_approval':
+            self.log_test("Payment Status After Submission", True, "Status changed to pending_approval")
+        else:
+            self.log_test("Payment Status After Submission", False, f"Expected pending_approval, got {status_after_payment.get('paymentStatus') if success else 'error'}")
+
+        # Test 12: Admin login
+        admin_success, admin_response = self.test_admin_login()
+        
+        # Test 13: Get pending payments (admin)
+        if admin_success:
+            self.test_admin_pending_payments()
+
+        # Test 14: Admin approve payment
+        if admin_success:
+            approve_success, approve_response = self.test_admin_approve_payment(profile1_id)
+            
+            # Test 15: Check status after admin approval (should be confirmed)
+            success, status_after_approval = self.test_profile_status(profile1_id)
+            if success and status_after_approval.get('paymentStatus') == 'confirmed':
+                self.log_test("Payment Status After Admin Approval", True, "Status changed to confirmed")
+            else:
+                self.log_test("Payment Status After Admin Approval", False, f"Expected confirmed, got {status_after_approval.get('paymentStatus') if success else 'error'}")
+
+            # Test 16: Upload document after payment confirmation (should succeed)
+            if success and status_after_approval.get('paymentStatus') == 'confirmed':
+                doc_success, doc_response = self.test_document_upload(profile1_id)
+                
+                # Test 17: Check QR code enabled after document upload
+                success, final_status = self.test_profile_status(profile1_id)
+                if success and final_status.get('qrCodeEnabled'):
+                    self.log_test("QR Code Enabled After Document Upload", True, "QR code enabled successfully")
+                else:
+                    self.log_test("QR Code Enabled After Document Upload", False, "QR code not enabled after document upload")
+
+        # === SEARCHABLE MEMBER REFERENCE SYSTEM TESTS ===
+        print("\n🔍 Testing Searchable Member Reference System...")
+        
+        # Create a third profile with confirmed payment for search testing
+        profile3_id = self.test_create_profile("Charlie Wilson", "charlie.jpg")
+        if profile3_id:
+            # Simulate payment confirmation for profile3 to make it searchable
+            self.test_payment_confirmation(profile3_id)
+            if admin_success:
+                self.test_admin_approve_payment(profile3_id)
+
+        # Test 18: Search members with empty query
+        success, empty_search = self.test_search_members("")
+        
+        # Test 19: Search members with specific name
+        success, name_search = self.test_search_members("Alice")
+        
+        # Test 20: Search members with membership ID
         if profile2_id:
-            # Test 8: Add reference
+            success, id_search = self.test_search_members(profile2_id[:8])  # Search with partial ID
+
+        # === REFERENCE SYSTEM TESTS ===
+        if profile2_id:
+            # First, make profile2 searchable by confirming payment
+            self.test_payment_confirmation(profile2_id)
+            if admin_success:
+                self.test_admin_approve_payment(profile2_id)
+
+            # Test 21: Add reference
             self.test_add_reference(profile1_id, profile2_id, "Bob Smith")
 
-            # Test 9: Verify reference was added
+            # Test 22: Verify reference was added
             success, profile_with_ref = self.test_get_profile(profile1_id)
             if success and profile_with_ref.get('references') and len(profile_with_ref['references']) > 0:
                 self.log_test("Reference Addition Verification", True, f"Reference added: {profile_with_ref['references'][0]['name']}")
             else:
                 self.log_test("Reference Addition Verification", False, "Reference not found in profile")
 
-            # Test 10: Try to add duplicate reference (should fail)
+            # Test 23: Try to add duplicate reference (should fail)
             self.test_add_duplicate_reference(profile1_id, profile2_id, "Bob Smith")
 
-            # Test 11: Remove reference
+            # Test 24: Remove reference
             self.test_remove_reference(profile1_id, profile2_id)
 
-            # Test 12: Verify reference was removed
+            # Test 25: Verify reference was removed
             success, profile_after_removal = self.test_get_profile(profile1_id)
             if success and (not profile_after_removal.get('references') or len(profile_after_removal['references']) == 0):
                 self.log_test("Reference Removal Verification", True, "Reference removed successfully")
             else:
                 self.log_test("Reference Removal Verification", False, "Reference still exists after removal")
 
-        # Test 13: Add reference to non-existent profile
+        # Test 26: Add reference to non-existent profile
         self.test_add_reference_to_nonexistent_profile()
 
-        # Test 14: Try to add reference to non-existent referenced profile
+        # Test 27: Try to add reference to non-existent referenced profile
         if profile1_id:
             success, response = self.run_test(
                 "Add Reference to Non-existent Referenced Profile",
