@@ -312,21 +312,42 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         intimacy.**
       </p>
 
-      {/* Payment Workflow - Show if membershipId exists */}
-      {membershipId && (
-        <PaymentWorkflow
-          membershipId={membershipId}
-          onStatusChange={(status) => setPaymentStatus(status)}
-        />
+      {/* Step 1: Initial Payment - Show if no membershipId */}
+      {!membershipId && (
+        <>
+          {/* Security Seals */}
+          <SecuritySeals />
+          
+          {/* Payment Section with Value Props */}
+          <PaymentSection />
+          
+          {/* Initial Payment Form */}
+          <InitialPayment 
+            onPaymentSubmitted={(newMembershipId) => {
+              setMembershipId(newMembershipId);
+              createMembershipId('Pending Member', '', '');
+            }}
+          />
+        </>
       )}
 
-      {/* Security Seals */}
-      <SecuritySeals />
-
-      {/* Payment Section - Always show if no payment confirmed yet */}
-      {!paymentStatus || paymentStatus.paymentStatus !== 'confirmed' ? (
-        <PaymentSection />
-      ) : null}
+      {/* Step 2: Payment Workflow - Show if membershipId exists */}
+      {membershipId && (
+        <>
+          <PaymentWorkflow
+            membershipId={membershipId}
+            onStatusChange={(status) => setPaymentStatus(status)}
+          />
+          
+          {/* Show payment section again if payment not confirmed */}
+          {(!paymentStatus || paymentStatus.paymentStatus !== 'confirmed') && (
+            <>
+              <SecuritySeals />
+              <PaymentSection />
+            </>
+          )}
+        </>
+      )}
 
       {/* Profile Creation - Only show after payment is confirmed */}
       {!localProfile && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
