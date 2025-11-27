@@ -21,10 +21,21 @@ const CleanCheckApp = () => {
   }, []);
 
   const initializeApp = async () => {
+    // Check for reset parameter (for testing)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === 'true') {
+      localStorage.clear();
+      window.location.href = window.location.pathname;
+      return;
+    }
+
     // Check if user has already consented
     const consentGiven = localStorage.getItem('cleanCheckAgeConsent');
     if (consentGiven === 'true') {
       setHasConsented(true);
+    } else {
+      // Explicitly set to false if not present to ensure consent screen shows
+      setHasConsented(false);
     }
 
     // Track site visit
