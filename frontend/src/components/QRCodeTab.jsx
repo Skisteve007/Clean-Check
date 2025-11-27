@@ -24,6 +24,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
+    currentHome: '',
+    secondHome: '',
     birthdayDay: '',
     birthdayMonth: '',
     birthdayYear: '',
