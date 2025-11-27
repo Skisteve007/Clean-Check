@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import QRCode from 'qrcode';
 import PaymentWorkflow from './PaymentWorkflow';
 import InitialPayment from './InitialPayment';
+import WaitingScreen from './WaitingScreen';
 import ReferencesSearch from './ReferencesSearch';
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
