@@ -3,6 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import QRCodeTab from './QRCodeTab';
 import ProfileManagementTab from './ProfileManagementTab';
 import AgeConsent from './AgeConsent';
+import BiometricSetup from './BiometricSetup';
+import { useBiometricAuth } from '@/hooks/useBiometricAuth';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
