@@ -352,6 +352,10 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           <InitialPayment 
             onPaymentSubmitted={(newMembershipId) => {
               setMembershipId(newMembershipId);
+              // Fetch user status which should now be "In_Review" (Status 2)
+              setTimeout(() => {
+                fetchUserStatus();
+              }, 1000);
             }}
           />
         </>
