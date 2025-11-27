@@ -1148,6 +1148,65 @@ const PaymentSection = () => (
       Membership can **only be canceled** by contacting support.
     </p>
 
+    {/* Value Propositions - Why Join Clean Check */}
+    <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
+      <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
+        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+        Why Join Clean Check?
+      </h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">✅</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Verified Health Status</p>
+            <p className="text-xs text-gray-600">Share your clean status with confidence using QR codes</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">🔒</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Private & Secure</p>
+            <p className="text-xs text-gray-600">Your data is encrypted and stored securely on your terms</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">🤝</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Member References</p>
+            <p className="text-xs text-gray-600">Build trust with verified references from other members</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">⚡</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Instant Verification</p>
+            <p className="text-xs text-gray-600">Partners scan your QR code for immediate transparency</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">💜</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Peace of Mind</p>
+            <p className="text-xs text-gray-600">Navigate intimacy with informed consent and mutual safety</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">🌟</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Premium Features</p>
+            <p className="text-xs text-gray-600">Photo gallery, social links, and customizable status colors</p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 p-3 bg-gradient-to-r from-red-100 to-pink-100 rounded-lg border border-red-300">
+        <p className="text-sm font-bold text-red-800">
+          🎯 Join a community committed to transparency, safety, and informed intimacy.
+        </p>
+      </div>
+    </div>
+
     <div className="flex flex-col space-y-3">
       <a
         href="https://paypal.me/pitbossent/39"
