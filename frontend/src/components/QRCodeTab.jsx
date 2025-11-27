@@ -432,21 +432,21 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
               <Button
                 type="button"
                 onClick={() => {
-                  const color = 'red';
+                  const color = 'green';
                   const updated = { ...localProfile, healthStatusColor: color };
                   setLocalProfile(updated);
                   localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
                   if (urlInput) {
                     updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
                   }
-                  toast.success('QR Code set to RED - STD Warning');
+                  toast.success('QR Code set to GREEN - 100% Clean');
                 }}
-                className="flex flex-col items-center p-4 bg-red-500 hover:bg-red-600 text-white"
-                data-testid="qr-color-red"
+                className="flex flex-col items-center p-4 bg-green-500 hover:bg-green-600 text-white"
+                data-testid="qr-color-green"
               >
-                <span className="text-3xl mb-1">🛑</span>
-                <span className="text-sm font-bold">RED</span>
-                <span className="text-xs">STD Alert</span>
+                <span className="text-3xl mb-1">✅</span>
+                <span className="text-sm font-bold">GREEN</span>
+                <span className="text-xs">100% Clean</span>
               </Button>
 
               <Button
@@ -459,34 +459,34 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                   if (urlInput) {
                     updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
                   }
-                  toast.success('QR Code set to YELLOW - Caution');
+                  toast.success('QR Code set to YELLOW - Proceed with Caution');
                 }}
                 className="flex flex-col items-center p-4 bg-yellow-500 hover:bg-yellow-600 text-white"
                 data-testid="qr-color-yellow"
               >
                 <span className="text-3xl mb-1">⚠️</span>
                 <span className="text-sm font-bold">YELLOW</span>
-                <span className="text-xs">Caution</span>
+                <span className="text-xs">Proceed with Caution</span>
               </Button>
 
               <Button
                 type="button"
                 onClick={() => {
-                  const color = 'green';
+                  const color = 'red';
                   const updated = { ...localProfile, healthStatusColor: color };
                   setLocalProfile(updated);
                   localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
                   if (urlInput) {
                     updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
                   }
-                  toast.success('QR Code set to GREEN - All Clear');
+                  toast.success('QR Code set to RED - Review Exams in Detail');
                 }}
-                className="flex flex-col items-center p-4 bg-green-500 hover:bg-green-600 text-white"
-                data-testid="qr-color-green"
+                className="flex flex-col items-center p-4 bg-red-500 hover:bg-red-600 text-white"
+                data-testid="qr-color-red"
               >
-                <span className="text-3xl mb-1">✅</span>
-                <span className="text-sm font-bold">GREEN</span>
-                <span className="text-xs">All Clear</span>
+                <span className="text-3xl mb-1">🛑</span>
+                <span className="text-sm font-bold">RED</span>
+                <span className="text-xs">Review Exams in Detail</span>
               </Button>
             </div>
             <p className="text-xs text-gray-600 mt-3 text-center">
