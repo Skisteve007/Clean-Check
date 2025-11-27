@@ -368,7 +368,7 @@ class CleanCheckAPITester:
         print("\n🔍 Testing Searchable Member Reference System...")
         
         # Create a third profile with confirmed payment for search testing
-        profile3_id = self.test_create_profile("Charlie Wilson", "charlie.jpg")
+        profile3_id = self.test_create_profile("Charlie Wilson", "charlie.wilson@test.com", "testpass123", "charlie.jpg")
         if profile3_id:
             # Simulate payment confirmation for profile3 to make it searchable
             self.test_payment_confirmation(profile3_id)
