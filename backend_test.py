@@ -286,7 +286,7 @@ class CleanCheckAPITester:
         self.test_root_endpoint()
 
         # Test 2: Create first profile
-        profile1_id = self.test_create_profile("Alice Johnson", "alice.jpg")
+        profile1_id = self.test_create_profile("Alice Johnson", "alice.johnson@test.com", "testpass123", "alice.jpg")
         if not profile1_id:
             print("❌ Cannot continue tests - profile creation failed")
             return False
