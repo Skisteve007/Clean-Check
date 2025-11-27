@@ -172,6 +172,9 @@ frontend:
         -working: "NA"
         -agent: "main"
         -comment: "Updated partner view to display references as cards with member photo, name, membershipId, and green verification badge instead of plain text."
+        -working: "NA"
+        -agent: "testing"
+        -comment: "⚠️ FRONTEND ONLY: Cannot test partner view display as this requires frontend UI testing. Backend APIs for retrieving profile data with references are working correctly."
 
 metadata:
   created_by: "main_agent"
