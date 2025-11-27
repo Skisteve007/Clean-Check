@@ -99,6 +99,10 @@ class DocumentUpload(BaseModel):
     documentData: str  # base64 encoded
     documentType: str
 
+class AdminApproval(BaseModel):
+    membershipId: str
+    assignedMemberId: str  # Admin-assigned Member ID (e.g., MEM-001)
+
 # Admin verification
 def verify_admin(password: str):
     if not secrets.compare_digest(password, ADMIN_PASSWORD):
