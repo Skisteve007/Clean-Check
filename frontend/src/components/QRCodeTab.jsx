@@ -43,7 +43,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     onlyFansUrl: '',
     xUrl: '',
     acknowledgedStds: '',
-    recentReferences: '',
+    recentReferences: [],
     preferences: '',
     healthStatusColor: 'green'
   });
