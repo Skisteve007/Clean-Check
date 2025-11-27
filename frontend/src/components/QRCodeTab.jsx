@@ -1170,12 +1170,21 @@ const SecuritySeals = () => (
 const PaymentSection = () => (
   <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
     <h3 className="text-xl font-bold text-red-700 mb-3">Service Contribution (Membership)</h3>
-    <p className="text-sm text-gray-700 mb-4">
+    <p className="text-sm text-gray-700 mb-2">
       This is a **Clean Check Membership** with a **recurring charge of $39 every 30 days** per
       donor to cover secure hosting and verification processing.
-      <br />
-      Membership can **only be canceled** by contacting support.
     </p>
+    
+    {/* Nonrefundable Disclaimer */}
+    <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+      <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
+      <ul className="text-xs text-gray-800 space-y-1">
+        <li>• <strong>All membership contributions are non-refundable and final</strong></li>
+        <li>• Recurring $39 charge every 30 days</li>
+        <li>• To cancel: Log into your PayPal account → Settings → Payments → Manage automatic payments → Cancel Clean Check subscription</li>
+        <li>• Cancellation must be done through PayPal directly</li>
+      </ul>
+    </div>
 
     {/* Value Propositions - Why Join Clean Check */}
     <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
