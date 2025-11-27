@@ -391,8 +391,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </>
       )}
 
-      {/* QR Code Display with Color Selection */}
-      {qrCodeDataUrl && (
+      {/* QR Code Display with Color Selection - Only show if payment confirmed and QR enabled */}
+      {qrCodeDataUrl && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && paymentStatus.qrCodeEnabled && (
         <div className="space-y-4">
           {/* Health Status Color Selector */}
           <div className="p-4 bg-gray-50 border-2 border-gray-300 rounded-lg">
