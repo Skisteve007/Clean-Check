@@ -186,12 +186,12 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       setUrlInput(mockUrl);
 
       if (localProfile) {
-        updateQRCodeWithProfile(mockUrl, localProfile);
+        updateQRCodeWithProfile(mockUrl, localProfile, localProfile.healthStatusColor || 'green');
       } else {
-        generateQRCode(mockUrl);
+        generateQRCode(mockUrl, 'green');
       }
 
-      toast.success('Link generated & QR code updated!');
+      toast.success('🎉 QR Code Generated! Scan to share your health status.');
     }, 1500);
   };
 
