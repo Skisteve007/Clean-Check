@@ -124,7 +124,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     toast.success('Profile saved successfully!');
   };
 
-  const updateQRCodeWithProfile = (baseUrl, profile) => {
+  const updateQRCodeWithProfile = (baseUrl, profile, healthColor = 'green') => {
     if (!baseUrl) return;
 
     const profileJson = JSON.stringify(profile);
@@ -133,7 +133,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
 
     setUrlInput(shareableUrl);
     localStorage.setItem('cleanCheckSecureLink', shareableUrl);
-    generateQRCode(shareableUrl);
+    generateQRCode(shareableUrl, healthColor);
   };
 
   const generateQRCode = async (url, healthColor = 'green') => {
