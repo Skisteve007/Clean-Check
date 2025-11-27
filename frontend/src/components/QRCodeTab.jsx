@@ -74,8 +74,27 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     } else {
       // Donor view - load from localStorage
       loadLocalProfile();
+      // Fetch user status if membershipId exists
+      if (membershipId) {
+        fetchUserStatus();
+      }
     }
-  }, []);
+  }, [membershipId]);
+
+  const fetchUserStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/profiles/${membershipId}`);
+      const profile = response.data;
+      setUserStatus(profile.userStatus || 1);
+      setUserEmail(profile.email || '');
+      setPaymentStatus({
+        paymentStatus: profile.paymentStatus,
+        qrCodeEnabled: profile.qrCodeEnabled
+      });
+    } catch (error) {
+      console.error('Failed to fetch user status:', error);
+    }
+  };
 
   const loadLocalProfile = () => {
     const saved = localStorage.getItem('cleanCheckDonorProfile');
