@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
 import PaymentWorkflow from './PaymentWorkflow';
+import ReferencesSearch from './ReferencesSearch';
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
   const [urlInput, setUrlInput] = useState('');
