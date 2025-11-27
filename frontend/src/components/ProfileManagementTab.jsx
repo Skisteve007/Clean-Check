@@ -134,9 +134,113 @@ const ProfileManagementTab = ({ membershipId, createMembershipId }) => {
     }
   };
 
+  // Load donor profile from localStorage
+  const [donorProfile, setDonorProfile] = React.useState(null);
+
+  React.useEffect(() => {
+    const savedProfile = localStorage.getItem('cleanCheckDonorProfile');
+    if (savedProfile) {
+      try {
+        setDonorProfile(JSON.parse(savedProfile));
+      } catch (e) {
+        console.error('Failed to load profile:', e);
+      }
+    }
+  }, []);
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-red-600">Membership and Reference Management</h2>
+      <h2 className="text-2xl font-bold text-red-600">Profile & Membership</h2>
+
+      {/* Complete Donor Profile Display */}
+      {donorProfile && (
+        <div className="p-6 bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-lg shadow-lg">
+          <h3 className="text-xl font-bold text-red-700 mb-4 flex items-center space-x-2">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM10 17l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+            </svg>
+            <span>Your Complete Profile</span>
+          </h3>
+
+          <div className="flex items-start space-x-4 mb-4">
+            <img
+              src={donorProfile.photo || 'https://placehold.co/96x96/f87171/ffffff?text=U'}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover border-4 border-red-400"
+            />
+            <div className="flex-grow">
+              <h4 className="text-2xl font-bold text-gray-800">{donorProfile.name}</h4>
+              <p className="text-sm text-gray-600">{donorProfile.email}</p>
+              {donorProfile.birthdayMonth && (
+                <p className="text-sm text-gray-600">
+                  🎂 Birthday: {donorProfile.birthdayMonth}/{donorProfile.birthdayDay}/{donorProfile.birthdayYear}
+                </p>
+              )}
+              {donorProfile.currentHome && (
+                <p className="text-sm text-gray-600">🏠 {donorProfile.currentHome}</p>
+              )}
+              {donorProfile.secondHome && (
+                <p className="text-sm text-gray-600">🌍 {donorProfile.secondHome}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="bg-white p-3 rounded-lg">
+              <p className="text-xs text-gray-600">Identity</p>
+              <p className="font-bold text-gray-800">{donorProfile.sex}</p>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <p className="text-xs text-gray-600">Orientation</p>
+              <p className="font-bold text-gray-800">{donorProfile.sexualOrientation}</p>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <p className="text-xs text-gray-600">Relationship</p>
+              <p className="font-bold text-gray-800">{donorProfile.relationshipStatus}</p>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <p className="text-xs text-gray-600">Preferences</p>
+              <p className="font-bold text-gray-800">
+                {donorProfile.partnerPreferences && donorProfile.partnerPreferences.length > 0 
+                  ? donorProfile.partnerPreferences.join(', ') 
+                  : 'Not specified'}
+              </p>
+            </div>
+          </div>
+
+          {donorProfile.healthStatusColor && (
+            <div className="bg-white p-3 rounded-lg mb-4">
+              <p className="text-xs text-gray-600 mb-1">Health Status Signal</p>
+              <div className="flex items-center space-x-2">
+                <div 
+                  className="w-8 h-8 rounded-full" 
+                  style={{backgroundColor: donorProfile.healthStatusColor === 'red' ? '#dc2626' : donorProfile.healthStatusColor === 'yellow' ? '#f59e0b' : '#10b981'}}
+                />
+                <span className="font-bold">
+                  {donorProfile.healthStatusColor === 'red' ? '🛑 RED - STD Warning' : donorProfile.healthStatusColor === 'yellow' ? '⚠️ YELLOW - Caution' : '✅ GREEN - All Clear'}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {(donorProfile.instagramUrl || donorProfile.tiktokUrl || donorProfile.facebookUrl || donorProfile.onlyFansUrl || donorProfile.xUrl) && (
+            <div className="bg-white p-3 rounded-lg mb-4">
+              <p className="text-xs text-gray-600 mb-2">Social Media</p>
+              <div className="flex flex-wrap gap-2">
+                {donorProfile.instagramUrl && <span className="text-xs bg-pink-100 px-2 py-1 rounded">📷 Instagram</span>}
+                {donorProfile.tiktokUrl && <span className="text-xs bg-gray-100 px-2 py-1 rounded">🎵 TikTok</span>}
+                {donorProfile.facebookUrl && <span className="text-xs bg-blue-100 px-2 py-1 rounded">📘 Facebook</span>}
+                {donorProfile.onlyFansUrl && <span className="text-xs bg-cyan-100 px-2 py-1 rounded">💎 OnlyFans</span>}
+                {donorProfile.xUrl && <span className="text-xs bg-gray-100 px-2 py-1 rounded">✖️ X</span>}
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-500 italic text-center">
+            Last Updated: {formatDate(donorProfile.lastUpdated)}
+          </p>
+        </div>
+      )}
 
       {/* Membership ID Display */}
       <div className="p-4 bg-gray-100 rounded-lg shadow-inner">
