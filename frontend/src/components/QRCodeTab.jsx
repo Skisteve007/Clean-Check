@@ -363,7 +363,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       {/* File Upload - Generate QR Code */}
       <div className="p-4 border-2 border-red-400 rounded-lg bg-red-50">
         <Label className="block text-sm font-bold text-red-700 mb-2">
-          📄 Upload Health Document to Generate QR Code
+          📄 Upload Health Document
         </Label>
         <input
           type="file"
@@ -375,13 +375,13 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         <Button
           onClick={handleFileUpload}
           variant="destructive"
-          className="w-full text-lg py-6"
+          className="w-full text-sm py-3"
           data-testid="upload-btn"
         >
-          📤 Upload Document & Generate QR Code
+          📤 Upload & Create QR Code
         </Button>
         <p className="mt-2 text-xs text-gray-600 italic text-center">
-          Upload your health document to instantly create your shareable QR code
+          Upload document to generate your QR code
         </p>
       </div>
 
