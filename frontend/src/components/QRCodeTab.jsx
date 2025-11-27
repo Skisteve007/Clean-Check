@@ -1169,35 +1169,20 @@ const PaymentSection = () => (
         💕 Joint/Companion Contribution ($69 via PayPal)
       </a>
 
-      <button
-        onClick={() => {
-          // Try to open Zelle in banking app
-          const zelleEmail = 'pitbossent@gmail.com';
-          
-          // Attempt to open Zelle through various methods
-          const tryOpenZelle = () => {
-            // Method 1: Try Zelle universal link
-            window.location.href = `https://enroll.zellepay.com/qr-codes?data={"token":"${btoa(zelleEmail)}","action":"payment"}`;
-            
-            // Fallback: Open mailto after a short delay if app doesn't open
-            setTimeout(() => {
-              window.location.href = `mailto:${zelleEmail}?subject=Zelle Payment for Clean Check&body=Please send $39 (single) or $69 (joint) via Zelle to ${zelleEmail}`;
-            }, 1500);
-          };
-          
-          tryOpenZelle();
-          toast.info('Opening Zelle... If app doesn\'t open, use: pitbossent@gmail.com');
-        }}
-        className="w-full p-3 font-semibold rounded-lg text-red-800 bg-red-200 hover:bg-red-300 flex items-center justify-center"
-        data-testid="zelle-btn"
+      <a
+        href="https://venmo.com/u/pitbossent"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full p-3 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex items-center justify-center"
+        data-testid="venmo-btn"
       >
-        📱 Zelle: Single ($39) or Joint ($69)
-      </button>
+        💰 Venmo: Single ($39) or Joint ($69)
+      </a>
     </div>
 
     <p className="mt-3 text-xs font-medium text-gray-700">
       <strong>PayPal:</strong> paypal.me/pitbossent<br />
-      <strong>Zelle:</strong> pitbossent@gmail.com
+      <strong>Venmo:</strong> @pitbossent
     </p>
     <p className="mt-2 text-xs text-gray-600">
       After payment, use the payment confirmation form above to notify admin for confirmation. Allow up to 5 mins for confirmation.
