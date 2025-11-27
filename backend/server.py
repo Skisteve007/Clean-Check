@@ -63,7 +63,7 @@ class DonorProfile(BaseModel):
 class ProfileCreate(BaseModel):
     name: str
     email: EmailStr
-    password: str
+    password: Optional[str] = None
     photo: Optional[str] = ""
 
 class UserLogin(BaseModel):
