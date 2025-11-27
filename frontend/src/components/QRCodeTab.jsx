@@ -1039,13 +1039,30 @@ const PartnerView = ({ profile, examLink }) => {
         {/* References */}
         <div className="mt-4 border-t border-red-200 pt-3">
           <p className="text-sm font-semibold text-gray-700 mb-1">
-            Recent References (Self-Reported):
+            Recent References (Verified Members):
           </p>
-          <p className="text-sm text-gray-600 italic whitespace-pre-wrap">
-            {profile.recentReferences && profile.recentReferences.trim()
-              ? profile.recentReferences
-              : 'None provided.'}
-          </p>
+          {profile.recentReferences && Array.isArray(profile.recentReferences) && profile.recentReferences.length > 0 ? (
+            <div className="space-y-2 mt-2">
+              {profile.recentReferences.map((ref, index) => (
+                <div key={index} className="flex items-center space-x-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {ref.photo ? (
+                      <img src={ref.photo} alt={ref.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-gray-500 text-lg">👤</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800 text-sm">{ref.name}</p>
+                    <p className="text-xs text-gray-500">ID: {ref.membershipId}</p>
+                  </div>
+                  <span className="text-xs text-green-600 font-semibold">✓ Verified</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600 italic">None provided.</p>
+          )}
         </div>
 
         {/* Preferences */}
