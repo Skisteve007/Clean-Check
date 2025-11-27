@@ -387,35 +387,20 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
 
       {/* QR Code Display - Only show if approved and document uploaded */}
       {paymentStatus?.qrCodeEnabled && qrCodeDataUrl && (
-        <div className="flex flex-col items-center space-y-4">
-          <div className="p-4 bg-white border border-gray-200 rounded-lg qr-code-container">
-            <img src={qrCodeDataUrl} alt="QR Code" data-testid="qr-code-image" />
-          </div>
-          <p className="text-sm font-semibold text-red-600 text-center">
-            Scan the QR code to access and share the validated health information.
-          </p>
-          <Button
-            onClick={handleShareLink}
-            variant="destructive"
-            className="w-full max-w-xs"
-            data-testid="share-btn"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8.684 13.342C8.88 12.753 9 12.175 9 11.5c0-1.415-.221-2.812-.647-4.103M19 11.5a7.5 7.5 0 01-15 0M4.5 11.5h15"
-              />
-            </svg>
-            Share Final Link
-          </Button>
-        </div>
+        <QRCodeDisplay
+          qrCodeDataUrl={qrCodeDataUrl}
+          healthColor={localProfile?.healthStatusColor || 'green'}
+          onColorChange={(color) => {
+            const updated = { ...localProfile, healthStatusColor: color };
+            setLocalProfile(updated);
+            localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
+            if (urlInput) {
+              updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
+            }
+            toast.success(`QR Code color changed to ${color.toUpperCase()}`);
+          }}
+          onShare={handleShareLink}
+        />
       )}
 
       {!paymentStatus?.qrCodeEnabled && !qrCodeDataUrl && (
