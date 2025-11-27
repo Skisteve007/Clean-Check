@@ -644,68 +644,63 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         </div>
       </div>
 
-      {/* Social Media Links */}
+      {/* Social Media Links - OPTIONAL */}
       <h3 className="text-lg font-bold text-gray-700 pt-2 border-t border-gray-200">
-        Social Media Links (for Verification)
+        Social Media Links (Optional for Verification)
       </h3>
 
       <div>
-        <Label htmlFor="instagramUrl">Instagram URL *</Label>
+        <Label htmlFor="instagramUrl">Instagram URL</Label>
         <Input
           id="instagramUrl"
           type="url"
-          value={profileForm.instagramUrl}
+          value={profileForm.instagramUrl || ''}
           onChange={(e) => setProfileForm({ ...profileForm, instagramUrl: e.target.value })}
           placeholder="https://instagram.com/..."
-          required
         />
       </div>
 
       <div>
-        <Label htmlFor="tiktokUrl">TikTok URL *</Label>
+        <Label htmlFor="tiktokUrl">TikTok URL</Label>
         <Input
           id="tiktokUrl"
           type="url"
-          value={profileForm.tiktokUrl}
+          value={profileForm.tiktokUrl || ''}
           onChange={(e) => setProfileForm({ ...profileForm, tiktokUrl: e.target.value })}
           placeholder="https://tiktok.com/@..."
-          required
         />
       </div>
 
       <div>
-        <Label htmlFor="facebookUrl">Facebook URL *</Label>
+        <Label htmlFor="facebookUrl">Facebook URL</Label>
         <Input
           id="facebookUrl"
           type="url"
-          value={profileForm.facebookUrl}
+          value={profileForm.facebookUrl || ''}
           onChange={(e) => setProfileForm({ ...profileForm, facebookUrl: e.target.value })}
           placeholder="https://facebook.com/..."
-          required
         />
       </div>
 
       <div>
-        <Label htmlFor="onlyFansUrl">OnlyFans URL *</Label>
+        <Label htmlFor="onlyFansUrl">OnlyFans URL</Label>
         <Input
           id="onlyFansUrl"
           type="url"
-          value={profileForm.onlyFansUrl}
+          value={profileForm.onlyFansUrl || ''}
           onChange={(e) => setProfileForm({ ...profileForm, onlyFansUrl: e.target.value })}
           placeholder="https://onlyfans.com/..."
-          required
         />
       </div>
 
       <div>
-        <Label htmlFor="xUrl">X/Twitter URL *</Label>
+        <Label htmlFor="xUrl">X/Twitter URL</Label>
         <Input
           id="xUrl"
           type="url"
-          value={profileForm.xUrl}
+          value={profileForm.xUrl || ''}
           onChange={(e) => setProfileForm({ ...profileForm, xUrl: e.target.value })}
           placeholder="https://x.com/..."
-          required
         />
       </div>
 
