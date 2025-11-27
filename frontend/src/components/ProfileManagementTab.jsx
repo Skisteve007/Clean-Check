@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import BiometricSetup from './BiometricSetup';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -151,6 +152,9 @@ const ProfileManagementTab = ({ membershipId, createMembershipId }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-red-600">Profile & Membership</h2>
+
+      {/* Biometric Authentication Setup */}
+      {membershipId && <BiometricSetup membershipId={membershipId} />}
 
       {/* Complete Donor Profile Display */}
       {donorProfile && (

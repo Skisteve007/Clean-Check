@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
 import PaymentWorkflow from './PaymentWorkflow';
+import InitialPayment from './InitialPayment';
+import ReferencesSearch from './ReferencesSearch';
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
   const [urlInput, setUrlInput] = useState('');
@@ -42,7 +44,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     onlyFansUrl: '',
     xUrl: '',
     acknowledgedStds: '',
-    recentReferences: '',
+    recentReferences: [],
     preferences: '',
     healthStatusColor: 'green'
   });
@@ -304,12 +306,60 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </div>
       )}
 
-      {!localProfile && (
-        <div className="text-center">
+      {/* Tagline */}
+      <p className="text-center text-gray-700 text-sm">
+        **Confidently share verified health status information for mutual safety and informed
+        intimacy.**
+      </p>
+
+      {/* Step 1: Initial Payment - Show if no membershipId */}
+      {!membershipId && (
+        <>
+          {/* Security Seals */}
+          <SecuritySeals />
+          
+          {/* Payment Section with Value Props */}
+          <PaymentSection />
+          
+          {/* Initial Payment Form */}
+          <InitialPayment 
+            onPaymentSubmitted={(newMembershipId) => {
+              setMembershipId(newMembershipId);
+              createMembershipId('Pending Member', '', '');
+            }}
+          />
+        </>
+      )}
+
+      {/* Step 2: Payment Workflow - Show if membershipId exists */}
+      {membershipId && (
+        <>
+          <PaymentWorkflow
+            membershipId={membershipId}
+            onStatusChange={(status) => setPaymentStatus(status)}
+          />
+          
+          {/* Show payment section again if payment not confirmed */}
+          {(!paymentStatus || paymentStatus.paymentStatus !== 'confirmed') && (
+            <>
+              <SecuritySeals />
+              <PaymentSection />
+            </>
+          )}
+        </>
+      )}
+
+      {/* Profile Creation - Only show after payment is confirmed */}
+      {!localProfile && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
+        <div className="text-center mt-4">
+          <div className="p-4 bg-green-50 border-2 border-green-400 rounded-lg mb-4">
+            <p className="text-green-800 font-bold mb-2">🎉 Payment Confirmed!</p>
+            <p className="text-sm text-green-700">You can now create your donor profile to get started.</p>
+          </div>
           <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
             <DialogTrigger asChild>
-              <Button variant="destructive" data-testid="set-profile-btn">
-                Set Profile to Get Started
+              <Button variant="destructive" data-testid="set-profile-btn" className="w-full max-w-md">
+                Create Your Donor Profile
               </Button>
             </DialogTrigger>
             <DialogContent className="max-h-[80vh] overflow-y-auto">
@@ -324,69 +374,54 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </div>
       )}
 
-      {/* Tagline */}
-      <p className="text-center text-gray-700 text-sm">
-        **Confidently share verified health status information for mutual safety and informed
-        intimacy.**
-      </p>
+      {/* Only show document upload and QR code generation if payment is confirmed */}
+      {paymentStatus && paymentStatus.paymentStatus === 'confirmed' && paymentStatus.qrCodeEnabled && (
+        <>
+          {/* URL Input */}
+          <div>
+            <Label htmlFor="urlInput" className="block text-sm font-medium text-gray-700 mb-2">
+              Secure Link to Exam Results
+            </Label>
+            <Input
+              id="urlInput"
+              type="text"
+              value={urlInput}
+              onChange={handleUrlChange}
+              placeholder="Paste the secure link to your recent lab results here..."
+              className="border-red-400"
+              data-testid="url-input"
+            />
+          </div>
 
-      {/* Payment Workflow */}
-      {membershipId && (
-        <PaymentWorkflow
-          membershipId={membershipId}
-          onStatusChange={(status) => setPaymentStatus(status)}
-        />
+          {/* File Upload - Generate QR Code */}
+          <div className="p-4 border-2 border-red-400 rounded-lg bg-red-50">
+            <Label className="block text-sm font-bold text-red-700 mb-2">
+              📄 Upload Health Document
+            </Label>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".pdf,.png,.jpg,.jpeg"
+              className="hidden"
+            />
+            <Button
+              onClick={handleFileUpload}
+              variant="destructive"
+              className="w-full text-sm py-3"
+              data-testid="upload-btn"
+            >
+              📤 Upload & Create QR Code
+            </Button>
+            <p className="mt-2 text-xs text-gray-600 italic text-center">
+              Upload document to generate your QR code
+            </p>
+          </div>
+        </>
       )}
 
-      {/* Security Seals */}
-      <SecuritySeals />
-
-      {/* Payment Section */}
-      <PaymentSection />
-
-      {/* URL Input */}
-      <div>
-        <Label htmlFor="urlInput" className="block text-sm font-medium text-gray-700 mb-2">
-          Secure Link to Exam Results
-        </Label>
-        <Input
-          id="urlInput"
-          type="text"
-          value={urlInput}
-          onChange={handleUrlChange}
-          placeholder="Paste the secure link to your recent lab results here..."
-          className="border-red-400"
-          data-testid="url-input"
-        />
-      </div>
-
-      {/* File Upload - Generate QR Code */}
-      <div className="p-4 border-2 border-red-400 rounded-lg bg-red-50">
-        <Label className="block text-sm font-bold text-red-700 mb-2">
-          📄 Upload Health Document
-        </Label>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".pdf,.png,.jpg,.jpeg"
-          className="hidden"
-        />
-        <Button
-          onClick={handleFileUpload}
-          variant="destructive"
-          className="w-full text-sm py-3"
-          data-testid="upload-btn"
-        >
-          📤 Upload & Create QR Code
-        </Button>
-        <p className="mt-2 text-xs text-gray-600 italic text-center">
-          Upload document to generate your QR code
-        </p>
-      </div>
-
-      {/* QR Code Display with Color Selection */}
-      {qrCodeDataUrl && (
+      {/* QR Code Display with Color Selection - Only show if payment confirmed and QR enabled */}
+      {qrCodeDataUrl && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && paymentStatus.qrCodeEnabled && (
         <div className="space-y-4">
           {/* Health Status Color Selector */}
           <div className="p-4 bg-gray-50 border-2 border-gray-300 rounded-lg">
@@ -397,21 +432,21 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
               <Button
                 type="button"
                 onClick={() => {
-                  const color = 'red';
+                  const color = 'green';
                   const updated = { ...localProfile, healthStatusColor: color };
                   setLocalProfile(updated);
                   localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
                   if (urlInput) {
                     updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
                   }
-                  toast.success('QR Code set to RED - STD Warning');
+                  toast.success('QR Code set to GREEN - 100% Clean');
                 }}
-                className="flex flex-col items-center p-4 bg-red-500 hover:bg-red-600 text-white"
-                data-testid="qr-color-red"
+                className="flex flex-col items-center p-4 bg-green-500 hover:bg-green-600 text-white"
+                data-testid="qr-color-green"
               >
-                <span className="text-3xl mb-1">🛑</span>
-                <span className="text-sm font-bold">RED</span>
-                <span className="text-xs">STD Alert</span>
+                <span className="text-3xl mb-1">✅</span>
+                <span className="text-sm font-bold">GREEN</span>
+                <span className="text-xs">100% Clean</span>
               </Button>
 
               <Button
@@ -424,34 +459,34 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                   if (urlInput) {
                     updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
                   }
-                  toast.success('QR Code set to YELLOW - Caution');
+                  toast.success('QR Code set to YELLOW - Proceed with Caution');
                 }}
                 className="flex flex-col items-center p-4 bg-yellow-500 hover:bg-yellow-600 text-white"
                 data-testid="qr-color-yellow"
               >
                 <span className="text-3xl mb-1">⚠️</span>
                 <span className="text-sm font-bold">YELLOW</span>
-                <span className="text-xs">Caution</span>
+                <span className="text-xs">Proceed with Caution</span>
               </Button>
 
               <Button
                 type="button"
                 onClick={() => {
-                  const color = 'green';
+                  const color = 'red';
                   const updated = { ...localProfile, healthStatusColor: color };
                   setLocalProfile(updated);
                   localStorage.setItem('cleanCheckDonorProfile', JSON.stringify(updated));
                   if (urlInput) {
                     updateQRCodeWithProfile(urlInput.split('?')[0], updated, color);
                   }
-                  toast.success('QR Code set to GREEN - All Clear');
+                  toast.success('QR Code set to RED - Review Exams in Detail');
                 }}
-                className="flex flex-col items-center p-4 bg-green-500 hover:bg-green-600 text-white"
-                data-testid="qr-color-green"
+                className="flex flex-col items-center p-4 bg-red-500 hover:bg-red-600 text-white"
+                data-testid="qr-color-red"
               >
-                <span className="text-3xl mb-1">✅</span>
-                <span className="text-sm font-bold">GREEN</span>
-                <span className="text-xs">All Clear</span>
+                <span className="text-3xl mb-1">🛑</span>
+                <span className="text-sm font-bold">RED</span>
+                <span className="text-xs">Review Exams in Detail</span>
               </Button>
             </div>
             <p className="text-xs text-gray-600 mt-3 text-center">
@@ -816,16 +851,10 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
       </div>
 
       {/* Recent References */}
-      <div>
-        <Label htmlFor="recentReferences">Recent References (Optional for Verification)</Label>
-        <Textarea
-          id="recentReferences"
-          rows={2}
-          value={profileForm.recentReferences || ''}
-          onChange={(e) => setProfileForm({ ...profileForm, recentReferences: e.target.value })}
-          placeholder="e.g., Contact information for 1-2 character references..."
-        />
-      </div>
+      <ReferencesSearch
+        selectedReferences={profileForm.recentReferences || []}
+        onReferencesChange={(refs) => setProfileForm({ ...profileForm, recentReferences: refs })}
+      />
 
       {/* Sexual Preferences */}
       <div>
@@ -1044,13 +1073,30 @@ const PartnerView = ({ profile, examLink }) => {
         {/* References */}
         <div className="mt-4 border-t border-red-200 pt-3">
           <p className="text-sm font-semibold text-gray-700 mb-1">
-            Recent References (Self-Reported):
+            Recent References (Verified Members):
           </p>
-          <p className="text-sm text-gray-600 italic whitespace-pre-wrap">
-            {profile.recentReferences && profile.recentReferences.trim()
-              ? profile.recentReferences
-              : 'None provided.'}
-          </p>
+          {profile.recentReferences && Array.isArray(profile.recentReferences) && profile.recentReferences.length > 0 ? (
+            <div className="space-y-2 mt-2">
+              {profile.recentReferences.map((ref, index) => (
+                <div key={index} className="flex items-center space-x-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {ref.photo ? (
+                      <img src={ref.photo} alt={ref.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-gray-500 text-lg">👤</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800 text-sm">{ref.name}</p>
+                    <p className="text-xs text-gray-500">ID: {ref.membershipId}</p>
+                  </div>
+                  <span className="text-xs text-green-600 font-semibold">✓ Verified</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600 italic">None provided.</p>
+          )}
         </div>
 
         {/* Preferences */}
@@ -1124,12 +1170,80 @@ const SecuritySeals = () => (
 const PaymentSection = () => (
   <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
     <h3 className="text-xl font-bold text-red-700 mb-3">Service Contribution (Membership)</h3>
-    <p className="text-sm text-gray-700 mb-4">
+    <p className="text-sm text-gray-700 mb-2">
       This is a **Clean Check Membership** with a **recurring charge of $39 every 30 days** per
       donor to cover secure hosting and verification processing.
-      <br />
-      Membership can **only be canceled** by contacting support.
     </p>
+    
+    {/* Nonrefundable Disclaimer */}
+    <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+      <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
+      <ul className="text-xs text-gray-800 space-y-1">
+        <li>• <strong>All membership contributions are non-refundable and final</strong></li>
+        <li>• Recurring $39 charge every 30 days</li>
+        <li>• To cancel: Log into your PayPal account → Settings → Payments → Manage automatic payments → Cancel Clean Check subscription</li>
+        <li>• Cancellation must be done through PayPal directly</li>
+      </ul>
+    </div>
+
+    {/* Value Propositions - Why Join Clean Check */}
+    <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
+      <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
+        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+        Why Join Clean Check?
+      </h4>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">✅</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Verified Health Status</p>
+            <p className="text-xs text-gray-600">Share your clean status with confidence using QR codes</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">🔒</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Private & Secure</p>
+            <p className="text-xs text-gray-600">Your data is encrypted and stored securely on your terms</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">🤝</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Member References</p>
+            <p className="text-xs text-gray-600">Build trust with verified references from other members</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">⚡</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Instant Verification</p>
+            <p className="text-xs text-gray-600">Partners scan your QR code for immediate transparency</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">💜</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Peace of Mind</p>
+            <p className="text-xs text-gray-600">Navigate intimacy with informed consent and mutual safety</p>
+          </div>
+        </div>
+        <div className="flex items-start space-x-2">
+          <span className="text-2xl flex-shrink-0">🌟</span>
+          <div>
+            <p className="font-bold text-sm text-gray-800">Premium Features</p>
+            <p className="text-xs text-gray-600">Photo gallery, social links, and customizable status colors</p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 p-3 bg-gradient-to-r from-red-100 to-pink-100 rounded-lg border border-red-300">
+        <p className="text-sm font-bold text-red-800">
+          🎯 Join a community committed to transparency, safety, and informed intimacy.
+        </p>
+      </div>
+    </div>
 
     <div className="flex flex-col space-y-3">
       <a
@@ -1152,38 +1266,23 @@ const PaymentSection = () => (
         💕 Joint/Companion Contribution ($69 via PayPal)
       </a>
 
-      <button
-        onClick={() => {
-          // Try to open Zelle in banking app
-          const zelleEmail = 'pitbossent@gmail.com';
-          
-          // Attempt to open Zelle through various methods
-          const tryOpenZelle = () => {
-            // Method 1: Try Zelle universal link
-            window.location.href = `https://enroll.zellepay.com/qr-codes?data={"token":"${btoa(zelleEmail)}","action":"payment"}`;
-            
-            // Fallback: Open mailto after a short delay if app doesn't open
-            setTimeout(() => {
-              window.location.href = `mailto:${zelleEmail}?subject=Zelle Payment for Clean Check&body=Please send $39 (single) or $69 (joint) via Zelle to ${zelleEmail}`;
-            }, 1500);
-          };
-          
-          tryOpenZelle();
-          toast.info('Opening Zelle... If app doesn\'t open, use: pitbossent@gmail.com');
-        }}
-        className="w-full p-3 font-semibold rounded-lg text-red-800 bg-red-200 hover:bg-red-300 flex items-center justify-center"
-        data-testid="zelle-btn"
+      <a
+        href="https://venmo.com/u/skisteve007"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full p-3 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex items-center justify-center"
+        data-testid="venmo-btn"
       >
-        📱 Zelle: Single ($39) or Joint ($69)
-      </button>
+        💰 Venmo: Single ($39) or Joint ($69)
+      </a>
     </div>
 
     <p className="mt-3 text-xs font-medium text-gray-700">
       <strong>PayPal:</strong> paypal.me/pitbossent<br />
-      <strong>Zelle:</strong> pitbossent@gmail.com
+      <strong>Venmo:</strong> @skisteve007
     </p>
-    <p className="mt-2 text-xs text-gray-600">
-      After payment, use the payment confirmation form above to notify admin for confirmation. Allow up to 5 mins for confirmation.
+    <p className="mt-2 text-xs text-gray-600 font-semibold">
+      ⏱️ After payment, use the payment confirmation form above to notify admin. Allow up to 10 minutes for verification.
     </p>
   </div>
 );

@@ -122,7 +122,6 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PayPal">PayPal</SelectItem>
-                  <SelectItem value="Zelle">Zelle</SelectItem>
                   <SelectItem value="Venmo">Venmo</SelectItem>
                   <SelectItem value="CashApp">Cash App</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
