@@ -53,7 +53,10 @@ class DonorProfile(BaseModel):
     name: str
     photo: Optional[str] = ""
     references: List[Reference] = []
-    paymentStatus: str = "pending"  # pending, confirmed, rejected
+    # Status system: 0=Guest, 1=Pending_Payment, 2=In_Review, 3=Approved
+    userStatus: int = 1  # Default: Pending_Payment (registered but not paid)
+    paymentStatus: str = "pending"  # pending, in_review, confirmed, rejected
+    assignedMemberId: Optional[str] = ""  # Admin-assigned Member ID (e.g., MEM-001)
     documentUploaded: bool = False
     documentData: Optional[str] = ""
     qrCodeEnabled: bool = False
