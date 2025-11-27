@@ -325,7 +325,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           <InitialPayment 
             onPaymentSubmitted={(newMembershipId) => {
               setMembershipId(newMembershipId);
-              createMembershipId('Pending Member', '', '');
             }}
           />
         </>
