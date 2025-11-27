@@ -159,6 +159,110 @@ class CleanCheckAPITester:
         )
         return success
 
+    def test_search_members(self, search_query="", expected_status=200):
+        """Test searching for active members"""
+        endpoint = f"members/search?search={search_query}&limit=10"
+        success, response = self.run_test(
+            f"Search Members (query: '{search_query}')",
+            "GET",
+            endpoint,
+            expected_status
+        )
+        return success, response
+
+    def test_profile_status(self, membership_id):
+        """Test getting profile status"""
+        success, response = self.run_test(
+            "Get Profile Status",
+            "GET",
+            f"profile/status/{membership_id}",
+            200
+        )
+        return success, response
+
+    def test_payment_confirmation(self, membership_id, payment_method="PayPal", amount="$39"):
+        """Test payment confirmation submission"""
+        success, response = self.run_test(
+            "Submit Payment Confirmation",
+            "POST",
+            "payment/confirm",
+            200,
+            data={
+                "membershipId": membership_id,
+                "paymentMethod": payment_method,
+                "amount": amount,
+                "transactionId": "TEST123456",
+                "notes": "Test payment confirmation"
+            }
+        )
+        return success, response
+
+    def test_admin_login(self, password="admin123"):
+        """Test admin login"""
+        success, response = self.run_test(
+            "Admin Login",
+            "POST",
+            "admin/login",
+            200,
+            data={"password": password}
+        )
+        return success, response
+
+    def test_admin_pending_payments(self, password="admin123"):
+        """Test getting pending payments (admin)"""
+        success, response = self.run_test(
+            "Get Pending Payments (Admin)",
+            "GET",
+            f"admin/payments/pending?password={password}",
+            200
+        )
+        return success, response
+
+    def test_admin_approve_payment(self, membership_id, password="admin123"):
+        """Test admin payment approval"""
+        success, response = self.run_test(
+            "Approve Payment (Admin)",
+            "POST",
+            f"admin/payments/approve/{membership_id}?password={password}",
+            200
+        )
+        return success, response
+
+    def test_document_upload(self, membership_id, document_type="health_certificate"):
+        """Test document upload"""
+        # Create a simple base64 encoded test document
+        test_document = base64.b64encode(b"Test health document content").decode('utf-8')
+        
+        success, response = self.run_test(
+            "Upload Document",
+            "POST",
+            "document/upload",
+            200,
+            data={
+                "membershipId": membership_id,
+                "documentData": test_document,
+                "documentType": document_type
+            }
+        )
+        return success, response
+
+    def test_document_upload_without_payment(self, membership_id):
+        """Test document upload without confirmed payment (should fail)"""
+        test_document = base64.b64encode(b"Test health document content").decode('utf-8')
+        
+        success, response = self.run_test(
+            "Upload Document Without Payment (Should Fail)",
+            "POST",
+            "document/upload",
+            403,
+            data={
+                "membershipId": membership_id,
+                "documentData": test_document,
+                "documentType": "health_certificate"
+            }
+        )
+        return success
+
     def run_comprehensive_tests(self):
         """Run all backend API tests"""
         print("🚀 Starting Clean Check Backend API Tests")
