@@ -41,7 +41,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     xUrl: '',
     acknowledgedStds: '',
     recentReferences: '',
-    preferences: ''
+    preferences: '',
+    healthStatusColor: 'green'
   });
 
   useEffect(() => {
