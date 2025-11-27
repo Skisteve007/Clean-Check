@@ -1229,7 +1229,7 @@ const PaymentSection = () => (
       </a>
 
       <a
-        href="https://venmo.com/u/pitbossent"
+        href="https://venmo.com/u/skisteve007"
         target="_blank"
         rel="noopener noreferrer"
         className="w-full p-3 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex items-center justify-center"
@@ -1241,10 +1241,10 @@ const PaymentSection = () => (
 
     <p className="mt-3 text-xs font-medium text-gray-700">
       <strong>PayPal:</strong> paypal.me/pitbossent<br />
-      <strong>Venmo:</strong> @pitbossent
+      <strong>Venmo:</strong> @skisteve007
     </p>
-    <p className="mt-2 text-xs text-gray-600">
-      After payment, use the payment confirmation form above to notify admin for confirmation. Allow up to 5 mins for confirmation.
+    <p className="mt-2 text-xs text-gray-600 font-semibold">
+      ⏱️ After payment, use the payment confirmation form above to notify admin. Allow up to 10 minutes for verification.
     </p>
   </div>
 );
