@@ -292,7 +292,7 @@ class CleanCheckAPITester:
             return False
 
         # Test 3: Create second profile for reference testing
-        profile2_id = self.test_create_profile("Bob Smith", "bob.jpg")
+        profile2_id = self.test_create_profile("Bob Smith", "bob.smith@test.com", "testpass123", "bob.jpg")
         if not profile2_id:
             print("❌ Cannot continue reference tests - second profile creation failed")
 
