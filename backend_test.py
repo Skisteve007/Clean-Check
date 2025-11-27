@@ -69,14 +69,23 @@ class CleanCheckAPITester:
         """Test root API endpoint"""
         return self.run_test("Root API Endpoint", "GET", "", 200)
 
-    def test_create_profile(self, name="Test User", photo=""):
+    def test_create_profile(self, name="Test User", email=None, password="testpass123", photo=""):
         """Test profile creation"""
+        if email is None:
+            # Generate unique email based on name
+            email = f"{name.lower().replace(' ', '.')}@test.com"
+        
         success, response = self.run_test(
-            "Create Profile",
+            f"Create Profile ({name})",
             "POST",
             "profiles",
             200,
-            data={"name": name, "photo": photo}
+            data={
+                "name": name, 
+                "email": email,
+                "password": password,
+                "photo": photo
+            }
         )
         if success and 'membershipId' in response:
             self.created_profiles.append(response['membershipId'])
