@@ -488,6 +488,30 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
+      {/* Current Home */}
+      <div>
+        <Label htmlFor="currentHome">🏠 Current Home</Label>
+        <Input
+          id="currentHome"
+          type="text"
+          value={profileForm.currentHome || ''}
+          onChange={(e) => setProfileForm({ ...profileForm, currentHome: e.target.value })}
+          placeholder="e.g., Los Angeles, CA"
+        />
+      </div>
+
+      {/* Second Home */}
+      <div>
+        <Label htmlFor="secondHome">🌍 Second Home: Where are you from?</Label>
+        <Input
+          id="secondHome"
+          type="text"
+          value={profileForm.secondHome || ''}
+          onChange={(e) => setProfileForm({ ...profileForm, secondHome: e.target.value })}
+          placeholder="e.g., Miami, FL"
+        />
+      </div>
+
       {/* Birthday 🎂 */}
       <div>
         <Label className="flex items-center space-x-2">
