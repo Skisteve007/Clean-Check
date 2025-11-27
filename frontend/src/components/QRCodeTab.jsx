@@ -134,13 +134,19 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     generateQRCode(shareableUrl);
   };
 
-  const generateQRCode = async (url) => {
+  const generateQRCode = async (url, healthColor = 'green') => {
     try {
+      const colorMap = {
+        red: '#dc2626',     // Stop - STD warning
+        yellow: '#f59e0b',  // Caution
+        green: '#10b981'    // All clear
+      };
+
       const qrDataUrl = await QRCode.toDataURL(url, {
         width: 256,
         margin: 2,
         color: {
-          dark: '#dc2626',
+          dark: colorMap[healthColor] || colorMap.green,
           light: '#ffffff'
         },
         errorCorrectionLevel: 'H'
