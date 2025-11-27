@@ -379,8 +379,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </>
       )}
 
-      {/* Profile Creation - Only show after payment is confirmed */}
-      {!localProfile && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
+      {/* Profile Creation - Only show after payment is confirmed AND userStatus is Approved (Status 3) */}
+      {!localProfile && userStatus === 3 && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
         <div className="text-center mt-4">
           <div className="p-4 bg-green-50 border-2 border-green-400 rounded-lg mb-4">
             <p className="text-green-800 font-bold mb-2">🎉 Payment Confirmed!</p>
