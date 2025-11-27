@@ -303,7 +303,7 @@ class CleanCheckAPITester:
         self.test_get_nonexistent_profile()
 
         # Test 6: Update profile
-        self.test_update_profile(profile1_id, "Alice Johnson Updated", "alice_updated.jpg")
+        self.test_update_profile(profile1_id, "Alice Johnson Updated", "alice.updated@test.com", "newpass123", "alice_updated.jpg")
 
         # Test 7: Verify profile was updated
         success, updated_profile = self.test_get_profile(profile1_id)
