@@ -374,36 +374,31 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         intimacy.**
       </p>
 
-      {/* Step 1: Get Started - Show if no membershipId */}
+      {/* Show Payment Section for users without membership */}
       {!membershipId && (
         <>
           {/* Security Seals */}
           <SecuritySeals sponsorLogos={sponsorLogos} />
           
-          {/* Get Started Form - Collect Name & Email First */}
-          <div className="p-6 border-2 border-red-400 rounded-xl bg-white shadow-lg">
-            <h3 className="text-2xl font-bold text-red-700 mb-4 text-center">Get Started</h3>
-            <p className="text-sm text-gray-600 mb-4 text-center">
-              Enter your details to begin your membership
-            </p>
-            <PaymentConfirmationForm 
-              onConfirmationSubmitted={(newMembershipId, email) => {
-                createMembershipId('Pending Member', email, '');
-                setUserEmail(email);
-                toast.success('Profile created! Now complete your payment below.');
-                // Trigger status fetch after a short delay
-                setTimeout(() => {
-                  if (updateMembershipProfile) {
-                    updateMembershipProfile();
-                  }
-                }, 1000);
-              }}
-            />
-          </div>
+          {/* Payment Section with PayPal Buttons - Collect name/email inline */}
+          <PaymentSection 
+            membershipId={membershipId}
+            createMembershipId={createMembershipId}
+            onPaymentSuccess={(data) => {
+              toast.success('Payment successful! 🎉 Welcome to Clean Check!');
+              // Update status immediately
+              setUserStatus(3);
+              setPaymentStatus({ paymentStatus: 'confirmed', qrCodeEnabled: true });
+              // Reload user status
+              if (updateMembershipProfile) {
+                updateMembershipProfile();
+              }
+            }}
+          />
         </>
       )}
 
-      {/* Step 2: Payment Section - Show if membershipId exists but not paid */}
+      {/* Show Payment Section for users with membership but not paid */}
       {membershipId && userStatus !== 3 && (
         <>
           <SecuritySeals sponsorLogos={sponsorLogos} />
@@ -411,6 +406,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           {/* Payment Section with PayPal Buttons */}
           <PaymentSection 
             membershipId={membershipId}
+            createMembershipId={createMembershipId}
             onPaymentSuccess={(data) => {
               toast.success('Payment successful! 🎉 Welcome to Clean Check!');
               // Update status immediately
