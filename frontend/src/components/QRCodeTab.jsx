@@ -57,6 +57,29 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     healthStatusColor: 'green'
   });
 
+  const generateQRCode = async (url, healthColor = 'green') => {
+    try {
+      const colorMap = {
+        red: '#dc2626',     // Stop - STD warning
+        yellow: '#f59e0b',  // Caution
+        green: '#10b981'    // All clear
+      };
+
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: colorMap[healthColor] || colorMap.green,
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'H'
+      });
+      setQrCodeDataUrl(qrDataUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
+
   const fetchSponsorLogos = async () => {
     try {
       const response = await axios.get(`${API}/sponsors`);
