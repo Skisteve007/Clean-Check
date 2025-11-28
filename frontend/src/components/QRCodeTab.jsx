@@ -1393,7 +1393,7 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
             <span className="text-2xl flex-shrink-0">🌟</span>
             <div>
               <p className="font-bold text-sm text-gray-800">Premium Features</p>
-              <p className="text-xs text-gray-600">QR codes, galleries, and more</p>
+              <p className="text-xs text-gray-600">QR codes, galleries, Member Profile secrets 😈</p>
             </div>
           </div>
           <div className="flex items-start space-x-2">
@@ -1401,6 +1401,13 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
             <div>
               <p className="font-bold text-sm text-gray-800">Universal Membership</p>
               <p className="text-xs text-gray-600">Works on all other sites that employ Clean Check services</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">⚡</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Instant - No Awkward Conversations</p>
+              <p className="text-xs text-gray-600">Quick reveal through your unique QR code</p>
             </div>
           </div>
         </div>
