@@ -94,8 +94,8 @@ class SiteVisit(BaseModel):
 
 class PaymentConfirmation(BaseModel):
     membershipId: str
-    paymentMethod: str
-    amount: str
+    paymentMethod: Optional[str] = "Not specified"
+    amount: Optional[str] = "Not specified"
     transactionId: Optional[str] = ""
     notes: Optional[str] = ""
 
