@@ -513,6 +513,65 @@ class CleanCheckAPITester:
                 data={"membershipId": "non-existent-ref-id", "name": "Non-existent User"}
             )
 
+        # === SPONSOR LOGO MANAGEMENT TESTS ===
+        print("\n🖼️ Testing Sponsor Logo Management System...")
+        
+        # Test 28: Get initial sponsor logos state
+        success, initial_logos = self.test_get_sponsor_logos_initial()
+        if success:
+            expected_structure = {1: None, 2: None, 3: None}
+            if initial_logos == expected_structure:
+                self.log_test("Initial Sponsor Logos Structure", True, "All slots initialized to None")
+            else:
+                self.log_test("Initial Sponsor Logos Structure", False, f"Expected {expected_structure}, got {initial_logos}")
+
+        # Test 29: Upload sponsor logo to slot 1
+        success, upload_response = self.test_upload_sponsor_logo(1)
+        
+        # Test 30: Verify logo was uploaded to slot 1
+        success, logos_after_upload = self.test_get_sponsor_logos_initial()
+        if success and logos_after_upload.get(1) is not None:
+            self.log_test("Sponsor Logo Upload Verification (Slot 1)", True, "Logo successfully uploaded to slot 1")
+        else:
+            self.log_test("Sponsor Logo Upload Verification (Slot 1)", False, "Logo not found in slot 1 after upload")
+
+        # Test 31: Upload sponsor logo to slot 2
+        self.test_upload_sponsor_logo(2)
+        
+        # Test 32: Upload sponsor logo to slot 3
+        self.test_upload_sponsor_logo(3)
+        
+        # Test 33: Verify all three logos are present
+        success, all_logos = self.test_get_sponsor_logos_initial()
+        if success:
+            filled_slots = sum(1 for slot in [1, 2, 3] if all_logos.get(slot) is not None)
+            if filled_slots == 3:
+                self.log_test("All Sponsor Slots Filled", True, "All 3 sponsor slots have logos")
+            else:
+                self.log_test("All Sponsor Slots Filled", False, f"Only {filled_slots}/3 slots filled")
+
+        # Test 34: Delete sponsor logo from slot 2
+        success, delete_response = self.test_delete_sponsor_logo(2)
+        
+        # Test 35: Verify slot 2 is now empty
+        success, logos_after_delete = self.test_get_sponsor_logos_initial()
+        if success and logos_after_delete.get(2) is None:
+            self.log_test("Sponsor Logo Deletion Verification", True, "Slot 2 successfully cleared")
+        else:
+            self.log_test("Sponsor Logo Deletion Verification", False, "Slot 2 still contains logo after deletion")
+
+        # Test 36: Test error cases - Invalid slot number
+        self.test_upload_sponsor_logo_invalid_slot()
+        
+        # Test 37: Test error cases - No logo data
+        self.test_upload_sponsor_logo_no_data()
+        
+        # Test 38: Test error cases - Wrong password for upload
+        self.test_upload_sponsor_logo_wrong_password()
+        
+        # Test 39: Test error cases - Wrong password for delete
+        self.test_delete_sponsor_logo_wrong_password()
+
         return True
 
     def print_summary(self):
