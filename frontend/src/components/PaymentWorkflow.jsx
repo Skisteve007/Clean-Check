@@ -141,30 +141,6 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
-              <Input
-                id="transactionId"
-                type="text"
-                placeholder="e.g., PayPal transaction ID"
-                value={paymentForm.transactionId}
-                onChange={(e) =>
-                  setPaymentForm({ ...paymentForm, transactionId: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="notes">Additional Notes (Optional)</Label>
-              <Textarea
-                id="notes"
-                placeholder="Any additional information..."
-                value={paymentForm.notes}
-                onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                rows={2}
-              />
-            </div>
-
             <Button
               type="submit"
               variant="default"
