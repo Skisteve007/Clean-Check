@@ -543,7 +543,20 @@ async def reject_payment(membership_id: str, password: str, reason: str = ""):
         {"$set": {
             "status": "rejected",
             "rejectedAt": datetime.now(timezone.utc).isoformat(),
-
+            "rejectionReason": reason
+        }}
+    )
+    
+    # Update profile to rejected
+    await db.profiles.update_one(
+        {"membershipId": membership_id},
+        {"$set": {
+            "paymentStatus": "rejected",
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Payment rejected."}
 
 # ============================================================================
 # SPONSOR LOGOS - Admin Management
