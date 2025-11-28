@@ -1275,51 +1275,34 @@ const PaymentSection = () => (
       </div>
     </div>
 
-    <div className="flex flex-col space-y-3">
+    <div className="grid grid-cols-2 gap-3">
       <a
-        href="https://paypal.me/pitbossent/39"
+        href="https://paypal.me/pitbossent"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex items-center justify-center"
-        data-testid="paypal-single-btn"
+        className="p-4 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex flex-col items-center justify-center text-center"
+        data-testid="paypal-btn"
       >
-        💳 Single Contribution ($39 via PayPal)
+        <span className="text-3xl mb-2">💳</span>
+        <span className="text-base">Pay by PayPal</span>
+        <span className="text-xs font-normal mt-1 opacity-90">@pitbossent</span>
       </a>
 
       <a
-        href="https://paypal.me/pitbossent/69"
+        href="https://venmo.com/u/skisteve007"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-red-600 hover:bg-red-700 flex items-center justify-center"
-        data-testid="paypal-joint-btn"
+        className="p-4 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex flex-col items-center justify-center text-center"
+        data-testid="venmo-btn"
       >
-        💕 Joint/Companion Contribution ($69 via PayPal)
-      </a>
-
-      <a
-        href="https://venmo.com/?txn=pay&recipients=skisteve007&amount=39&note=Clean%20Check%20Membership"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex items-center justify-center"
-        data-testid="venmo-single-btn"
-      >
-        💰 Venmo: Single ($39)
-      </a>
-
-      <a
-        href="https://venmo.com/?txn=pay&recipients=skisteve007&amount=69&note=Clean%20Check%20Joint%20Membership"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-sky-500 hover:bg-sky-600 flex items-center justify-center"
-        data-testid="venmo-joint-btn"
-      >
-        💕 Venmo: Joint ($69)
+        <span className="text-3xl mb-2">💰</span>
+        <span className="text-base">Pay by Venmo</span>
+        <span className="text-xs font-normal mt-1 opacity-90">@skisteve007</span>
       </a>
     </div>
 
-    <p className="mt-3 text-xs font-medium text-gray-700">
-      <strong>PayPal:</strong> paypal.me/pitbossent<br />
-      <strong>Venmo:</strong> @skisteve007
+    <p className="mt-3 text-xs text-center font-medium text-gray-700">
+      Select your amount below: <strong>$39 Single</strong> or <strong>$69 Combined</strong>
     </p>
     <p className="mt-2 text-xs text-gray-600 font-semibold">
       ⏱️ After payment, use the payment confirmation form above to notify admin. Allow up to 10 minutes for verification.
