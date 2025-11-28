@@ -171,21 +171,6 @@ const CleanCheckApp = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Sponsors Section */}
-        <div className="mt-6 p-3 rounded-lg bg-gray-50 border border-gray-200">
-          <h4 className="text-xs font-semibold text-center text-gray-700 mb-2">
-            This Month's Sponsors
-          </h4>
-          <div className="flex justify-around items-center space-x-2">
-            {[1, 2, 3].map((num) => (
-              <SponsorSlot key={num} slotNumber={num} />
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-center text-gray-500 italic">
-            Support partners helping ensure safe and informed intimacy.
-          </p>
-        </div>
-
         {/* Legal Disclaimer */}
         <div className="mt-4 p-2 text-center text-xs text-gray-500">
           **Legal Disclaimer:** By using this service, the donor acknowledges and agrees that
