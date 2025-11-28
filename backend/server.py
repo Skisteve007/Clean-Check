@@ -643,6 +643,143 @@ async def reject_payment(membership_id: str, password: str, reason: str = ""):
     
     return {"message": "Payment rejected."}
 
+
+# ============================================================================
+# PAYPAL AUTOMATED PAYMENT VERIFICATION
+# ============================================================================
+
+@api_router.post("/payment/paypal/verify")
+async def verify_paypal_payment(order_data: dict, background_tasks: BackgroundTasks):
+    """
+    Verify PayPal payment and automatically approve user
+    This endpoint is called from frontend after PayPal onApprove
+    """
+    try:
+        order_id = order_data.get('orderID')
+        membership_id = order_data.get('membershipId')
+        
+        if not order_id or not membership_id:
+            raise HTTPException(status_code=400, detail="Missing orderID or membershipId")
+        
+        # Get profile
+        profile = await db.profiles.find_one({"membershipId": membership_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profile not found")
+        
+        # Verify payment with PayPal API
+        logger.info(f"Verifying PayPal payment: Order ID={order_id}, Membership ID={membership_id}")
+        
+        # Use PayPal API to verify the order
+        import base64
+        auth_string = f"{PAYPAL_CLIENT_ID}:{PAYPAL_SECRET}"
+        auth_bytes = auth_string.encode('utf-8')
+        auth_b64 = base64.b64encode(auth_bytes).decode('utf-8')
+        
+        # Get PayPal API URL based on mode
+        api_url = "https://api-m.paypal.com" if PAYPAL_MODE == "live" else "https://api-m.sandbox.paypal.com"
+        
+        # Get order details from PayPal
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {auth_b64}"
+        }
+        
+        import requests
+        response = requests.get(f"{api_url}/v2/checkout/orders/{order_id}", headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"PayPal API error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail="Failed to verify payment with PayPal")
+        
+        order_details = response.json()
+        logger.info(f"PayPal order details: {order_details}")
+        
+        # Verify payment status
+        payment_status = order_details.get('status')
+        if payment_status != 'COMPLETED':
+            logger.warning(f"Payment not completed. Status: {payment_status}")
+            raise HTTPException(status_code=400, detail=f"Payment not completed. Status: {payment_status}")
+        
+        # Verify payment amount
+        purchase_units = order_details.get('purchase_units', [])
+        if not purchase_units:
+            raise HTTPException(status_code=400, detail="No purchase units in order")
+        
+        amount_paid = float(purchase_units[0].get('amount', {}).get('value', '0'))
+        currency = purchase_units[0].get('amount', {}).get('currency_code', 'USD')
+        
+        # Accept both $39 (single) and $69 (joint) memberships
+        valid_amounts = [39.0, 69.0]
+        if amount_paid not in valid_amounts:
+            logger.warning(f"Invalid payment amount: ${amount_paid}")
+            raise HTTPException(status_code=400, detail=f"Invalid payment amount: ${amount_paid}. Expected $39 or $69")
+        
+        logger.info(f"Payment verified: ${amount_paid} {currency}")
+        
+        # Generate unique Member ID
+        assigned_member_id = await generate_unique_member_id()
+        
+        # Update profile to Approved status
+        await db.profiles.update_one(
+            {"membershipId": membership_id},
+            {"$set": {
+                "userStatus": 3,  # Status 3: Approved
+                "paymentStatus": "confirmed",
+                "assignedMemberId": assigned_member_id,
+                "qrCodeEnabled": True,
+                "paymentAmount": amount_paid,
+                "paypalOrderId": order_id,
+                "updatedAt": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # Record payment confirmation
+        await db.payment_confirmations.insert_one({
+            "membershipId": membership_id,
+            "name": profile.get("name", "Unknown"),
+            "email": profile.get("email", ""),
+            "paymentMethod": "PayPal (Automated)",
+            "amount": f"${amount_paid}",
+            "transactionId": order_id,
+            "status": "approved",
+            "submittedAt": datetime.now(timezone.utc).isoformat(),
+            "approvedAt": datetime.now(timezone.utc).isoformat(),
+            "automated": True
+        })
+        
+        # Send welcome email to user
+        background_tasks.add_task(
+            send_user_approval_notification,
+            profile.get("name", "Member"),
+            profile.get("email", ""),
+            assigned_member_id
+        )
+        
+        logger.info(f"User auto-approved: {membership_id} - Member ID: {assigned_member_id}")
+        
+        return {
+            "success": True,
+            "message": "Payment verified and account activated!",
+            "membershipId": membership_id,
+            "assignedMemberId": assigned_member_id,
+            "amount": amount_paid,
+            "status": "active"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Payment verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Payment verification failed: {str(e)}")
+
+@api_router.get("/payment/paypal/client-id")
+async def get_paypal_client_id():
+    """Return PayPal Client ID for frontend SDK"""
+    if not PAYPAL_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="PayPal not configured")
+    return {"clientId": PAYPAL_CLIENT_ID}
+
+
 # ============================================================================
 # SPONSOR LOGOS - Admin Management
 # ============================================================================
