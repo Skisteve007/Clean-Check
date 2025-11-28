@@ -280,8 +280,7 @@ class ManualApprovalWorkflowTester:
     def test_list_admin_users(self):
         """Test listing all admin users"""
         success, response, status = self.make_request(
-            'GET', 'admin/users',
-            params={'password': self.admin_password}
+            'GET', f'admin/users?password={self.admin_password}'
         )
         
         if success:
