@@ -376,7 +376,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       {!membershipId && (
         <>
           {/* Security Seals */}
-          <SecuritySeals />
+          <SecuritySeals sponsorLogos={sponsorLogos} />
           
           {/* Payment Section with Value Props */}
           <PaymentSection />
