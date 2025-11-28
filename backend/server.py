@@ -142,6 +142,60 @@ def verify_admin(password: str):
         raise HTTPException(status_code=401, detail="Invalid admin password")
     return True
 
+# Generate unique 6-digit Member ID
+async def generate_unique_member_id():
+    """Generate a unique 6-digit Member ID"""
+    while True:
+        member_id = str(random.randint(100000, 999999))
+        existing = await db.profiles.find_one({"assignedMemberId": member_id})
+        if not existing:
+            return member_id
+
+# Send SMS notification to admins
+async def send_sms_to_admins(message: str):
+    """Send SMS notification to all admin users"""
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+        logger.warning("Twilio credentials not configured. SMS not sent.")
+        return False
+    
+    try:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        
+        # Get all admin users
+        admins = await db.admin_users.find({}, {"_id": 0, "phone": 1, "name": 1}).to_list(100)
+        
+        if not admins:
+            logger.warning("No admin users found to send SMS")
+            return False
+        
+        for admin in admins:
+            try:
+                client.messages.create(
+                    body=message,
+                    from_=TWILIO_PHONE_NUMBER,
+                    to=admin.get('phone')
+                )
+                logger.info(f"SMS sent to admin: {admin.get('name')}")
+            except Exception as e:
+                logger.error(f"Failed to send SMS to {admin.get('name')}: {e}")
+        
+        return True
+    except Exception as e:
+        logger.error(f"SMS sending failed: {e}")
+        return False
+
+# Verify admin user credentials
+async def verify_admin_user(username: str, password: str):
+    """Verify admin user login credentials"""
+    admin = await db.admin_users.find_one({"username": username})
+    if not admin:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not pwd_context.verify(password, admin['password']):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    return admin
+
 # Email sending function
 async def send_welcome_email(email: str, name: str, membership_id: str):
     """Send welcome email to new member"""
