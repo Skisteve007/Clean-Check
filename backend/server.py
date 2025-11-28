@@ -608,21 +608,6 @@ async def get_sponsor_logos():
     
     return logo_dict
 
-            "rejectionReason": reason
-        }}
-    )
-    
-    # Update profile to rejected
-    await db.profiles.update_one(
-        {"membershipId": membership_id},
-        {"$set": {
-            "paymentStatus": "rejected",
-            "updatedAt": datetime.now(timezone.utc).isoformat()
-        }}
-    )
-    
-    return {"message": "Payment rejected."}
-
 # User - Upload Document
 @api_router.post("/document/upload")
 async def upload_document(doc: DocumentUpload):
