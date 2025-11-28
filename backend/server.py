@@ -796,6 +796,173 @@ async def get_subscription_plans():
         }
     }
 
+
+@api_router.post("/payment/paypal/create-subscription-plans")
+async def create_subscription_plans():
+    """
+    Create PayPal subscription plans programmatically
+    This endpoint creates both $39 and $69 recurring monthly subscription plans
+    """
+    try:
+        if not PAYPAL_CLIENT_ID or not PAYPAL_SECRET:
+            raise HTTPException(status_code=500, detail="PayPal credentials not configured")
+        
+        import requests
+        import base64
+        
+        # Prepare auth
+        auth_string = f"{PAYPAL_CLIENT_ID}:{PAYPAL_SECRET}"
+        auth_bytes = auth_string.encode('utf-8')
+        auth_b64 = base64.b64encode(auth_bytes).decode('utf-8')
+        
+        # Get PayPal API URL based on mode
+        api_url = "https://api-m.paypal.com" if PAYPAL_MODE == "live" else "https://api-m.sandbox.paypal.com"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {auth_b64}"
+        }
+        
+        results = {}
+        
+        # Create Product for Single Member
+        product_single = {
+            "name": "Clean Check - Single Member",
+            "description": "Monthly subscription for single Clean Check membership with health verification and QR code access",
+            "type": "SERVICE",
+            "category": "SOFTWARE"
+        }
+        
+        response = requests.post(f"{api_url}/v1/catalogs/products", headers=headers, json=product_single)
+        if response.status_code not in [200, 201]:
+            logger.error(f"Failed to create product: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail=f"Failed to create product: {response.text}")
+        
+        product_single_id = response.json()['id']
+        results['product_single_id'] = product_single_id
+        
+        # Create Billing Plan for $39
+        plan_39 = {
+            "product_id": product_single_id,
+            "name": "Single Member - Monthly",
+            "description": "Recurring monthly subscription for Clean Check single membership",
+            "billing_cycles": [
+                {
+                    "frequency": {
+                        "interval_unit": "MONTH",
+                        "interval_count": 1
+                    },
+                    "tenure_type": "REGULAR",
+                    "sequence": 1,
+                    "total_cycles": 0,
+                    "pricing_scheme": {
+                        "fixed_price": {
+                            "value": "39",
+                            "currency_code": "USD"
+                        }
+                    }
+                }
+            ],
+            "payment_preferences": {
+                "auto_bill_outstanding": True,
+                "setup_fee": {
+                    "value": "0",
+                    "currency_code": "USD"
+                },
+                "setup_fee_failure_action": "CONTINUE",
+                "payment_failure_threshold": 3
+            }
+        }
+        
+        response = requests.post(f"{api_url}/v1/billing/plans", headers=headers, json=plan_39)
+        if response.status_code not in [200, 201]:
+            logger.error(f"Failed to create plan $39: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail=f"Failed to create $39 plan: {response.text}")
+        
+        plan_39_id = response.json()['id']
+        results['plan_39_id'] = plan_39_id
+        
+        # Create Product for Joint Member
+        product_joint = {
+            "name": "Clean Check - Joint/Couple",
+            "description": "Monthly subscription for joint/couple Clean Check membership with health verification and QR code access",
+            "type": "SERVICE",
+            "category": "SOFTWARE"
+        }
+        
+        response = requests.post(f"{api_url}/v1/catalogs/products", headers=headers, json=product_joint)
+        if response.status_code not in [200, 201]:
+            logger.error(f"Failed to create product: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail=f"Failed to create product: {response.text}")
+        
+        product_joint_id = response.json()['id']
+        results['product_joint_id'] = product_joint_id
+        
+        # Create Billing Plan for $69
+        plan_69 = {
+            "product_id": product_joint_id,
+            "name": "Joint Member - Monthly",
+            "description": "Recurring monthly subscription for Clean Check joint/couple membership",
+            "billing_cycles": [
+                {
+                    "frequency": {
+                        "interval_unit": "MONTH",
+                        "interval_count": 1
+                    },
+                    "tenure_type": "REGULAR",
+                    "sequence": 1,
+                    "total_cycles": 0,
+                    "pricing_scheme": {
+                        "fixed_price": {
+                            "value": "69",
+                            "currency_code": "USD"
+                        }
+                    }
+                }
+            ],
+            "payment_preferences": {
+                "auto_bill_outstanding": True,
+                "setup_fee": {
+                    "value": "0",
+                    "currency_code": "USD"
+                },
+                "setup_fee_failure_action": "CONTINUE",
+                "payment_failure_threshold": 3
+            }
+        }
+        
+        response = requests.post(f"{api_url}/v1/billing/plans", headers=headers, json=plan_69)
+        if response.status_code not in [200, 201]:
+            logger.error(f"Failed to create plan $69: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail=f"Failed to create $69 plan: {response.text}")
+        
+        plan_69_id = response.json()['id']
+        results['plan_69_id'] = plan_69_id
+        
+        logger.info(f"Successfully created subscription plans: {results}")
+        
+        return {
+            "success": True,
+            "message": "Subscription plans created successfully",
+            "mode": PAYPAL_MODE,
+            "plans": {
+                "single_39": plan_39_id,
+                "joint_69": plan_69_id
+            },
+            "next_steps": [
+                "Add these Plan IDs to your /app/backend/.env file:",
+                f'PAYPAL_PLAN_ID_39="{plan_39_id}"',
+                f'PAYPAL_PLAN_ID_69="{plan_69_id}"',
+                "Then restart backend: sudo supervisorctl restart backend"
+            ]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating subscription plans: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create subscription plans: {str(e)}")
+
 @api_router.post("/payment/paypal/subscription/verify")
 async def verify_paypal_subscription(subscription_data: dict, background_tasks: BackgroundTasks):
     """
