@@ -76,22 +76,34 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       loadLocalProfile();
       
       // Auto-create membershipId if doesn't exist
-      if (!membershipId) {
-        const storedId = localStorage.getItem('cleanCheckMembershipId');
-        if (storedId) {
-          setMembershipId(storedId);
-        } else {
-          // Generate new membershipId
-          const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-          localStorage.setItem('cleanCheckMembershipId', newId);
-          setMembershipId(newId);
-        }
+      const storedId = localStorage.getItem('cleanCheckMembershipId');
+      if (storedId) {
+        setMembershipId(storedId);
+        // Fetch user status
+        fetchUserStatusForId(storedId);
       } else {
-        // Fetch user status if membershipId exists
-        fetchUserStatus();
+        // Generate new membershipId
+        const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('cleanCheckMembershipId', newId);
+        setMembershipId(newId);
       }
     }
-  }, [membershipId]);
+  }, []);
+
+  const fetchUserStatusForId = async (id) => {
+    try {
+      const response = await axios.get(`${API}/profiles/${id}`);
+      const profile = response.data;
+      setUserStatus(profile.userStatus || 1);
+      setUserEmail(profile.email || '');
+      setPaymentStatus({
+        paymentStatus: profile.paymentStatus,
+        qrCodeEnabled: profile.qrCodeEnabled
+      });
+    } catch (error) {
+      console.error('Failed to fetch user status:', error);
+    }
+  };
 
   const fetchUserStatus = async () => {
     try {
