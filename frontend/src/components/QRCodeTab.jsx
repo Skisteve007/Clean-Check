@@ -937,17 +937,10 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
       {/* Sponsors Section in Profile Modal */}
       <div className="mt-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
         <h4 className="text-xs font-semibold text-center text-gray-700 mb-3">
-          This Month's Sponsors
+          This Month&apos;s Sponsors
         </h4>
         <div className="flex justify-around items-center space-x-2">
           {[1, 2, 3].map((num) => {
-            const [logoSrc, setLogoSrc] = React.useState(null);
-            
-            React.useEffect(() => {
-              const saved = localStorage.getItem(`sponsorLogo${num}`);
-              if (saved) setLogoSrc(saved);
-            }, []);
-
             const colors = [
               'bg-yellow-50 border-yellow-300',
               'bg-green-50 border-green-300',
@@ -958,7 +951,7 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
               <div key={num} className="w-1/3 p-1 flex justify-center">
                 <div className={`sponsor-slot border ${colors[num - 1]}`}>
                   <img
-                    src={logoSrc || `https://placehold.co/150x60/${num === 1 ? 'fef3c7/a16207' : num === 2 ? 'd1fae5/065f46' : 'e0e7ff/3730a3'}?text=Logo+${num}`}
+                    src={`https://placehold.co/150x60/${num === 1 ? 'fef3c7/a16207' : num === 2 ? 'd1fae5/065f46' : 'e0e7ff/3730a3'}?text=Logo+${num}`}
                     alt={`Sponsor ${num}`}
                     onError={(e) => {
                       e.target.src = `https://placehold.co/150x60/cccccc/666666?text=Logo+${num}`;
