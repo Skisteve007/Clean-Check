@@ -163,6 +163,91 @@ class CleanCheckAPITester:
         )
         return success
 
+    # ============================================================================
+    # SPONSOR LOGO MANAGEMENT TESTS
+    # ============================================================================
+
+    def test_get_sponsor_logos_initial(self):
+        """Test getting sponsor logos - initial state (should return empty slots)"""
+        success, response = self.run_test(
+            "Get Sponsor Logos (Initial State)",
+            "GET",
+            "sponsors",
+            200
+        )
+        return success, response
+
+    def test_upload_sponsor_logo(self, slot, password="admin123"):
+        """Test uploading sponsor logo to a specific slot"""
+        # Create a simple base64 test image (1x1 pixel PNG)
+        test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        
+        success, response = self.run_test(
+            f"Upload Sponsor Logo to Slot {slot}",
+            "POST",
+            f"admin/sponsors/{slot}?password={password}",
+            200,
+            data={"logo": test_logo}
+        )
+        return success, response
+
+    def test_upload_sponsor_logo_invalid_slot(self, password="admin123"):
+        """Test uploading sponsor logo to invalid slot (should fail)"""
+        test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        
+        success, response = self.run_test(
+            "Upload Sponsor Logo to Invalid Slot (4)",
+            "POST",
+            f"admin/sponsors/4?password={password}",
+            400,
+            data={"logo": test_logo}
+        )
+        return success
+
+    def test_upload_sponsor_logo_no_data(self, slot=1, password="admin123"):
+        """Test uploading sponsor logo without logo data (should fail)"""
+        success, response = self.run_test(
+            "Upload Sponsor Logo Without Data",
+            "POST",
+            f"admin/sponsors/{slot}?password={password}",
+            400,
+            data={}
+        )
+        return success
+
+    def test_upload_sponsor_logo_wrong_password(self, slot=1):
+        """Test uploading sponsor logo with wrong password (should fail)"""
+        test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        
+        success, response = self.run_test(
+            "Upload Sponsor Logo with Wrong Password",
+            "POST",
+            f"admin/sponsors/{slot}?password=wrongpassword",
+            401,
+            data={"logo": test_logo}
+        )
+        return success
+
+    def test_delete_sponsor_logo(self, slot, password="admin123"):
+        """Test deleting sponsor logo from a specific slot"""
+        success, response = self.run_test(
+            f"Delete Sponsor Logo from Slot {slot}",
+            "DELETE",
+            f"admin/sponsors/{slot}?password={password}",
+            200
+        )
+        return success, response
+
+    def test_delete_sponsor_logo_wrong_password(self, slot=1):
+        """Test deleting sponsor logo with wrong password (should fail)"""
+        success, response = self.run_test(
+            "Delete Sponsor Logo with Wrong Password",
+            "DELETE",
+            f"admin/sponsors/{slot}?password=wrongpassword",
+            401
+        )
+        return success
+
     def test_remove_reference(self, membership_id, ref_id):
         """Test removing reference"""
         success, response = self.run_test(
