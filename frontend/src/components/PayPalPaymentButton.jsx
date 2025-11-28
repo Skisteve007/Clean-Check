@@ -31,8 +31,10 @@ const PayPalPaymentButton = ({ membershipId, amount, onSuccess }) => {
     if (!clientId || sdkLoaded) return;
 
     // Load PayPal SDK with subscription support
+    // enable-funding=venmo - Shows Venmo on mobile
+    // disable-funding=credit,card,paylater - Removes credit card, debit card, and Pay Later options
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&enable-funding=venmo&currency=USD&vault=true&intent=subscription`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&enable-funding=venmo&disable-funding=credit,card,paylater&currency=USD&vault=true&intent=subscription`;
     script.async = true;
     
     script.onload = () => {
