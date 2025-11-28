@@ -23,6 +23,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [userStatus, setUserStatus] = useState(null); // 0=Guest, 1=Pending_Payment, 2=In_Review, 3=Approved
   const [userEmail, setUserEmail] = useState('');
+  const [sponsorLogos, setSponsorLogos] = useState({1: null, 2: null, 3: null});
   const fileInputRef = useRef(null);
 
   // Profile form state
