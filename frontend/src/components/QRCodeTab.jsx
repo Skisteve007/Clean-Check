@@ -1226,10 +1226,10 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
         <strong>Automatic Approval!</strong> Your account will be activated instantly after payment.
       </p>
       
-      {/* Key Value Proposition */}
-      <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-300">
-        <p className="text-sm font-semibold text-gray-800">
-          💙 Confidently share verified health status information for mutual safety and informed intimacy
+      {/* QR Code Generation Notice */}
+      <div className="mb-4 p-3 bg-green-50 rounded-lg border-2 border-green-400">
+        <p className="text-xs font-semibold text-green-900">
+          ✅ YOUR unique QR Code will be generated after membership payment, after documents uploaded onto your member profile page
         </p>
       </div>
       
