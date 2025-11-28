@@ -149,26 +149,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     }
   };
 
-  const loadLocalProfile = () => {
-    const saved = localStorage.getItem('cleanCheckDonorProfile');
-    if (saved) {
-      try {
-        const profile = JSON.parse(saved);
-        setLocalProfile(profile);
-        setProfileForm(profile);
-
-        // Load saved link
-        const savedLink = localStorage.getItem('cleanCheckSecureLink');
-        if (savedLink) {
-          setUrlInput(savedLink);
-          generateQRCode(savedLink);
-        }
-      } catch (e) {
-        console.error('Failed to load profile:', e);
-      }
-    }
-  };
-
   const saveLocalProfile = async (formData) => {
     const now = new Date();
     const expirationDate = new Date();
