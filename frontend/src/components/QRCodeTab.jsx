@@ -57,6 +57,50 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     healthStatusColor: 'green'
   });
 
+  const fetchSponsorLogos = async () => {
+    try {
+      const response = await axios.get(`${API}/sponsors`);
+      setSponsorLogos(response.data);
+    } catch (error) {
+      console.error('Failed to fetch sponsor logos:', error);
+    }
+  };
+
+  const fetchUserStatusForId = async (id) => {
+    try {
+      const response = await axios.get(`${API}/profiles/${id}`);
+      const profile = response.data;
+      setUserStatus(profile.userStatus || 1);
+      setUserEmail(profile.email || '');
+      setPaymentStatus({
+        paymentStatus: profile.paymentStatus,
+        qrCodeEnabled: profile.qrCodeEnabled
+      });
+    } catch (error) {
+      console.error('Failed to fetch user status:', error);
+    }
+  };
+
+  const loadLocalProfile = () => {
+    const saved = localStorage.getItem('cleanCheckDonorProfile');
+    if (saved) {
+      try {
+        const profile = JSON.parse(saved);
+        setLocalProfile(profile);
+        setProfileForm(profile);
+
+        // Load saved link
+        const savedLink = localStorage.getItem('cleanCheckSecureLink');
+        if (savedLink) {
+          setUrlInput(savedLink);
+          generateQRCode(savedLink);
+        }
+      } catch (e) {
+        console.error('Failed to load profile:', e);
+      }
+    }
+  };
+
   useEffect(() => {
     // Fetch sponsor logos
     fetchSponsorLogos();
@@ -88,31 +132,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         fetchUserStatusForId(membershipId);
       }
     }
-  }, [membershipId]);
-
-  const fetchSponsorLogos = async () => {
-    try {
-      const response = await axios.get(`${API}/sponsors`);
-      setSponsorLogos(response.data);
-    } catch (error) {
-      console.error('Failed to fetch sponsor logos:', error);
-    }
-  };
-
-  const fetchUserStatusForId = async (id) => {
-    try {
-      const response = await axios.get(`${API}/profiles/${id}`);
-      const profile = response.data;
-      setUserStatus(profile.userStatus || 1);
-      setUserEmail(profile.email || '');
-      setPaymentStatus({
-        paymentStatus: profile.paymentStatus,
-        qrCodeEnabled: profile.qrCodeEnabled
-      });
-    } catch (error) {
-      console.error('Failed to fetch user status:', error);
-    }
-  };
+  }, [membershipId, fetchSponsorLogos, loadLocalProfile, fetchUserStatusForId]);
 
   const fetchUserStatus = async () => {
     try {
