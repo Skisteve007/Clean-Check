@@ -120,8 +120,8 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
             </span>
           )}
         </Button>
-        <p className="text-xs text-gray-600 mt-3">
-          Click after you&apos;ve completed your payment via PayPal or Venmo
+        <p className="text-sm text-gray-700 mt-3 font-medium">
+          Button to notify admin. Allow up to 5 minutes for verification.
         </p>
       </div>
     );
