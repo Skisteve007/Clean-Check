@@ -110,38 +110,18 @@ const InitialPayment = ({ onPaymentSubmitted }) => {
 
           <div>
             <Label htmlFor="amount">Amount Paid *</Label>
-            <Input
-              id="amount"
-              type="text"
-              placeholder="$39 or $69"
+            <Select
               value={paymentForm.amount}
-              onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
-            <Input
-              id="transactionId"
-              type="text"
-              placeholder="e.g., PayPal transaction ID or Venmo transaction ID"
-              value={paymentForm.transactionId}
-              onChange={(e) =>
-                setPaymentForm({ ...paymentForm, transactionId: e.target.value })
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="notes">Additional Notes (Optional)</Label>
-            <Textarea
-              id="notes"
-              placeholder="Any additional information..."
-              value={paymentForm.notes}
-              onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-              rows={2}
-            />
+              onValueChange={(value) => setPaymentForm({ ...paymentForm, amount: value })}
+            >
+              <SelectTrigger id="amount">
+                <SelectValue placeholder="Select amount" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="$39">$39 - Single Membership</SelectItem>
+                <SelectItem value="$69">$69 - Combined/Joint Membership</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg">

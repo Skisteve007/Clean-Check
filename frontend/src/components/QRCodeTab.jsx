@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
 import PaymentWorkflow from './PaymentWorkflow';
-import InitialPayment from './InitialPayment';
+import PaymentConfirmationForm from './PaymentConfirmationForm';
+import WaitingScreen from './WaitingScreen';
 import ReferencesSearch from './ReferencesSearch';
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
@@ -20,6 +21,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const [isPartnerView, setIsPartnerView] = useState(false);
   const [partnerProfile, setPartnerProfile] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
+  const [userStatus, setUserStatus] = useState(null); // 0=Guest, 1=Pending_Payment, 2=In_Review, 3=Approved
+  const [userEmail, setUserEmail] = useState('');
   const fileInputRef = useRef(null);
 
   // Profile form state
@@ -71,8 +74,43 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     } else {
       // Donor view - load from localStorage
       loadLocalProfile();
+      
+      // Fetch user status if membershipId exists
+      if (membershipId) {
+        fetchUserStatusForId(membershipId);
+      }
     }
-  }, []);
+  }, [membershipId]);
+
+  const fetchUserStatusForId = async (id) => {
+    try {
+      const response = await axios.get(`${API}/profiles/${id}`);
+      const profile = response.data;
+      setUserStatus(profile.userStatus || 1);
+      setUserEmail(profile.email || '');
+      setPaymentStatus({
+        paymentStatus: profile.paymentStatus,
+        qrCodeEnabled: profile.qrCodeEnabled
+      });
+    } catch (error) {
+      console.error('Failed to fetch user status:', error);
+    }
+  };
+
+  const fetchUserStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/profiles/${membershipId}`);
+      const profile = response.data;
+      setUserStatus(profile.userStatus || 1);
+      setUserEmail(profile.email || '');
+      setPaymentStatus({
+        paymentStatus: profile.paymentStatus,
+        qrCodeEnabled: profile.qrCodeEnabled
+      });
+    } catch (error) {
+      console.error('Failed to fetch user status:', error);
+    }
+  };
 
   const loadLocalProfile = () => {
     const saved = localStorage.getItem('cleanCheckDonorProfile');
@@ -255,6 +293,11 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     return <PartnerView profile={partnerProfile} examLink={urlInput} />;
   }
 
+  // Show Waiting Screen if user status is In_Review (Status 2)
+  if (membershipId && userStatus === 2) {
+    return <WaitingScreen membershipId={membershipId} userEmail={userEmail} />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Donor Summary */}
@@ -312,7 +355,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         intimacy.**
       </p>
 
-      {/* Step 1: Initial Payment - Show if no membershipId */}
+      {/* Step 1: Payment Section - Show if no membershipId */}
       {!membershipId && (
         <>
           {/* Security Seals */}
@@ -321,11 +364,17 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           {/* Payment Section with Value Props */}
           <PaymentSection />
           
-          {/* Initial Payment Form */}
-          <InitialPayment 
-            onPaymentSubmitted={(newMembershipId) => {
-              setMembershipId(newMembershipId);
-              createMembershipId('Pending Member', '', '');
+          {/* Payment Confirmation Form */}
+          <PaymentConfirmationForm 
+            onConfirmationSubmitted={(newMembershipId, email) => {
+              createMembershipId('Pending Member', email, '');
+              setUserEmail(email);
+              // Trigger status fetch after a short delay
+              setTimeout(() => {
+                if (updateMembershipProfile) {
+                  updateMembershipProfile();
+                }
+              }, 1000);
             }}
           />
         </>
@@ -349,8 +398,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         </>
       )}
 
-      {/* Profile Creation - Only show after payment is confirmed */}
-      {!localProfile && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
+      {/* Profile Creation - Only show after payment is confirmed AND userStatus is Approved (Status 3) */}
+      {!localProfile && userStatus === 3 && paymentStatus && paymentStatus.paymentStatus === 'confirmed' && (
         <div className="text-center mt-4">
           <div className="p-4 bg-green-50 border-2 border-green-400 rounded-lg mb-4">
             <p className="text-green-800 font-bold mb-2">🎉 Payment Confirmed!</p>
@@ -1245,44 +1294,37 @@ const PaymentSection = () => (
       </div>
     </div>
 
-    <div className="flex flex-col space-y-3">
+    <div className="grid grid-cols-2 gap-3">
       <a
-        href="https://paypal.me/pitbossent/39"
+        href="https://paypal.me/pitbossent"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex items-center justify-center"
-        data-testid="paypal-single-btn"
+        className="p-4 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex flex-col items-center justify-center text-center"
+        data-testid="paypal-btn"
       >
-        💳 Single Contribution ($39 via PayPal)
-      </a>
-
-      <a
-        href="https://paypal.me/pitbossent/69"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-red-600 hover:bg-red-700 flex items-center justify-center"
-        data-testid="paypal-joint-btn"
-      >
-        💕 Joint/Companion Contribution ($69 via PayPal)
+        <span className="text-3xl mb-2">💳</span>
+        <span className="text-base">Pay by PayPal</span>
+        <span className="text-xs font-normal mt-1 opacity-90">@pitbossent</span>
       </a>
 
       <a
         href="https://venmo.com/u/skisteve007"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full p-3 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex items-center justify-center"
+        className="p-4 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex flex-col items-center justify-center text-center"
         data-testid="venmo-btn"
       >
-        💰 Venmo: Single ($39) or Joint ($69)
+        <span className="text-3xl mb-2">💰</span>
+        <span className="text-base">Pay by Venmo</span>
+        <span className="text-xs font-normal mt-1 opacity-90">@skisteve007</span>
       </a>
     </div>
 
-    <p className="mt-3 text-xs font-medium text-gray-700">
-      <strong>PayPal:</strong> paypal.me/pitbossent<br />
-      <strong>Venmo:</strong> @skisteve007
+    <p className="mt-3 text-xs text-center font-medium text-gray-700">
+      Select your amount below: <strong>$39 Single</strong> or <strong>$69 Combined</strong>
     </p>
     <p className="mt-2 text-xs text-gray-600 font-semibold">
-      ⏱️ After payment, use the payment confirmation form above to notify admin. Allow up to 10 minutes for verification.
+      ⏱️ After payment, enter your name and email below to notify admin. Allow up to 5 minutes for verification.
     </p>
   </div>
 );

@@ -21,10 +21,21 @@ const CleanCheckApp = () => {
   }, []);
 
   const initializeApp = async () => {
+    // Check for reset parameter (for testing)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('reset') === 'true') {
+      localStorage.clear();
+      window.location.href = window.location.pathname;
+      return;
+    }
+
     // Check if user has already consented
     const consentGiven = localStorage.getItem('cleanCheckAgeConsent');
     if (consentGiven === 'true') {
       setHasConsented(true);
+    } else {
+      // Explicitly set to false if not present to ensure consent screen shows
+      setHasConsented(false);
     }
 
     // Track site visit
@@ -57,9 +68,21 @@ const CleanCheckApp = () => {
     }
   };
 
-  // Show age consent screen first
-  if (!hasConsented) {
+  // Show age consent screen first - always check before showing any content
+  if (!loading && !hasConsented) {
     return <AgeConsent onConsent={() => setHasConsented(true)} />;
+  }
+
+  // Show loading only briefly during initialization
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Clean Check...</p>
+        </div>
+      </div>
+    );
   }
 
   const createMembershipId = async (name, email, photo) => {

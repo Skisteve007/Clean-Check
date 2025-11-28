@@ -100,16 +100,27 @@ const AdminPanel = () => {
   };
 
   const handleApprovePayment = async (membershipId, name) => {
-    if (!window.confirm(`Confirm payment for ${name}?`)) {
+    // Prompt for Member ID
+    const assignedMemberId = prompt(`Assign Member ID for ${name}:\n\n(Example: MEM-001, MEM-002, etc.)`);
+    
+    if (!assignedMemberId || assignedMemberId.trim() === '') {
+      toast.error('Member ID is required to approve payment');
+      return;
+    }
+
+    if (!window.confirm(`Confirm payment for ${name} with Member ID: ${assignedMemberId}?`)) {
       return;
     }
 
     try {
-      await axios.post(`${API}/admin/payments/approve/${membershipId}?password=${adminPassword}`);
-      toast.success(`Payment confirmed for ${name}! User can now upload documents.`);
+      await axios.post(`${API}/admin/payments/approve?password=${adminPassword}`, {
+        membershipId: membershipId,
+        assignedMemberId: assignedMemberId.trim()
+      });
+      toast.success(`Payment approved! ${name} assigned Member ID: ${assignedMemberId}. Email sent to user.`);
       loadData(adminPassword);
     } catch (error) {
-      toast.error('Failed to confirm payment');
+      toast.error('Failed to approve payment: ' + (error.response?.data?.detail || error.message));
     }
   };
 

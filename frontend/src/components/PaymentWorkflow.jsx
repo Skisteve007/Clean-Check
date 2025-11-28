@@ -100,83 +100,30 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
   // Status: Pending - Need to confirm payment
   if (!status || status.paymentStatus === 'pending') {
     return (
-      <Card className="border-2 border-yellow-400 bg-yellow-50" data-testid="payment-pending-card">
-        <CardHeader>
-          <CardTitle className="text-yellow-800">⚠️ Payment Required</CardTitle>
-          <CardDescription>
-            Complete payment and confirm to unlock document upload and QR code generation
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handlePaymentConfirm} className="space-y-4">
-            <div>
-              <Label htmlFor="paymentMethod">Payment Method *</Label>
-              <Select
-                value={paymentForm.paymentMethod}
-                onValueChange={(value) =>
-                  setPaymentForm({ ...paymentForm, paymentMethod: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PayPal">PayPal</SelectItem>
-                  <SelectItem value="Venmo">Venmo</SelectItem>
-                  <SelectItem value="CashApp">Cash App</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="amount">Amount Paid *</Label>
-              <Input
-                id="amount"
-                type="text"
-                placeholder="$39 or $69"
-                value={paymentForm.amount}
-                onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
-              <Input
-                id="transactionId"
-                type="text"
-                placeholder="e.g., PayPal transaction ID"
-                value={paymentForm.transactionId}
-                onChange={(e) =>
-                  setPaymentForm({ ...paymentForm, transactionId: e.target.value })
-                }
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="notes">Additional Notes (Optional)</Label>
-              <Textarea
-                id="notes"
-                placeholder="Any additional information..."
-                value={paymentForm.notes}
-                onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                rows={2}
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant="default"
-              className="w-full bg-yellow-600 hover:bg-yellow-700"
-              disabled={loading}
-              data-testid="confirm-payment-btn"
-            >
-              {loading ? 'Submitting...' : 'I Made Payment - Confirm'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      <div className="text-center my-6">
+        <Button
+          onClick={handlePaymentConfirm}
+          variant="default"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg transform transition hover:scale-105"
+          disabled={loading}
+          data-testid="confirm-payment-btn"
+        >
+          {loading ? (
+            <span className="flex items-center space-x-2">
+              <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
+              <span>Submitting...</span>
+            </span>
+          ) : (
+            <span className="flex items-center space-x-2">
+              <span className="text-2xl">✅</span>
+              <span>I Made Payment - Confirm</span>
+            </span>
+          )}
+        </Button>
+        <p className="text-sm text-gray-700 mt-3 font-medium">
+          Button to notify admin. Allow up to 5 minutes for verification.
+        </p>
+      </div>
     );
   }
 
