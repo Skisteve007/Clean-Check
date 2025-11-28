@@ -1297,13 +1297,23 @@ const PaymentSection = () => (
       </a>
 
       <a
-        href="https://venmo.com/u/skisteve007"
+        href="https://venmo.com/?txn=pay&recipients=skisteve007&amount=39&note=Clean%20Check%20Membership"
         target="_blank"
         rel="noopener noreferrer"
         className="w-full p-3 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex items-center justify-center"
-        data-testid="venmo-btn"
+        data-testid="venmo-single-btn"
       >
-        💰 Venmo: Single ($39) or Joint ($69)
+        💰 Venmo: Single ($39)
+      </a>
+
+      <a
+        href="https://venmo.com/?txn=pay&recipients=skisteve007&amount=69&note=Clean%20Check%20Joint%20Membership"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full p-3 font-semibold rounded-lg text-white bg-sky-500 hover:bg-sky-600 flex items-center justify-center"
+        data-testid="venmo-joint-btn"
+      >
+        💕 Venmo: Joint ($69)
       </a>
     </div>
 
