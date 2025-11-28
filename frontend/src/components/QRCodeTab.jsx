@@ -54,6 +54,9 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   });
 
   useEffect(() => {
+    // Fetch sponsor logos
+    fetchSponsorLogos();
+    
     // Check URL for profile parameter (partner view)
     const urlParams = new URLSearchParams(window.location.search);
     const profileParam = urlParams.get('profile');
@@ -82,6 +85,15 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       }
     }
   }, [membershipId]);
+
+  const fetchSponsorLogos = async () => {
+    try {
+      const response = await axios.get(`${API}/sponsors`);
+      setSponsorLogos(response.data);
+    } catch (error) {
+      console.error('Failed to fetch sponsor logos:', error);
+    }
+  };
 
   const fetchUserStatusForId = async (id) => {
     try {
