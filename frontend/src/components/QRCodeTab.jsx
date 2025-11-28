@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
 import PaymentWorkflow from './PaymentWorkflow';
-import InitialPayment from './InitialPayment';
+import PaymentConfirmationForm from './PaymentConfirmationForm';
 import WaitingScreen from './WaitingScreen';
 import ReferencesSearch from './ReferencesSearch';
 
