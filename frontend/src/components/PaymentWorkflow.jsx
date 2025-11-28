@@ -116,7 +116,7 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
           ) : (
             <span className="flex items-center space-x-2">
               <span className="text-2xl">✅</span>
-              <span>I Made Payment</span>
+              <span>I Made Payment - Confirm</span>
             </span>
           )}
         </Button>
