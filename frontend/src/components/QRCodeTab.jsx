@@ -1228,119 +1228,115 @@ const SecuritySeals = ({ sponsorLogos }) => {
   );
 };
 
-// Payment Section Component
-const PaymentSection = () => (
-  <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
-    <h3 className="text-xl font-bold text-red-700 mb-3">Service Contribution (Membership)</h3>
-    <p className="text-sm text-gray-700 mb-2">
-      This is a **Clean Check Membership** with a **recurring charge of $39 every 30 days** per
-      donor to cover secure hosting and verification processing.
-    </p>
-    
-    {/* Nonrefundable Disclaimer */}
-    <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-      <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
-      <ul className="text-xs text-gray-800 space-y-1">
-        <li>• <strong>All membership contributions are non-refundable and final</strong></li>
-        <li>• Recurring $39 charge every 30 days</li>
-        <li>• To cancel: Log into your PayPal account → Settings → Payments → Manage automatic payments → Cancel Clean Check subscription</li>
-        <li>• Cancellation must be done through PayPal directly</li>
-      </ul>
-    </div>
+// Payment Section Component - AUTOMATED with PayPal Smart Buttons
+const PaymentSection = ({ membershipId, onPaymentSuccess }) => {
+  const [selectedAmount, setSelectedAmount] = useState(39);
 
-    {/* Value Propositions - Why Join Clean Check */}
-    <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
-      <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
-        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-        Why Join Clean Check?
-      </h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">✅</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Verified Health Status</p>
-            <p className="text-xs text-gray-600">Share your clean status with confidence using QR codes</p>
+  return (
+    <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
+      <h3 className="text-xl font-bold text-red-700 mb-3">🚀 Complete Your Membership</h3>
+      <p className="text-sm text-gray-700 mb-2">
+        <strong>Automatic Approval!</strong> Your account will be activated instantly after payment.
+      </p>
+      
+      {/* Nonrefundable Disclaimer */}
+      <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+        <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
+        <ul className="text-xs text-gray-800 space-y-1 text-left">
+          <li>• <strong>All memberships are non-refundable and final</strong></li>
+          <li>• Recurring monthly charge (cancel anytime via PayPal)</li>
+          <li>• Instant account activation upon payment</li>
+          <li>• Venmo option available on mobile</li>
+        </ul>
+      </div>
+
+      {/* Value Propositions - Why Join Clean Check */}
+      <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
+        <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
+          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          Why Join Clean Check?
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">✅</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Verified Health Status</p>
+              <p className="text-xs text-gray-600">Share your clean status with confidence</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">🔒</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Private & Secure</p>
-            <p className="text-xs text-gray-600">Your data is encrypted and stored securely on your terms</p>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">🔒</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Private & Secure</p>
+              <p className="text-xs text-gray-600">Your data encrypted and protected</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">🤝</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Member References</p>
-            <p className="text-xs text-gray-600">Build trust with verified references from other members</p>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">⚡</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Instant Activation</p>
+              <p className="text-xs text-gray-600">Account active immediately after payment</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">⚡</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Instant Verification</p>
-            <p className="text-xs text-gray-600">Partners scan your QR code for immediate transparency</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">💜</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Peace of Mind</p>
-            <p className="text-xs text-gray-600">Navigate intimacy with informed consent and mutual safety</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">🌟</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Premium Features</p>
-            <p className="text-xs text-gray-600">Photo gallery, social links, and customizable status colors</p>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">🌟</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Premium Features</p>
+              <p className="text-xs text-gray-600">QR codes, galleries, and more</p>
+            </div>
           </div>
         </div>
       </div>
-      <div className="mt-4 p-3 bg-gradient-to-r from-red-100 to-pink-100 rounded-lg border border-red-300">
-        <p className="text-sm font-bold text-red-800">
-          🎯 Join a community committed to transparency, safety, and informed intimacy.
-        </p>
+
+      {/* Membership Selection */}
+      <div className="mb-4">
+        <h4 className="text-sm font-bold text-gray-800 mb-3">Select Membership Type:</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setSelectedAmount(39)}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              selectedAmount === 39
+                ? 'border-red-600 bg-red-100'
+                : 'border-gray-300 bg-white hover:border-red-400'
+            }`}
+          >
+            <p className="text-2xl font-bold text-red-600">$39</p>
+            <p className="text-xs font-semibold text-gray-700">Single</p>
+            <p className="text-xs text-gray-500">Per month</p>
+          </button>
+          <button
+            onClick={() => setSelectedAmount(69)}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              selectedAmount === 69
+                ? 'border-red-600 bg-red-100'
+                : 'border-gray-300 bg-white hover:border-red-400'
+            }`}
+          >
+            <p className="text-2xl font-bold text-red-600">$69</p>
+            <p className="text-xs font-semibold text-gray-700">Joint</p>
+            <p className="text-xs text-gray-500">Per month</p>
+          </button>
+        </div>
       </div>
+
+      {/* PayPal Buttons */}
+      <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+        <p className="text-sm font-semibold text-gray-700 mb-3">Complete Payment with PayPal or Venmo:</p>
+        <PayPalPaymentButton 
+          membershipId={membershipId} 
+          amount={selectedAmount}
+          onSuccess={onPaymentSuccess}
+        />
+      </div>
+
+      <p className="mt-3 text-xs text-gray-600">
+        💳 Secure payment powered by PayPal | Mobile users will see Venmo option
+      </p>
     </div>
-
-    <div className="grid grid-cols-2 gap-3">
-      <a
-        href="https://paypal.me/pitbossent"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-4 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex flex-col items-center justify-center text-center"
-        data-testid="paypal-btn"
-      >
-        <span className="text-3xl mb-2">💳</span>
-        <span className="text-base">Pay by PayPal</span>
-        <span className="text-xs font-normal mt-1 opacity-90">@pitbossent</span>
-      </a>
-
-      <a
-        href="https://venmo.com/u/skisteve007"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-4 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex flex-col items-center justify-center text-center"
-        data-testid="venmo-btn"
-      >
-        <span className="text-3xl mb-2">💰</span>
-        <span className="text-base">Pay by Venmo</span>
-        <span className="text-xs font-normal mt-1 opacity-90">@skisteve007</span>
-      </a>
-    </div>
-
-    <p className="mt-3 text-xs text-center font-medium text-gray-700">
-      Select your amount below: <strong>$39 Single</strong> or <strong>$69 Combined</strong>
-    </p>
-    <p className="mt-2 text-xs text-gray-600 font-semibold">
-      ⏱️ After payment, enter your name and email below to notify admin. Allow up to 5 minutes for verification.
-    </p>
-  </div>
-);
+  );
+};
 
 // Utility Functions
 const b64EncodeUnicode = (str) => {
