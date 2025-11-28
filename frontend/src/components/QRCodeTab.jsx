@@ -13,6 +13,7 @@ import PaymentWorkflow from './PaymentWorkflow';
 import PaymentConfirmationForm from './PaymentConfirmationForm';
 import WaitingScreen from './WaitingScreen';
 import ReferencesSearch from './ReferencesSearch';
+import PayPalPaymentButton from './PayPalPaymentButton';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
