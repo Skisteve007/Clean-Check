@@ -1290,14 +1290,25 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
         </div>
       ) : (
         <>
-          {/* Nonrefundable Disclaimer */}
-          <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-            <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
-            <ul className="text-xs text-gray-800 space-y-1 text-left">
-              <li>• <strong>All memberships are non-refundable and final</strong></li>
-              <li>• Recurring monthly charge (cancel anytime via PayPal)</li>
-              <li>• Instant account activation upon payment</li>
-              <li>• Venmo option available on mobile</li>
+          {/* Recurring Payment Disclaimer */}
+          <div className="mb-3 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+            <p className="text-sm font-bold text-yellow-900 mb-2">⚠️ Important Payment Information:</p>
+            <ul className="text-xs text-gray-800 space-y-2 text-left">
+              <li>
+                <strong className="text-red-600">• RECURRING CHARGES:</strong> This is a subscription that automatically charges 
+                every 30 days from your initial payment date. Your membership will renew monthly unless you cancel.
+              </li>
+              <li>
+                <strong>• How to Cancel:</strong> You must cancel through PayPal by going to your PayPal account → 
+                Settings → Payments → Manage automatic payments → Cancel Clean Check subscription.
+              </li>
+              <li>
+                <strong>• Non-Refundable:</strong> All membership contributions are non-refundable and final once processed.
+              </li>
+              <li>
+                <strong>• Instant Activation:</strong> Your account activates immediately upon first payment.
+              </li>
+              <li>• Venmo option available on mobile devices</li>
             </ul>
           </div>
 
