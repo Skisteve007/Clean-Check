@@ -408,7 +408,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           {/* Show payment section again if payment not confirmed */}
           {(!paymentStatus || paymentStatus.paymentStatus !== 'confirmed') && (
             <>
-              <SecuritySeals />
+              <SecuritySeals sponsorLogos={sponsorLogos} />
               <PaymentSection />
             </>
           )}
