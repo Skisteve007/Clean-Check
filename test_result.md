@@ -190,12 +190,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Payment Confirmation Access Control"
-    - "ReferencesSearch Component"
-    - "Profile Modal - References Integration"
-    - "Partner View - References Display"
+    - "Manual Admin Approval Workflow"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
