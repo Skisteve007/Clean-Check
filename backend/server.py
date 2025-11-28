@@ -571,29 +571,32 @@ async def get_pending_payments(password: str):
     
     return pending
 
-# Admin - Approve Payment
+# Admin - Approve Payment (NEW: Auto-generates Member ID)
 @api_router.post("/admin/payments/approve")
-async def approve_payment(approval: AdminApproval, password: str, background_tasks: BackgroundTasks):
+async def approve_payment(membership_id: str, password: str, background_tasks: BackgroundTasks):
     verify_admin(password)
     
     # Get profile
-    profile = await db.profiles.find_one({"membershipId": approval.membershipId})
+    profile = await db.profiles.find_one({"membershipId": membership_id})
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     
+    # Generate unique 6-digit Member ID
+    assigned_member_id = await generate_unique_member_id()
+    
     # Update payment confirmation
     await db.payment_confirmations.update_one(
-        {"membershipId": approval.membershipId, "status": "pending"},
+        {"membershipId": membership_id, "status": "pending"},
         {"$set": {"status": "approved", "approvedAt": datetime.now(timezone.utc).isoformat()}}
     )
     
     # Update profile to Status 3: Approved - Can now build profile
     await db.profiles.update_one(
-        {"membershipId": approval.membershipId},
+        {"membershipId": membership_id},
         {"$set": {
             "userStatus": 3,  # Status 3: Approved
             "paymentStatus": "confirmed",
-            "assignedMemberId": approval.assignedMemberId,
+            "assignedMemberId": assigned_member_id,
             "qrCodeEnabled": True,  # Enable QR code generation
             "updatedAt": datetime.now(timezone.utc).isoformat()
         }}
@@ -604,10 +607,10 @@ async def approve_payment(approval: AdminApproval, password: str, background_tas
         send_user_approval_notification,
         profile.get("name", "Member"),
         profile.get("email", ""),
-        approval.assignedMemberId
+        assigned_member_id
     )
     
-    return {"message": f"Payment confirmed. User approved with Member ID: {approval.assignedMemberId}. Notification sent."}
+    return {"message": f"Payment confirmed. User approved with Member ID: {assigned_member_id}. Notification sent."}
 
 # Admin - Reject Payment
 @api_router.post("/admin/payments/reject/{membership_id}")
