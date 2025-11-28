@@ -508,7 +508,7 @@ async def track_visit(visit: SiteVisit):
     await db.site_visits.insert_one(visit.model_dump())
     return {"status": "tracked"}
 
-# Payment Confirmation - User submits
+# Payment Confirmation - User submits (MANUAL APPROVAL - No auto-approve)
 @api_router.post("/payment/confirm")
 async def confirm_payment(payment: PaymentConfirmation, background_tasks: BackgroundTasks):
     # Check if profile exists
@@ -525,24 +525,23 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
         "amount": payment.amount,
         "transactionId": payment.transactionId,
         "notes": payment.notes,
-        "status": "pending",
+        "status": "pending",  # Remains pending until admin approves
         "submittedAt": datetime.now(timezone.utc).isoformat()
     }
     
     await db.payment_confirmations.insert_one(confirmation)
     
-    # AUTO-APPROVE: Update profile status to Approved (Status 3) - member can now upload documents
+    # Update profile to indicate payment submitted but pending approval
     await db.profiles.update_one(
         {"membershipId": payment.membershipId},
         {"$set": {
-            "userStatus": 3,  # Status 3: Approved - Can upload documents and create profile
-            "paymentStatus": "confirmed", 
-            "qrCodeEnabled": True,  # Enable QR code generation
+            "userStatus": 1,  # Status 1: Pending Payment Approval
+            "paymentStatus": "pending", 
             "updatedAt": datetime.now(timezone.utc).isoformat()
         }}
     )
     
-    # Send admin notification email in background (for record keeping)
+    # Send admin notification email in background
     background_tasks.add_task(
         send_admin_payment_notification,
         profile.get("name", "Unknown"),
@@ -554,15 +553,11 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
         payment.notes or ""
     )
     
-    # Send confirmation email to member with link to upload documents
-    background_tasks.add_task(
-        send_member_payment_confirmation,
-        profile.get("name", "Unknown"),
-        profile.get("email", ""),
-        payment.membershipId
-    )
+    # Send SMS to all admins
+    sms_message = f"🔔 Clean Check: New payment from {profile.get('name', 'Unknown')} - ${payment.amount} via {payment.paymentMethod}. Login to admin panel to approve."
+    background_tasks.add_task(send_sms_to_admins, sms_message)
     
-    return {"message": "Payment confirmed! You are now a member. Check your email for next steps.", "status": "approved"}
+    return {"message": "Payment confirmation submitted! Admin will review and approve shortly.", "status": "pending"}
 
 # Admin - Get Pending Payment Confirmations
 @api_router.get("/admin/payments/pending")
