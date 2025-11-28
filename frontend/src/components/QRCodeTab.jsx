@@ -57,7 +57,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     healthStatusColor: 'green'
   });
 
-  const generateQRCode = async (url, healthColor = 'green') => {
+  const generateQRCode = useCallback(async (url, healthColor = 'green') => {
     try {
       const colorMap = {
         red: '#dc2626',     // Stop - STD warning
@@ -78,18 +78,18 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     } catch (error) {
       console.error('Error generating QR code:', error);
     }
-  };
+  }, []);
 
-  const fetchSponsorLogos = async () => {
+  const fetchSponsorLogos = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/sponsors`);
       setSponsorLogos(response.data);
     } catch (error) {
       console.error('Failed to fetch sponsor logos:', error);
     }
-  };
+  }, []);
 
-  const fetchUserStatusForId = async (id) => {
+  const fetchUserStatusForId = useCallback(async (id) => {
     try {
       const response = await axios.get(`${API}/profiles/${id}`);
       const profile = response.data;
@@ -102,9 +102,9 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     } catch (error) {
       console.error('Failed to fetch user status:', error);
     }
-  };
+  }, []);
 
-  const loadLocalProfile = () => {
+  const loadLocalProfile = useCallback(() => {
     const saved = localStorage.getItem('cleanCheckDonorProfile');
     if (saved) {
       try {
@@ -122,7 +122,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         console.error('Failed to load profile:', e);
       }
     }
-  };
+  }, [generateQRCode]);
 
   useEffect(() => {
     // Fetch sponsor logos
