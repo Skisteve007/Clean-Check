@@ -427,39 +427,62 @@ const AdminPanel = () => {
 };
 
 // Sponsor Upload Component - ADMIN ONLY
-const SponsorUploadAdmin = ({ slotNumber }) => {
+const SponsorUploadAdmin = ({ slotNumber, adminPassword }) => {
   const [logoSrc, setLogoSrc] = React.useState(null);
   const [uploading, setUploading] = React.useState(false);
 
   React.useEffect(() => {
-    const saved = localStorage.getItem(`sponsorLogo${slotNumber}`);
-    if (saved) {
-      setLogoSrc(saved);
-    }
+    loadLogo();
   }, [slotNumber]);
 
-  const handleFileChange = (e) => {
+  const loadLogo = async () => {
+    try {
+      const response = await axios.get(`${API}/sponsors`);
+      const logos = response.data;
+      if (logos[slotNumber]) {
+        setLogoSrc(logos[slotNumber]);
+      }
+    } catch (error) {
+      console.error('Error loading sponsor logos:', error);
+    }
+  };
+
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setUploading(true);
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const base64 = event.target.result;
-      setLogoSrc(base64);
-      localStorage.setItem(`sponsorLogo${slotNumber}`, base64);
-      setUploading(false);
-      toast.success(`Sponsor Logo ${slotNumber} updated!`);
+      
+      try {
+        await axios.post(`${API}/admin/sponsors/${slotNumber}?password=${adminPassword}`, {
+          logo: base64
+        });
+        setLogoSrc(base64);
+        toast.success(`Sponsor Logo ${slotNumber} uploaded!`);
+      } catch (error) {
+        toast.error('Failed to upload sponsor logo');
+        console.error('Upload error:', error);
+      } finally {
+        setUploading(false);
+      }
     };
     reader.readAsDataURL(file);
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     if (window.confirm('Remove this sponsor logo?')) {
-      localStorage.removeItem(`sponsorLogo${slotNumber}`);
-      setLogoSrc(null);
-      toast.success(`Sponsor Logo ${slotNumber} removed`);
+      try {
+        await axios.delete(`${API}/admin/sponsors/${slotNumber}?password=${adminPassword}`);
+        setLogoSrc(null);
+        toast.success(`Sponsor Logo ${slotNumber} removed`);
+      } catch (error) {
+        toast.error('Failed to remove sponsor logo');
+        console.error('Remove error:', error);
+      }
     }
   };
 
