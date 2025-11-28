@@ -1087,41 +1087,6 @@ async def send_auto_payment_notification(name: str, email: str, membership_id: s
         logger.error(f"Failed to send auto-payment notification: {str(e)}")
         return False
 
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-@app.on_event("startup")
-async def create_indexes():
-    """Create database indexes for optimal performance"""
-    try:
-        # Index on createdAt for sorting
-        await db.profiles.create_index([("createdAt", -1)])
-        # Index on membershipId for fast lookups
-        await db.profiles.create_index([("membershipId", 1)], unique=True)
-        # Index on name for search
-        await db.profiles.create_index([("name", 1)])
-        # Index on payment status
-        await db.profiles.create_index([("paymentStatus", 1)])
-        logger.info("Database indexes created successfully")
-    except Exception as e:
-        logger.warning(f"Index creation warning (may already exist): {e}")
-
-
 # ============================================================================
 # ADMIN USER MANAGEMENT
 # ============================================================================
@@ -1220,6 +1185,40 @@ async def delete_admin_user(username: str, password: str):
         raise HTTPException(status_code=404, detail="Admin user not found")
     
     return {"message": "Admin user deleted successfully"}
+
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def create_indexes():
+    """Create database indexes for optimal performance"""
+    try:
+        # Index on createdAt for sorting
+        await db.profiles.create_index([("createdAt", -1)])
+        # Index on membershipId for fast lookups
+        await db.profiles.create_index([("membershipId", 1)], unique=True)
+        # Index on name for search
+        await db.profiles.create_index([("name", 1)])
+        # Index on payment status
+        await db.profiles.create_index([("paymentStatus", 1)])
+        logger.info("Database indexes created successfully")
+    except Exception as e:
+        logger.warning(f"Index creation warning (may already exist): {e}")
 
 
 @app.on_event("shutdown")
