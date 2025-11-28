@@ -126,6 +126,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
 
   useEffect(() => {
     // Fetch sponsor logos
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSponsorLogos();
     
     // Check URL for profile parameter (partner view)
