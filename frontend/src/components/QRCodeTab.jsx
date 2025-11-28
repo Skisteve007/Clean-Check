@@ -1225,13 +1225,6 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
       <p className="text-sm text-gray-700 mb-2">
         <strong>Automatic Approval!</strong> Your account will be activated instantly after payment.
       </p>
-      
-      {/* Key Value Proposition */}
-      <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-300">
-        <p className="text-sm font-semibold text-gray-800">
-          💙 Confidently share verified health status information for mutual safety and informed intimacy
-        </p>
-      </div>
 
       {/* QR Code Generation Notice */}
       <div className="mb-4 p-3 bg-green-50 rounded-lg border-2 border-green-400">
