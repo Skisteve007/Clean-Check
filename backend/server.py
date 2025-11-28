@@ -1087,16 +1087,6 @@ async def send_auto_payment_notification(name: str, email: str, membership_id: s
         logger.error(f"Failed to send auto-payment notification: {str(e)}")
         return False
 
-    if not profile:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    
-    await db.profiles.update_one(
-        {"membershipId": membership_id},
-        {"$pull": {"references": {"membershipId": ref_id}}}
-    )
-    
-    return {"message": "Reference removed"}
-
 # Include the router in the main app
 app.include_router(api_router)
 
