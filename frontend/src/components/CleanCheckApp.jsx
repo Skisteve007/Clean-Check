@@ -184,7 +184,7 @@ const CleanCheckApp = () => {
   );
 };
 
-// Sponsor Slot Component - READ ONLY for users
+// Sponsor Slot Component - READ ONLY for users (REMOVED - sponsors now only in QRCodeTab SecuritySeals)
 const SponsorSlot = ({ slotNumber }) => {
   const [logoSrc, setLogoSrc] = useState(null);
 
