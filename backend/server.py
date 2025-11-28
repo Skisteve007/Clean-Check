@@ -698,6 +698,175 @@ async def remove_reference(membership_id: str, ref_id: str):
     """
     profile = await db.profiles.find_one({"membershipId": membership_id})
     
+
+
+# ============================================================================
+# PAYMENT WEBHOOKS - Automatic Payment Notifications
+# ============================================================================
+
+@api_router.post("/webhooks/paypal")
+async def paypal_webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    PayPal Webhook Handler
+    Receives instant payment notifications from PayPal
+    """
+    try:
+        # Get webhook data
+        body = await request.body()
+        headers = request.headers
+        
+        # Log webhook received
+        logger.info("PayPal webhook received")
+        
+        # Parse webhook data
+        webhook_data = await request.json()
+        event_type = webhook_data.get("event_type", "")
+        
+        logger.info(f"PayPal Event Type: {event_type}")
+        
+        # Handle different event types
+        if event_type == "PAYMENT.SALE.COMPLETED":
+            # Payment completed successfully
+            sale = webhook_data.get("resource", {})
+            
+            # Extract payment info
+            payer_email = sale.get("payer", {}).get("payer_info", {}).get("email", "")
+            amount = sale.get("amount", {}).get("total", "")
+            currency = sale.get("amount", {}).get("currency", "USD")
+            transaction_id = sale.get("id", "")
+            payment_status = sale.get("state", "")
+            
+            logger.info(f"Payment from {payer_email}: {currency} {amount}, Transaction: {transaction_id}")
+            
+            # Try to match with pending payment in database
+            profile = await db.profiles.find_one({"email": payer_email, "paymentStatus": "in_review"})
+            
+            if profile:
+                # Auto-update payment status
+                await db.profiles.update_one(
+                    {"email": payer_email},
+                    {"$set": {
+                        "paymentStatus": "auto_verified",
+                        "paymentTransactionId": transaction_id,
+                        "paymentAmount": f"{currency} {amount}",
+                        "paymentVerifiedAt": datetime.now(timezone.utc).isoformat(),
+                        "updatedAt": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                # Send notification to admin
+                background_tasks.add_task(
+                    send_auto_payment_notification,
+                    profile.get("name", "Member"),
+                    payer_email,
+                    profile.get("membershipId", ""),
+                    amount,
+                    transaction_id
+                )
+                
+                logger.info(f"Auto-matched payment for {payer_email}")
+            else:
+                # No matching profile - still log it for admin review
+                await db.unmatched_payments.insert_one({
+                    "payer_email": payer_email,
+                    "amount": amount,
+                    "currency": currency,
+                    "transaction_id": transaction_id,
+                    "payment_status": payment_status,
+                    "received_at": datetime.now(timezone.utc).isoformat(),
+                    "webhook_data": webhook_data
+                })
+                
+                logger.warning(f"Unmatched payment from {payer_email} - stored for admin review")
+        
+        return {"status": "success", "event_type": event_type}
+        
+    except Exception as e:
+        logger.error(f"PayPal webhook error: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+
+@api_router.post("/webhooks/venmo")
+async def venmo_webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    Venmo Webhook Handler
+    Note: Venmo has limited webhook support. This is prepared for future use.
+    """
+    try:
+        webhook_data = await request.json()
+        event_type = webhook_data.get("type", "")
+        
+        logger.info(f"Venmo webhook received: {event_type}")
+        
+        # Log for admin review
+        await db.venmo_notifications.insert_one({
+            "event_type": event_type,
+            "data": webhook_data,
+            "received_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {"status": "success"}
+        
+    except Exception as e:
+        logger.error(f"Venmo webhook error: {str(e)}")
+        return {"status": "error", "message": str(e)}
+
+
+async def send_auto_payment_notification(name: str, email: str, membership_id: str, amount: str, transaction_id: str):
+    """Send notification when payment is auto-verified"""
+    try:
+        subject = f"💰 Auto-Verified Payment - {name}"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #10b981; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">💰 Payment Auto-Verified!</h1>
+            </div>
+            
+            <div style="background-color: #f0fdf4; padding: 30px; border: 1px solid #86efac;">
+                <h2 style="color: #065f46;">Payment Automatically Detected</h2>
+                
+                <div style="background-color: white; padding: 20px; border-left: 4px solid #10b981; margin: 20px 0;">
+                    <p style="margin: 5px 0;"><strong>Member:</strong> {name}</p>
+                    <p style="margin: 5px 0;"><strong>Email:</strong> {email}</p>
+                    <p style="margin: 5px 0;"><strong>Membership ID:</strong> {membership_id}</p>
+                    <p style="margin: 5px 0;"><strong>Amount:</strong> ${amount}</p>
+                    <p style="margin: 5px 0;"><strong>Transaction ID:</strong> {transaction_id}</p>
+                </div>
+                
+                <div style="background-color: #dbeafe; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                        <strong>✨ Next Step:</strong> Go to admin panel to assign Member ID and fully approve this user.
+                    </p>
+                </div>
+                
+                <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
+                    This payment was automatically detected via PayPal webhook integration.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        logger.info(f"Auto-payment notification logged for admin - {name}: ${amount}")
+        
+        # Store notification
+        await db.email_logs.insert_one({
+            "to": "pitbossent@gmail.com",
+            "subject": subject,
+            "name": name,
+            "amount": amount,
+            "transactionId": transaction_id,
+            "sentAt": datetime.now(timezone.utc).isoformat(),
+            "type": "auto_payment_notification"
+        })
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send auto-payment notification: {str(e)}")
+        return False
+
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     
