@@ -315,8 +315,7 @@ class ManualApprovalWorkflowTester:
     def test_delete_admin_user(self, username):
         """Test deleting an admin user"""
         success, response, status = self.make_request(
-            'DELETE', f'admin/users/{username}',
-            params={'password': self.admin_password}
+            'DELETE', f'admin/users/{username}?password={self.admin_password}'
         )
         
         if success:
