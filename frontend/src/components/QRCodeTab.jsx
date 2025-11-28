@@ -1310,7 +1310,7 @@ const PaymentSection = () => (
       Select your amount below: <strong>$39 Single</strong> or <strong>$69 Combined</strong>
     </p>
     <p className="mt-2 text-xs text-gray-600 font-semibold">
-      ⏱️ After payment, use the payment confirmation form above to notify admin. Allow up to 10 minutes for verification.
+      ⏱️ After payment, enter your name and email below to notify admin. Allow up to 5 minutes for verification.
     </p>
   </div>
 );
