@@ -366,7 +366,7 @@ const AdminPanel = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[1, 2, 3].map((num) => (
-                <SponsorUploadAdmin key={num} slotNumber={num} />
+                <SponsorUploadAdmin key={num} slotNumber={num} adminPassword={adminPassword} />
               ))}
             </div>
           </CardContent>
