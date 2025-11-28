@@ -204,10 +204,24 @@ const SponsorSlot = ({ slotNumber }) => {
   const [logoSrc, setLogoSrc] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`sponsorLogo${slotNumber}`);
-    if (saved) {
-      setLogoSrc(saved);
-    }
+    const loadSponsorLogos = async () => {
+      try {
+        const response = await axios.get(`${API}/sponsors`);
+        const logos = response.data;
+        if (logos[slotNumber]) {
+          setLogoSrc(logos[slotNumber]);
+        }
+      } catch (error) {
+        console.error('Error loading sponsor logos:', error);
+        // Fallback to localStorage if API fails
+        const saved = localStorage.getItem(`sponsorLogo${slotNumber}`);
+        if (saved) {
+          setLogoSrc(saved);
+        }
+      }
+    };
+
+    loadSponsorLogos();
   }, [slotNumber]);
 
   const colors = [
