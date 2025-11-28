@@ -99,6 +99,23 @@ class ReferenceAdd(BaseModel):
 class AdminLogin(BaseModel):
     password: str
 
+class AdminUserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+    username: str
+    password: str
+
+class AdminUserLogin(BaseModel):
+    username: str
+    password: str
+
+class AdminUserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
 class SiteVisit(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     page: str = "/"
