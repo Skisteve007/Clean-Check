@@ -435,6 +435,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 setProfileForm={setProfileForm}
                 handlePhotoUpload={handlePhotoUpload}
                 handleProfileSubmit={handleProfileSubmit}
+                saveLocalProfile={saveLocalProfile}
               />
             </DialogContent>
           </Dialog>
