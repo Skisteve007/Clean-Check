@@ -9,6 +9,11 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
+
+import hmac
+import hashlib
+import json as json_lib
+
 from datetime import datetime, timezone
 import secrets
 import base64
