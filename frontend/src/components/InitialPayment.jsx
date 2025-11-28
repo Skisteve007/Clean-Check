@@ -124,30 +124,6 @@ const InitialPayment = ({ onPaymentSubmitted }) => {
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="transactionId">Transaction ID (Optional)</Label>
-            <Input
-              id="transactionId"
-              type="text"
-              placeholder="e.g., PayPal transaction ID or Venmo transaction ID"
-              value={paymentForm.transactionId}
-              onChange={(e) =>
-                setPaymentForm({ ...paymentForm, transactionId: e.target.value })
-              }
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="notes">Additional Notes (Optional)</Label>
-            <Textarea
-              id="notes"
-              placeholder="Any additional information..."
-              value={paymentForm.notes}
-              onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-              rows={2}
-            />
-          </div>
-
           <div className="p-3 bg-blue-50 border border-blue-300 rounded-lg">
             <p className="text-xs text-blue-800 font-semibold">
               ⏱️ Verification Time: Allow up to 10 minutes for admin to confirm your payment. 
