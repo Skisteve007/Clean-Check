@@ -28,9 +28,9 @@ const PayPalPaymentButton = ({ membershipId, amount, onSuccess }) => {
   useEffect(() => {
     if (!clientId || sdkLoaded) return;
 
-    // Load PayPal SDK
+    // Load PayPal SDK with subscription support
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&enable-funding=venmo&currency=USD`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&enable-funding=venmo&currency=USD&vault=true&intent=subscription`;
     script.async = true;
     
     script.onload = () => {
