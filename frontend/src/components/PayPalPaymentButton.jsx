@@ -8,21 +8,23 @@ const API = `${BACKEND_URL}/api`;
 const PayPalPaymentButton = ({ membershipId, amount, onSuccess }) => {
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [clientId, setClientId] = useState(null);
+  const [subscriptionPlans, setSubscriptionPlans] = useState(null);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    // Get PayPal Client ID from backend
-    const fetchClientId = async () => {
+    // Get PayPal Client ID and subscription plans from backend
+    const fetchPayPalConfig = async () => {
       try {
-        const response = await axios.get(`${API}/payment/paypal/client-id`);
+        const response = await axios.get(`${API}/payment/paypal/subscription-plans`);
         setClientId(response.data.clientId);
+        setSubscriptionPlans(response.data.plans);
       } catch (error) {
-        console.error('Failed to get PayPal Client ID:', error);
+        console.error('Failed to get PayPal configuration:', error);
         toast.error('Payment system not configured');
       }
     };
 
-    fetchClientId();
+    fetchPayPalConfig();
   }, []);
 
   useEffect(() => {
@@ -52,84 +54,157 @@ const PayPalPaymentButton = ({ membershipId, amount, onSuccess }) => {
   }, [clientId, sdkLoaded]);
 
   useEffect(() => {
-    if (!sdkLoaded || !window.paypal || processing) return;
+    if (!sdkLoaded || !window.paypal || processing || !subscriptionPlans) return;
 
     // Render PayPal buttons
     const container = document.getElementById(`paypal-button-container-${amount}`);
     if (!container || container.innerHTML) return;
 
-    window.paypal.Buttons({
-      style: {
-        layout: 'vertical',
-        color: 'gold',
-        shape: 'rect',
-        label: 'paypal'
-      },
-      
-      createOrder: (data, actions) => {
-        return actions.order.create({
-          purchase_units: [{
-            amount: {
-              value: amount.toString(),
-              currency_code: 'USD'
-            },
-            description: amount === 39 
-              ? 'Clean Check Membership - Single ($39/month)' 
-              : 'Clean Check Membership - Joint ($69/month)'
-          }]
-        });
-      },
+    const planId = subscriptionPlans[amount.toString()];
+    const useSubscription = planId && planId !== 'CREATE_MANUAL';
 
-      onApprove: async (data, actions) => {
-        setProcessing(true);
+    if (useSubscription) {
+      // SUBSCRIPTION MODE - Recurring billing every 30 days
+      window.paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'paypal'
+        },
         
-        try {
-          // Payment completed on PayPal side
-          toast.loading('Verifying payment...');
-          
-          // Verify payment with backend
-          const response = await axios.post(`${API}/payment/paypal/verify`, {
-            orderID: data.orderID,
-            membershipId: membershipId
+        createSubscription: (data, actions) => {
+          return actions.subscription.create({
+            plan_id: planId
           });
+        },
 
-          if (response.data.success) {
-            toast.dismiss();
-            toast.success('Payment successful! Your account is now active! 🎉');
+        onApprove: async (data, actions) => {
+          setProcessing(true);
+          
+          try {
+            // Subscription approved on PayPal side
+            toast.loading('Activating subscription...');
             
-            // Call onSuccess callback
-            if (onSuccess) {
-              onSuccess({
-                membershipId: membershipId,
-                assignedMemberId: response.data.assignedMemberId,
-                amount: response.data.amount
-              });
+            // Verify subscription with backend
+            const response = await axios.post(`${API}/payment/paypal/subscription/verify`, {
+              subscriptionID: data.subscriptionID,
+              membershipId: membershipId,
+              amount: amount
+            });
+
+            if (response.data.success) {
+              toast.dismiss();
+              toast.success('Subscription activated! Your account is now active! 🎉');
+              
+              // Call onSuccess callback
+              if (onSuccess) {
+                onSuccess({
+                  membershipId: membershipId,
+                  assignedMemberId: response.data.assignedMemberId,
+                  amount: response.data.amount,
+                  subscriptionId: response.data.subscriptionId
+                });
+              }
+            } else {
+              toast.dismiss();
+              toast.error('Subscription activation failed');
+              setProcessing(false);
             }
-          } else {
+          } catch (error) {
             toast.dismiss();
-            toast.error('Payment verification failed');
+            console.error('Subscription verification error:', error);
+            toast.error(error.response?.data?.detail || 'Subscription activation failed');
             setProcessing(false);
           }
-        } catch (error) {
-          toast.dismiss();
-          console.error('Payment verification error:', error);
-          toast.error(error.response?.data?.detail || 'Payment verification failed');
+        },
+
+        onError: (err) => {
+          console.error('PayPal error:', err);
+          toast.error('Payment failed. Please try again.');
+          setProcessing(false);
+        },
+
+        onCancel: () => {
+          toast.info('Subscription cancelled');
           setProcessing(false);
         }
-      },
+      }).render(`#paypal-button-container-${amount}`);
+    } else {
+      // ONE-TIME ORDER MODE - Fallback if subscription not configured
+      window.paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'paypal'
+        },
+        
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: amount.toString(),
+                currency_code: 'USD'
+              },
+              description: amount === 39 
+                ? 'Clean Check Membership - Single ($39/month)' 
+                : 'Clean Check Membership - Joint ($69/month)'
+            }]
+          });
+        },
 
-      onError: (err) => {
-        console.error('PayPal error:', err);
-        toast.error('Payment failed. Please try again.');
-        setProcessing(false);
-      },
+        onApprove: async (data, actions) => {
+          setProcessing(true);
+          
+          try {
+            // Payment completed on PayPal side
+            toast.loading('Verifying payment...');
+            
+            // Verify payment with backend
+            const response = await axios.post(`${API}/payment/paypal/verify`, {
+              orderID: data.orderID,
+              membershipId: membershipId
+            });
 
-      onCancel: () => {
-        toast.info('Payment cancelled');
-        setProcessing(false);
-      }
-    }).render(`#paypal-button-container-${amount}`);
-  }, [sdkLoaded, amount, membershipId, onSuccess, processing]);
+            if (response.data.success) {
+              toast.dismiss();
+              toast.success('Payment successful! Your account is now active! 🎉');
+              
+              // Call onSuccess callback
+              if (onSuccess) {
+                onSuccess({
+                  membershipId: membershipId,
+                  assignedMemberId: response.data.assignedMemberId,
+                  amount: response.data.amount
+                });
+              }
+            } else {
+              toast.dismiss();
+              toast.error('Payment verification failed');
+              setProcessing(false);
+            }
+          } catch (error) {
+            toast.dismiss();
+            console.error('Payment verification error:', error);
+            toast.error(error.response?.data?.detail || 'Payment verification failed');
+            setProcessing(false);
+          }
+        },
+
+        onError: (err) => {
+          console.error('PayPal error:', err);
+          toast.error('Payment failed. Please try again.');
+          setProcessing(false);
+        },
+
+        onCancel: () => {
+          toast.info('Payment cancelled');
+          setProcessing(false);
+        }
+      }).render(`#paypal-button-container-${amount}`);
+    }
+  }, [sdkLoaded, amount, membershipId, onSuccess, processing, subscriptionPlans]);
 
   if (!clientId) {
     return (
