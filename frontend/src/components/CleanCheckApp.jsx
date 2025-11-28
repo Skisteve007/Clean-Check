@@ -171,6 +171,28 @@ const CleanCheckApp = () => {
           </TabsContent>
         </Tabs>
 
+        {/* Important Payment Information */}
+        <div className="mt-4 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+          <p className="text-sm font-bold text-yellow-900 mb-2">⚠️ Important Payment Information:</p>
+          <ul className="text-xs text-gray-800 space-y-2 text-left">
+            <li>
+              <strong className="text-red-600">• RECURRING CHARGES:</strong> This is a subscription that automatically charges 
+              every 30 days from your initial payment date. Your membership will renew monthly unless you cancel.
+            </li>
+            <li>
+              <strong>• How to Cancel:</strong> You must cancel through PayPal by going to your PayPal account → 
+              Settings → Payments → Manage automatic payments → Cancel Clean Check subscription.
+            </li>
+            <li>
+              <strong>• Non-Refundable:</strong> All membership contributions are non-refundable and final once processed.
+            </li>
+            <li>
+              <strong>• Instant Activation:</strong> Your account activates immediately upon first payment.
+            </li>
+            <li>• Venmo option available on mobile devices</li>
+          </ul>
+        </div>
+
         {/* Combined Legal Disclaimer */}
         <div className="mt-4 p-4 bg-gray-100 rounded-lg border-2 border-gray-300">
           <h4 className="text-xs font-bold text-gray-800 mb-2 text-center">⚖️ LEGAL DISCLAIMER</h4>
