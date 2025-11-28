@@ -1357,6 +1357,44 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
           </div>
         </div>
       </div>
+
+      {/* Legal Disclaimer - Sponsor Protection */}
+      <div className="mt-4 p-4 bg-gray-100 rounded-lg border-2 border-gray-300">
+        <h4 className="text-xs font-bold text-gray-800 mb-2 text-center">⚖️ LEGAL DISCLAIMER</h4>
+        <div className="text-xs text-gray-700 space-y-2">
+          <p>
+            <strong>By using Clean Check, you acknowledge and agree that:</strong>
+          </p>
+          <ul className="list-disc list-inside space-y-1 ml-2">
+            <li>
+              <strong>Platform Sponsors and Partners:</strong> All sponsors, advertisers, and supporting partners of Clean Check 
+              (collectively "Sponsors") are held with <strong>NO LIABILITY</strong> for any health, financial, informational, 
+              or other consequences resulting from your use of this service.
+            </li>
+            <li>
+              <strong>Health Decisions:</strong> Sponsors are not responsible for any health-related outcomes, medical conditions, 
+              infections, or diseases that may result from interactions facilitated through this platform.
+            </li>
+            <li>
+              <strong>Financial Matters:</strong> Sponsors bear no responsibility for membership fees, payment processing issues, 
+              refund disputes, or any financial losses incurred.
+            </li>
+            <li>
+              <strong>Information Accuracy:</strong> Sponsors are not liable for the accuracy, completeness, or reliability of 
+              information shared by users, including health status, test results, or personal data.
+            </li>
+            <li>
+              <strong>Independent Service:</strong> Sponsors provide advertising or financial support only and are completely 
+              separate from the operation, management, and content of Clean Check. Their participation does not constitute 
+              endorsement of user behavior or platform practices.
+            </li>
+          </ul>
+          <p className="mt-3 font-semibold text-gray-900">
+            You agree to hold harmless and indemnify Clean Check, its operators, and all Sponsors from any claims, damages, 
+            or liabilities arising from your use of this service. Use at your own risk.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
