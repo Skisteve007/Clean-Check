@@ -449,17 +449,18 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
     
     await db.payment_confirmations.insert_one(confirmation)
     
-    # Update profile status to In_Review (Status 2) - waiting for admin confirmation
+    # AUTO-APPROVE: Update profile status to Approved (Status 3) - member can now upload documents
     await db.profiles.update_one(
         {"membershipId": payment.membershipId},
         {"$set": {
-            "userStatus": 2,  # Status 2: In_Review
-            "paymentStatus": "in_review", 
+            "userStatus": 3,  # Status 3: Approved - Can upload documents and create profile
+            "paymentStatus": "confirmed", 
+            "qrCodeEnabled": True,  # Enable QR code generation
             "updatedAt": datetime.now(timezone.utc).isoformat()
         }}
     )
     
-    # Send admin notification email in background
+    # Send admin notification email in background (for record keeping)
     background_tasks.add_task(
         send_admin_payment_notification,
         profile.get("name", "Unknown"),
@@ -471,14 +472,15 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
         payment.notes or ""
     )
     
-    # Send confirmation email to member
+    # Send confirmation email to member with link to upload documents
     background_tasks.add_task(
         send_member_payment_confirmation,
         profile.get("name", "Unknown"),
-        profile.get("email", "")
+        profile.get("email", ""),
+        payment.membershipId
     )
     
-    return {"message": "Payment confirmation submitted. Waiting for admin confirmation.", "status": "pending_approval"}
+    return {"message": "Payment confirmed! You are now a member. Check your email for next steps.", "status": "approved"}
 
 # Admin - Get Pending Payment Confirmations
 @api_router.get("/admin/payments/pending")
