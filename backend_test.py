@@ -519,18 +519,21 @@ class CleanCheckAPITester:
         # Test 28: Get initial sponsor logos state
         success, initial_logos = self.test_get_sponsor_logos_initial()
         if success:
-            expected_structure = {1: None, 2: None, 3: None}
-            if initial_logos == expected_structure:
+            # JSON returns string keys, so we need to check for string keys
+            expected_keys = ['1', '2', '3']
+            has_all_keys = all(key in initial_logos for key in expected_keys)
+            all_null = all(initial_logos.get(key) is None for key in expected_keys)
+            if has_all_keys and all_null:
                 self.log_test("Initial Sponsor Logos Structure", True, "All slots initialized to None")
             else:
-                self.log_test("Initial Sponsor Logos Structure", False, f"Expected {expected_structure}, got {initial_logos}")
+                self.log_test("Initial Sponsor Logos Structure", False, f"Structure incorrect: {initial_logos}")
 
         # Test 29: Upload sponsor logo to slot 1
         success, upload_response = self.test_upload_sponsor_logo(1)
         
         # Test 30: Verify logo was uploaded to slot 1
         success, logos_after_upload = self.test_get_sponsor_logos_initial()
-        if success and logos_after_upload.get(1) is not None:
+        if success and logos_after_upload.get('1') is not None:
             self.log_test("Sponsor Logo Upload Verification (Slot 1)", True, "Logo successfully uploaded to slot 1")
         else:
             self.log_test("Sponsor Logo Upload Verification (Slot 1)", False, "Logo not found in slot 1 after upload")
@@ -544,7 +547,7 @@ class CleanCheckAPITester:
         # Test 33: Verify all three logos are present
         success, all_logos = self.test_get_sponsor_logos_initial()
         if success:
-            filled_slots = sum(1 for slot in [1, 2, 3] if all_logos.get(slot) is not None)
+            filled_slots = sum(1 for slot in ['1', '2', '3'] if all_logos.get(slot) is not None)
             if filled_slots == 3:
                 self.log_test("All Sponsor Slots Filled", True, "All 3 sponsor slots have logos")
             else:
@@ -555,7 +558,7 @@ class CleanCheckAPITester:
         
         # Test 35: Verify slot 2 is now empty
         success, logos_after_delete = self.test_get_sponsor_logos_initial()
-        if success and logos_after_delete.get(2) is None:
+        if success and logos_after_delete.get('2') is None:
             self.log_test("Sponsor Logo Deletion Verification", True, "Slot 2 successfully cleared")
         else:
             self.log_test("Sponsor Logo Deletion Verification", False, "Slot 2 still contains logo after deletion")
