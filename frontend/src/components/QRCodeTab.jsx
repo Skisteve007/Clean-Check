@@ -1200,8 +1200,24 @@ const SecuritySeals = ({ sponsorLogos }) => {
 };
 
 // Payment Section Component - AUTOMATED with PayPal Smart Buttons
-const PaymentSection = ({ membershipId, onPaymentSuccess }) => {
+const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) => {
   const [selectedAmount, setSelectedAmount] = useState(39);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [showPayment, setShowPayment] = useState(!!membershipId);
+
+  const handleGetStarted = (e) => {
+    e.preventDefault();
+    if (!userName || !userEmail) {
+      toast.error('Please enter your name and email');
+      return;
+    }
+    
+    // Create membership ID
+    createMembershipId(userName, userEmail, '');
+    setShowPayment(true);
+    toast.success('Great! Now complete your payment below.');
+  };
 
   return (
     <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
