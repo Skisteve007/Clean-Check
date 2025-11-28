@@ -363,6 +363,20 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           
           {/* Payment Section with Value Props */}
           <PaymentSection />
+          
+          {/* Payment Confirmation Form */}
+          <PaymentConfirmationForm 
+            onConfirmationSubmitted={(newMembershipId, email) => {
+              createMembershipId('Pending Member', email, '');
+              setUserEmail(email);
+              // Trigger status fetch after a short delay
+              setTimeout(() => {
+                if (updateMembershipProfile) {
+                  updateMembershipProfile();
+                }
+              }, 1000);
+            }}
+          />
         </>
       )}
 
