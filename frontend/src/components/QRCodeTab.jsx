@@ -1226,6 +1226,26 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
         <strong>Automatic Approval!</strong> Your account will be activated instantly after payment.
       </p>
       
+      {/* Pricing Information - Prominent Display */}
+      <div className="mb-4 p-4 bg-white rounded-lg border-2 border-red-500 shadow-md">
+        <h4 className="text-lg font-bold text-red-600 mb-3">💳 Membership Pricing</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border-2 border-red-300">
+            <p className="text-3xl font-bold text-red-600">$39</p>
+            <p className="text-sm font-semibold text-gray-800">Single Member</p>
+            <p className="text-xs text-gray-600 mt-1">Per month</p>
+          </div>
+          <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-2 border-purple-300">
+            <p className="text-3xl font-bold text-purple-600">$69</p>
+            <p className="text-sm font-semibold text-gray-800">Joint/Couple</p>
+            <p className="text-xs text-gray-600 mt-1">Per month</p>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-gray-700 font-semibold">
+          ✨ Universal membership - works on all sites employing Clean Check services
+        </p>
+      </div>
+      
       {/* Show name/email form if no membership ID yet */}
       {!showPayment ? (
         <div className="bg-white p-6 rounded-lg border-2 border-red-300 mb-4">
