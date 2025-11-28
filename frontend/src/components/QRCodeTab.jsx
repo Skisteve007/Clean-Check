@@ -8,10 +8,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
+import axios from 'axios';
 import PaymentWorkflow from './PaymentWorkflow';
 import PaymentConfirmationForm from './PaymentConfirmationForm';
 import WaitingScreen from './WaitingScreen';
 import ReferencesSearch from './ReferencesSearch';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
   const [urlInput, setUrlInput] = useState('');
