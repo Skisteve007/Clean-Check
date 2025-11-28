@@ -5,7 +5,7 @@ import base64
 from datetime import datetime
 
 class CleanCheckAPITester:
-    def __init__(self, base_url="https://securedoc-3.preview.emergentagent.com"):
+    def __init__(self, base_url="https://safe-share-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
@@ -160,6 +160,91 @@ class CleanCheckAPITester:
             f"profiles/{fake_id}/references",
             404,
             data={"membershipId": "some-ref-id", "name": "Some Name"}
+        )
+        return success
+
+    # ============================================================================
+    # SPONSOR LOGO MANAGEMENT TESTS
+    # ============================================================================
+
+    def test_get_sponsor_logos_initial(self):
+        """Test getting sponsor logos - initial state (should return empty slots)"""
+        success, response = self.run_test(
+            "Get Sponsor Logos (Initial State)",
+            "GET",
+            "sponsors",
+            200
+        )
+        return success, response
+
+    def test_upload_sponsor_logo(self, slot, password="admin123"):
+        """Test uploading sponsor logo to a specific slot"""
+        # Create a simple base64 test image (1x1 pixel PNG)
+        test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        
+        success, response = self.run_test(
+            f"Upload Sponsor Logo to Slot {slot}",
+            "POST",
+            f"admin/sponsors/{slot}?password={password}",
+            200,
+            data={"logo": test_logo}
+        )
+        return success, response
+
+    def test_upload_sponsor_logo_invalid_slot(self, password="admin123"):
+        """Test uploading sponsor logo to invalid slot (should fail)"""
+        test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        
+        success, response = self.run_test(
+            "Upload Sponsor Logo to Invalid Slot (4)",
+            "POST",
+            f"admin/sponsors/4?password={password}",
+            400,
+            data={"logo": test_logo}
+        )
+        return success
+
+    def test_upload_sponsor_logo_no_data(self, slot=1, password="admin123"):
+        """Test uploading sponsor logo without logo data (should fail)"""
+        success, response = self.run_test(
+            "Upload Sponsor Logo Without Data",
+            "POST",
+            f"admin/sponsors/{slot}?password={password}",
+            400,
+            data={}
+        )
+        return success
+
+    def test_upload_sponsor_logo_wrong_password(self, slot=1):
+        """Test uploading sponsor logo with wrong password (should fail)"""
+        test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        
+        success, response = self.run_test(
+            "Upload Sponsor Logo with Wrong Password",
+            "POST",
+            f"admin/sponsors/{slot}?password=wrongpassword",
+            401,
+            data={"logo": test_logo}
+        )
+        return success
+
+    def test_delete_sponsor_logo(self, slot, password="admin123"):
+        """Test deleting sponsor logo from a specific slot"""
+        success, response = self.run_test(
+            f"Delete Sponsor Logo from Slot {slot}",
+            "DELETE",
+            f"admin/sponsors/{slot}?password={password}",
+            200
+        )
+        return success, response
+
+    def test_delete_sponsor_logo_wrong_password(self, slot=1):
+        """Test deleting sponsor logo with wrong password (should fail)"""
+        success, response = self.run_test(
+            "Delete Sponsor Logo with Wrong Password",
+            "DELETE",
+            f"admin/sponsors/{slot}?password=wrongpassword",
+            401
         )
         return success
 
@@ -427,6 +512,68 @@ class CleanCheckAPITester:
                 404,
                 data={"membershipId": "non-existent-ref-id", "name": "Non-existent User"}
             )
+
+        # === SPONSOR LOGO MANAGEMENT TESTS ===
+        print("\n🖼️ Testing Sponsor Logo Management System...")
+        
+        # Test 28: Get initial sponsor logos state
+        success, initial_logos = self.test_get_sponsor_logos_initial()
+        if success:
+            # JSON returns string keys, so we need to check for string keys
+            expected_keys = ['1', '2', '3']
+            has_all_keys = all(key in initial_logos for key in expected_keys)
+            all_null = all(initial_logos.get(key) is None for key in expected_keys)
+            if has_all_keys and all_null:
+                self.log_test("Initial Sponsor Logos Structure", True, "All slots initialized to None")
+            else:
+                self.log_test("Initial Sponsor Logos Structure", False, f"Structure incorrect: {initial_logos}")
+
+        # Test 29: Upload sponsor logo to slot 1
+        success, upload_response = self.test_upload_sponsor_logo(1)
+        
+        # Test 30: Verify logo was uploaded to slot 1
+        success, logos_after_upload = self.test_get_sponsor_logos_initial()
+        if success and logos_after_upload.get('1') is not None:
+            self.log_test("Sponsor Logo Upload Verification (Slot 1)", True, "Logo successfully uploaded to slot 1")
+        else:
+            self.log_test("Sponsor Logo Upload Verification (Slot 1)", False, "Logo not found in slot 1 after upload")
+
+        # Test 31: Upload sponsor logo to slot 2
+        self.test_upload_sponsor_logo(2)
+        
+        # Test 32: Upload sponsor logo to slot 3
+        self.test_upload_sponsor_logo(3)
+        
+        # Test 33: Verify all three logos are present
+        success, all_logos = self.test_get_sponsor_logos_initial()
+        if success:
+            filled_slots = sum(1 for slot in ['1', '2', '3'] if all_logos.get(slot) is not None)
+            if filled_slots == 3:
+                self.log_test("All Sponsor Slots Filled", True, "All 3 sponsor slots have logos")
+            else:
+                self.log_test("All Sponsor Slots Filled", False, f"Only {filled_slots}/3 slots filled")
+
+        # Test 34: Delete sponsor logo from slot 2
+        success, delete_response = self.test_delete_sponsor_logo(2)
+        
+        # Test 35: Verify slot 2 is now empty
+        success, logos_after_delete = self.test_get_sponsor_logos_initial()
+        if success and logos_after_delete.get('2') is None:
+            self.log_test("Sponsor Logo Deletion Verification", True, "Slot 2 successfully cleared")
+        else:
+            self.log_test("Sponsor Logo Deletion Verification", False, "Slot 2 still contains logo after deletion")
+
+        # Test 36: Test error cases - Invalid slot number
+        self.test_upload_sponsor_logo_invalid_slot()
+        
+        # Test 37: Test error cases - No logo data
+        self.test_upload_sponsor_logo_no_data()
+        
+        # Test 38: Test error cases - Wrong password for upload
+        self.test_upload_sponsor_logo_wrong_password()
+        
+        # Test 39: Test error cases - Wrong password for delete
+        self.test_delete_sponsor_logo_wrong_password()
 
         return True
 

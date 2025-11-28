@@ -171,43 +171,82 @@ const CleanCheckApp = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Sponsors Section */}
-        <div className="mt-6 p-3 rounded-lg bg-gray-50 border border-gray-200">
-          <h4 className="text-xs font-semibold text-center text-gray-700 mb-2">
-            This Month's Sponsors
-          </h4>
-          <div className="flex justify-around items-center space-x-2">
-            {[1, 2, 3].map((num) => (
-              <SponsorSlot key={num} slotNumber={num} />
-            ))}
+        {/* Combined Legal Disclaimer */}
+        <div className="mt-4 p-4 bg-gray-100 rounded-lg border-2 border-gray-300">
+          <h4 className="text-xs font-bold text-gray-800 mb-2 text-center">⚖️ LEGAL DISCLAIMER</h4>
+          <div className="text-xs text-gray-700 space-y-2">
+            <p>
+              <strong>By using Clean Check, you acknowledge and agree that:</strong>
+            </p>
+            
+            {/* Clean Check Service Nature */}
+            <p>
+              <strong>Service Nature:</strong> Clean Check is a peer-to-peer data sharing tool and not a medical or financial
+              service provider. The donor releases Clean Check from all liability for any health,
+              financial, or informational consequences resulting from the use or alteration of this
+              service. All membership contributions are <strong>non-refundable and final</strong>.
+            </p>
+            
+            {/* Sponsor Protection */}
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>
+                <strong>Platform Sponsors and Partners:</strong> All sponsors, advertisers, and supporting partners of Clean Check 
+                (collectively "Sponsors") are held with <strong>NO LIABILITY</strong> for any health, financial, informational, 
+                or other consequences resulting from your use of this service.
+              </li>
+              <li>
+                <strong>Health Decisions:</strong> Neither Clean Check nor Sponsors are responsible for any health-related outcomes, medical conditions, 
+                infections, or diseases that may result from interactions facilitated through this platform.
+              </li>
+              <li>
+                <strong>Financial Matters:</strong> Neither Clean Check nor Sponsors bear responsibility for membership fees, payment processing issues, 
+                refund disputes, or any financial losses incurred.
+              </li>
+              <li>
+                <strong>Information Accuracy:</strong> Neither Clean Check nor Sponsors are liable for the accuracy, completeness, or reliability of 
+                information shared by users, including health status, test results, or personal data.
+              </li>
+              <li>
+                <strong>Independent Service:</strong> Sponsors provide advertising or financial support only and are completely 
+                separate from the operation, management, and content of Clean Check. Their participation does not constitute 
+                endorsement of user behavior or platform practices.
+              </li>
+            </ul>
+            
+            <p className="mt-3 font-semibold text-gray-900">
+              You agree to hold harmless and indemnify Clean Check, its operators, and all Sponsors from any claims, damages, 
+              or liabilities arising from your use of this service. Use at your own risk.
+            </p>
           </div>
-          <p className="mt-2 text-xs text-center text-gray-500 italic">
-            Support partners helping ensure safe and informed intimacy.
-          </p>
-        </div>
-
-        {/* Legal Disclaimer */}
-        <div className="mt-4 p-2 text-center text-xs text-gray-500">
-          **Legal Disclaimer:** By using this service, the donor acknowledges and agrees that
-          Clean Check is a peer-to-peer data sharing tool and not a medical or financial
-          service provider. The donor releases Clean Check from all liability for any health,
-          financial, or informational consequences resulting from the use or alteration of this
-          service. All membership contributions are non-refundable and final.
         </div>
       </div>
     </div>
   );
 };
 
-// Sponsor Slot Component - READ ONLY for users
+// Sponsor Slot Component - READ ONLY for users (REMOVED - sponsors now only in QRCodeTab SecuritySeals)
 const SponsorSlot = ({ slotNumber }) => {
   const [logoSrc, setLogoSrc] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem(`sponsorLogo${slotNumber}`);
-    if (saved) {
-      setLogoSrc(saved);
-    }
+    const loadSponsorLogos = async () => {
+      try {
+        const response = await axios.get(`${API}/sponsors`);
+        const logos = response.data;
+        if (logos[slotNumber]) {
+          setLogoSrc(logos[slotNumber]);
+        }
+      } catch (error) {
+        console.error('Error loading sponsor logos:', error);
+        // Fallback to localStorage if API fails
+        const saved = localStorage.getItem(`sponsorLogo${slotNumber}`);
+        if (saved) {
+          setLogoSrc(saved);
+        }
+      }
+    };
+
+    loadSponsorLogos();
   }, [slotNumber]);
 
   const colors = [

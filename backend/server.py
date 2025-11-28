@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, BackgroundTasks, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -9,6 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
+import random
 
 import hmac
 import hashlib
@@ -20,6 +21,8 @@ import base64
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from passlib.context import CryptContext
+from twilio.rest import Client
 
 
 ROOT_DIR = Path(__file__).parent
@@ -30,11 +33,26 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Admin password
+# Admin password (legacy - for backward compatibility)
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 
 # Frontend URL for email links
 FRONTEND_URL = os.environ.get('FRONTEND_URL', os.environ.get('REACT_APP_BACKEND_URL', ''))
+
+# Twilio Configuration for SMS
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', '')
+
+# PayPal Configuration
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', '')
+PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET', '')
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE', 'live')  # 'sandbox' or 'live'
+PAYPAL_PLAN_ID_39 = os.environ.get('PAYPAL_PLAN_ID_39', '')  # Subscription plan for $39
+PAYPAL_PLAN_ID_69 = os.environ.get('PAYPAL_PLAN_ID_69', '')  # Subscription plan for $69
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -88,6 +106,23 @@ class ReferenceAdd(BaseModel):
 class AdminLogin(BaseModel):
     password: str
 
+class AdminUserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+    username: str
+    password: str
+
+class AdminUserLogin(BaseModel):
+    username: str
+    password: str
+
+class AdminUserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    password: Optional[str] = None
+
 class SiteVisit(BaseModel):
     timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     page: str = "/"
@@ -113,6 +148,60 @@ def verify_admin(password: str):
     if not secrets.compare_digest(password, ADMIN_PASSWORD):
         raise HTTPException(status_code=401, detail="Invalid admin password")
     return True
+
+# Generate unique 6-digit Member ID
+async def generate_unique_member_id():
+    """Generate a unique 6-digit Member ID"""
+    while True:
+        member_id = str(random.randint(100000, 999999))
+        existing = await db.profiles.find_one({"assignedMemberId": member_id})
+        if not existing:
+            return member_id
+
+# Send SMS notification to admins
+async def send_sms_to_admins(message: str):
+    """Send SMS notification to all admin users"""
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+        logger.warning("Twilio credentials not configured. SMS not sent.")
+        return False
+    
+    try:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        
+        # Get all admin users
+        admins = await db.admin_users.find({}, {"_id": 0, "phone": 1, "name": 1}).to_list(100)
+        
+        if not admins:
+            logger.warning("No admin users found to send SMS")
+            return False
+        
+        for admin in admins:
+            try:
+                client.messages.create(
+                    body=message,
+                    from_=TWILIO_PHONE_NUMBER,
+                    to=admin.get('phone')
+                )
+                logger.info(f"SMS sent to admin: {admin.get('name')}")
+            except Exception as e:
+                logger.error(f"Failed to send SMS to {admin.get('name')}: {e}")
+        
+        return True
+    except Exception as e:
+        logger.error(f"SMS sending failed: {e}")
+        return False
+
+# Verify admin user credentials
+async def verify_admin_user(username: str, password: str):
+    """Verify admin user login credentials"""
+    admin = await db.admin_users.find_one({"username": username})
+    if not admin:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not pwd_context.verify(password, admin['password']):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    return admin
 
 # Email sending function
 async def send_welcome_email(email: str, name: str, membership_id: str):
@@ -426,7 +515,7 @@ async def track_visit(visit: SiteVisit):
     await db.site_visits.insert_one(visit.model_dump())
     return {"status": "tracked"}
 
-# Payment Confirmation - User submits
+# Payment Confirmation - User submits (MANUAL APPROVAL - No auto-approve)
 @api_router.post("/payment/confirm")
 async def confirm_payment(payment: PaymentConfirmation, background_tasks: BackgroundTasks):
     # Check if profile exists
@@ -443,24 +532,23 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
         "amount": payment.amount,
         "transactionId": payment.transactionId,
         "notes": payment.notes,
-        "status": "pending",
+        "status": "pending",  # Remains pending until admin approves
         "submittedAt": datetime.now(timezone.utc).isoformat()
     }
     
     await db.payment_confirmations.insert_one(confirmation)
     
-    # AUTO-APPROVE: Update profile status to Approved (Status 3) - member can now upload documents
+    # Update profile to indicate payment submitted but pending approval
     await db.profiles.update_one(
         {"membershipId": payment.membershipId},
         {"$set": {
-            "userStatus": 3,  # Status 3: Approved - Can upload documents and create profile
-            "paymentStatus": "confirmed", 
-            "qrCodeEnabled": True,  # Enable QR code generation
+            "userStatus": 1,  # Status 1: Pending Payment Approval
+            "paymentStatus": "pending", 
             "updatedAt": datetime.now(timezone.utc).isoformat()
         }}
     )
     
-    # Send admin notification email in background (for record keeping)
+    # Send admin notification email in background
     background_tasks.add_task(
         send_admin_payment_notification,
         profile.get("name", "Unknown"),
@@ -472,15 +560,11 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
         payment.notes or ""
     )
     
-    # Send confirmation email to member with link to upload documents
-    background_tasks.add_task(
-        send_member_payment_confirmation,
-        profile.get("name", "Unknown"),
-        profile.get("email", ""),
-        payment.membershipId
-    )
+    # Send SMS to all admins
+    sms_message = f"🔔 Clean Check: New payment from {profile.get('name', 'Unknown')} - ${payment.amount} via {payment.paymentMethod}. Login to admin panel to approve."
+    background_tasks.add_task(send_sms_to_admins, sms_message)
     
-    return {"message": "Payment confirmed! You are now a member. Check your email for next steps.", "status": "approved"}
+    return {"message": "Payment confirmation submitted! Admin will review and approve shortly.", "status": "pending"}
 
 # Admin - Get Pending Payment Confirmations
 @api_router.get("/admin/payments/pending")
@@ -494,29 +578,32 @@ async def get_pending_payments(password: str):
     
     return pending
 
-# Admin - Approve Payment
+# Admin - Approve Payment (NEW: Auto-generates Member ID)
 @api_router.post("/admin/payments/approve")
-async def approve_payment(approval: AdminApproval, password: str, background_tasks: BackgroundTasks):
+async def approve_payment(membership_id: str, password: str, background_tasks: BackgroundTasks):
     verify_admin(password)
     
     # Get profile
-    profile = await db.profiles.find_one({"membershipId": approval.membershipId})
+    profile = await db.profiles.find_one({"membershipId": membership_id})
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     
+    # Generate unique 6-digit Member ID
+    assigned_member_id = await generate_unique_member_id()
+    
     # Update payment confirmation
     await db.payment_confirmations.update_one(
-        {"membershipId": approval.membershipId, "status": "pending"},
+        {"membershipId": membership_id, "status": "pending"},
         {"$set": {"status": "approved", "approvedAt": datetime.now(timezone.utc).isoformat()}}
     )
     
     # Update profile to Status 3: Approved - Can now build profile
     await db.profiles.update_one(
-        {"membershipId": approval.membershipId},
+        {"membershipId": membership_id},
         {"$set": {
             "userStatus": 3,  # Status 3: Approved
             "paymentStatus": "confirmed",
-            "assignedMemberId": approval.assignedMemberId,
+            "assignedMemberId": assigned_member_id,
             "qrCodeEnabled": True,  # Enable QR code generation
             "updatedAt": datetime.now(timezone.utc).isoformat()
         }}
@@ -527,10 +614,10 @@ async def approve_payment(approval: AdminApproval, password: str, background_tas
         send_user_approval_notification,
         profile.get("name", "Member"),
         profile.get("email", ""),
-        approval.assignedMemberId
+        assigned_member_id
     )
     
-    return {"message": f"Payment confirmed. User approved with Member ID: {approval.assignedMemberId}. Notification sent."}
+    return {"message": f"Payment confirmed. User approved with Member ID: {assigned_member_id}. Notification sent."}
 
 # Admin - Reject Payment
 @api_router.post("/admin/payments/reject/{membership_id}")
@@ -557,6 +644,323 @@ async def reject_payment(membership_id: str, password: str, reason: str = ""):
     )
     
     return {"message": "Payment rejected."}
+
+
+# ============================================================================
+# PAYPAL AUTOMATED PAYMENT VERIFICATION
+# ============================================================================
+
+@api_router.post("/payment/paypal/verify")
+async def verify_paypal_payment(order_data: dict, background_tasks: BackgroundTasks):
+    """
+    Verify PayPal payment and automatically approve user
+    This endpoint is called from frontend after PayPal onApprove
+    """
+    try:
+        order_id = order_data.get('orderID')
+        membership_id = order_data.get('membershipId')
+        
+        if not order_id or not membership_id:
+            raise HTTPException(status_code=400, detail="Missing orderID or membershipId")
+        
+        # Get profile
+        profile = await db.profiles.find_one({"membershipId": membership_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profile not found")
+        
+        # Verify payment with PayPal API
+        logger.info(f"Verifying PayPal payment: Order ID={order_id}, Membership ID={membership_id}")
+        
+        # Use PayPal API to verify the order
+        import base64
+        auth_string = f"{PAYPAL_CLIENT_ID}:{PAYPAL_SECRET}"
+        auth_bytes = auth_string.encode('utf-8')
+        auth_b64 = base64.b64encode(auth_bytes).decode('utf-8')
+        
+        # Get PayPal API URL based on mode
+        api_url = "https://api-m.paypal.com" if PAYPAL_MODE == "live" else "https://api-m.sandbox.paypal.com"
+        
+        # Get order details from PayPal
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {auth_b64}"
+        }
+        
+        import requests
+        response = requests.get(f"{api_url}/v2/checkout/orders/{order_id}", headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"PayPal API error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail="Failed to verify payment with PayPal")
+        
+        order_details = response.json()
+        logger.info(f"PayPal order details: {order_details}")
+        
+        # Verify payment status
+        payment_status = order_details.get('status')
+        if payment_status != 'COMPLETED':
+            logger.warning(f"Payment not completed. Status: {payment_status}")
+            raise HTTPException(status_code=400, detail=f"Payment not completed. Status: {payment_status}")
+        
+        # Verify payment amount
+        purchase_units = order_details.get('purchase_units', [])
+        if not purchase_units:
+            raise HTTPException(status_code=400, detail="No purchase units in order")
+        
+        amount_paid = float(purchase_units[0].get('amount', {}).get('value', '0'))
+        currency = purchase_units[0].get('amount', {}).get('currency_code', 'USD')
+        
+        # Accept both $39 (single) and $69 (joint) memberships
+        valid_amounts = [39.0, 69.0]
+        if amount_paid not in valid_amounts:
+            logger.warning(f"Invalid payment amount: ${amount_paid}")
+            raise HTTPException(status_code=400, detail=f"Invalid payment amount: ${amount_paid}. Expected $39 or $69")
+        
+        logger.info(f"Payment verified: ${amount_paid} {currency}")
+        
+        # Generate unique Member ID
+        assigned_member_id = await generate_unique_member_id()
+        
+        # Update profile to Approved status
+        await db.profiles.update_one(
+            {"membershipId": membership_id},
+            {"$set": {
+                "userStatus": 3,  # Status 3: Approved
+                "paymentStatus": "confirmed",
+                "assignedMemberId": assigned_member_id,
+                "qrCodeEnabled": True,
+                "paymentAmount": amount_paid,
+                "paypalOrderId": order_id,
+                "updatedAt": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # Record payment confirmation
+        await db.payment_confirmations.insert_one({
+            "membershipId": membership_id,
+            "name": profile.get("name", "Unknown"),
+            "email": profile.get("email", ""),
+            "paymentMethod": "PayPal (Automated)",
+            "amount": f"${amount_paid}",
+            "transactionId": order_id,
+            "status": "approved",
+            "submittedAt": datetime.now(timezone.utc).isoformat(),
+            "approvedAt": datetime.now(timezone.utc).isoformat(),
+            "automated": True
+        })
+        
+        # Send welcome email to user
+        background_tasks.add_task(
+            send_user_approval_notification,
+            profile.get("name", "Member"),
+            profile.get("email", ""),
+            assigned_member_id
+        )
+        
+        logger.info(f"User auto-approved: {membership_id} - Member ID: {assigned_member_id}")
+        
+        return {
+            "success": True,
+            "message": "Payment verified and account activated!",
+            "membershipId": membership_id,
+            "assignedMemberId": assigned_member_id,
+            "amount": amount_paid,
+            "status": "active"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Payment verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Payment verification failed: {str(e)}")
+
+@api_router.get("/payment/paypal/client-id")
+async def get_paypal_client_id():
+    """Return PayPal Client ID for frontend SDK"""
+    if not PAYPAL_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="PayPal not configured")
+    return {"clientId": PAYPAL_CLIENT_ID}
+
+
+@api_router.get("/payment/paypal/subscription-plans")
+async def get_subscription_plans():
+    """Return PayPal subscription plan IDs for recurring billing"""
+    if not PAYPAL_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="PayPal not configured")
+    
+    return {
+        "clientId": PAYPAL_CLIENT_ID,
+        "plans": {
+            "39": PAYPAL_PLAN_ID_39 or "CREATE_MANUAL",  # Will need manual setup
+            "69": PAYPAL_PLAN_ID_69 or "CREATE_MANUAL"
+        }
+    }
+
+@api_router.post("/payment/paypal/subscription/verify")
+async def verify_paypal_subscription(subscription_data: dict, background_tasks: BackgroundTasks):
+    """
+    Verify PayPal subscription and automatically approve user
+    This endpoint is called from frontend after subscription approval
+    """
+    try:
+        subscription_id = subscription_data.get('subscriptionID')
+        membership_id = subscription_data.get('membershipId')
+        amount = subscription_data.get('amount', 39)
+        
+        if not subscription_id or not membership_id:
+            raise HTTPException(status_code=400, detail="Missing subscriptionID or membershipId")
+        
+        # Get profile
+        profile = await db.profiles.find_one({"membershipId": membership_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Profile not found")
+        
+        # Verify subscription with PayPal API
+        logger.info(f"Verifying PayPal subscription: Subscription ID={subscription_id}, Membership ID={membership_id}")
+        
+        # Use PayPal API to verify the subscription
+        import base64
+        auth_string = f"{PAYPAL_CLIENT_ID}:{PAYPAL_SECRET}"
+        auth_bytes = auth_string.encode('utf-8')
+        auth_b64 = base64.b64encode(auth_bytes).decode('utf-8')
+        
+        # Get PayPal API URL based on mode
+        api_url = "https://api-m.paypal.com" if PAYPAL_MODE == "live" else "https://api-m.sandbox.paypal.com"
+        
+        # Get subscription details from PayPal
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {auth_b64}"
+        }
+        
+        import requests
+        response = requests.get(f"{api_url}/v1/billing/subscriptions/{subscription_id}", headers=headers)
+        
+        if response.status_code != 200:
+            logger.error(f"PayPal API error: {response.status_code} - {response.text}")
+            raise HTTPException(status_code=400, detail="Failed to verify subscription with PayPal")
+        
+        subscription_details = response.json()
+        logger.info(f"PayPal subscription details: {subscription_details}")
+        
+        # Verify subscription status
+        subscription_status = subscription_details.get('status')
+        if subscription_status not in ['ACTIVE', 'APPROVED']:
+            logger.warning(f"Subscription not active. Status: {subscription_status}")
+            raise HTTPException(status_code=400, detail=f"Subscription not active. Status: {subscription_status}")
+        
+        logger.info(f"Subscription verified: {subscription_status}")
+        
+        # Generate unique Member ID
+        assigned_member_id = await generate_unique_member_id()
+        
+        # Update profile to Approved status
+        await db.profiles.update_one(
+            {"membershipId": membership_id},
+            {"$set": {
+                "userStatus": 3,  # Status 3: Approved
+                "paymentStatus": "confirmed",
+                "assignedMemberId": assigned_member_id,
+                "qrCodeEnabled": True,
+                "paymentAmount": amount,
+                "paypalSubscriptionId": subscription_id,
+                "subscriptionStatus": subscription_status,
+                "updatedAt": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # Record payment confirmation
+        await db.payment_confirmations.insert_one({
+            "membershipId": membership_id,
+            "name": profile.get("name", "Unknown"),
+            "email": profile.get("email", ""),
+            "paymentMethod": "PayPal Subscription (Automated)",
+            "amount": f"${amount}",
+            "transactionId": subscription_id,
+            "status": "approved",
+            "submittedAt": datetime.now(timezone.utc).isoformat(),
+            "approvedAt": datetime.now(timezone.utc).isoformat(),
+            "automated": True,
+            "recurring": True
+        })
+        
+        # Send welcome email to user
+        background_tasks.add_task(
+            send_user_approval_notification,
+            profile.get("name", "Member"),
+            profile.get("email", ""),
+            assigned_member_id
+        )
+        
+        logger.info(f"User auto-approved with subscription: {membership_id} - Member ID: {assigned_member_id}")
+        
+        return {
+            "success": True,
+            "message": "Subscription activated! Your account is now active!",
+            "membershipId": membership_id,
+            "assignedMemberId": assigned_member_id,
+            "amount": amount,
+            "status": "active",
+            "subscriptionId": subscription_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Subscription verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Subscription verification failed: {str(e)}")
+
+
+
+# ============================================================================
+# SPONSOR LOGOS - Admin Management
+# ============================================================================
+
+@api_router.post("/admin/sponsors/{slot}")
+async def upload_sponsor_logo(slot: int, data: dict, password: str):
+    """Upload sponsor logo for a specific slot (1, 2, or 3)"""
+    verify_admin(password)
+    
+    if slot not in [1, 2, 3]:
+        raise HTTPException(status_code=400, detail="Invalid slot number. Must be 1, 2, or 3")
+    
+    logo_data = data.get("logo", "")
+    if not logo_data:
+        raise HTTPException(status_code=400, detail="No logo data provided")
+    
+    # Store or update sponsor logo
+    await db.sponsors.update_one(
+        {"slot": slot},
+        {"$set": {
+            "logo": logo_data,
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    return {"message": f"Sponsor logo uploaded for slot {slot}"}
+
+
+@api_router.delete("/admin/sponsors/{slot}")
+async def remove_sponsor_logo(slot: int, password: str):
+    """Remove sponsor logo from a specific slot"""
+    verify_admin(password)
+    
+    await db.sponsors.delete_one({"slot": slot})
+    return {"message": f"Sponsor logo removed from slot {slot}"}
+
+
+@api_router.get("/sponsors")
+async def get_sponsor_logos():
+    """Get all sponsor logos (public endpoint)"""
+    sponsors = await db.sponsors.find({}, {"_id": 0}).to_list(3)
+    
+    # Create a dict with all slots
+    logo_dict = {1: None, 2: None, 3: None}
+    for sponsor in sponsors:
+        logo_dict[sponsor.get("slot")] = sponsor.get("logo")
+    
+    return logo_dict
 
 # User - Upload Document
 @api_router.post("/document/upload")
@@ -957,15 +1361,104 @@ async def send_auto_payment_notification(name: str, email: str, membership_id: s
         logger.error(f"Failed to send auto-payment notification: {str(e)}")
         return False
 
-    if not profile:
-        raise HTTPException(status_code=404, detail="Profile not found")
+# ============================================================================
+# ADMIN USER MANAGEMENT
+# ============================================================================
+
+@api_router.post("/admin/users/create")
+async def create_admin_user(admin_data: AdminUserCreate, password: str):
+    """Create a new admin user (requires existing admin authentication)"""
+    verify_admin(password)
     
-    await db.profiles.update_one(
-        {"membershipId": membership_id},
-        {"$pull": {"references": {"membershipId": ref_id}}}
+    # Check if username already exists
+    existing = await db.admin_users.find_one({"username": admin_data.username})
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Check if email already exists
+    existing_email = await db.admin_users.find_one({"email": admin_data.email})
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already exists")
+    
+    # Hash password
+    hashed_password = pwd_context.hash(admin_data.password)
+    
+    # Create admin user
+    admin_user = {
+        "name": admin_data.name,
+        "email": admin_data.email,
+        "phone": admin_data.phone,
+        "username": admin_data.username,
+        "password": hashed_password,
+        "createdAt": datetime.now(timezone.utc).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.admin_users.insert_one(admin_user)
+    
+    return {"message": "Admin user created successfully", "username": admin_data.username}
+
+@api_router.post("/admin/users/login")
+async def admin_user_login(login_data: AdminUserLogin):
+    """Login for admin users with individual credentials"""
+    admin = await verify_admin_user(login_data.username, login_data.password)
+    
+    return {
+        "message": "Login successful",
+        "admin": {
+            "username": admin['username'],
+            "name": admin['name'],
+            "email": admin['email'],
+            "phone": admin.get('phone', '')
+        }
+    }
+
+@api_router.get("/admin/users")
+async def get_all_admin_users(password: str):
+    """Get all admin users (requires authentication)"""
+    verify_admin(password)
+    
+    admins = await db.admin_users.find({}, {"_id": 0, "password": 0}).to_list(100)
+    return admins
+
+@api_router.put("/admin/users/{username}")
+async def update_admin_user(username: str, update_data: AdminUserUpdate, password: str):
+    """Update admin user profile"""
+    verify_admin(password)
+    
+    admin = await db.admin_users.find_one({"username": username})
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin user not found")
+    
+    update_fields = {}
+    if update_data.name:
+        update_fields["name"] = update_data.name
+    if update_data.email:
+        update_fields["email"] = update_data.email
+    if update_data.phone:
+        update_fields["phone"] = update_data.phone
+    if update_data.password:
+        update_fields["password"] = pwd_context.hash(update_data.password)
+    
+    update_fields["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.admin_users.update_one(
+        {"username": username},
+        {"$set": update_fields}
     )
     
-    return {"message": "Reference removed"}
+    return {"message": "Admin user updated successfully"}
+
+@api_router.delete("/admin/users/{username}")
+async def delete_admin_user(username: str, password: str):
+    """Delete an admin user"""
+    verify_admin(password)
+    
+    result = await db.admin_users.delete_one({"username": username})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Admin user not found")
+    
+    return {"message": "Admin user deleted successfully"}
 
 # Include the router in the main app
 app.include_router(api_router)
@@ -1000,6 +1493,7 @@ async def create_indexes():
         logger.info("Database indexes created successfully")
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

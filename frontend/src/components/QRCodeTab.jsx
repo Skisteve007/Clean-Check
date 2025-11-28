@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -8,10 +8,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
+import axios from 'axios';
 import PaymentWorkflow from './PaymentWorkflow';
 import PaymentConfirmationForm from './PaymentConfirmationForm';
 import WaitingScreen from './WaitingScreen';
 import ReferencesSearch from './ReferencesSearch';
+import PayPalPaymentButton from './PayPalPaymentButton';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }) => {
   const [urlInput, setUrlInput] = useState('');
@@ -23,6 +28,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [userStatus, setUserStatus] = useState(null); // 0=Guest, 1=Pending_Payment, 2=In_Review, 3=Approved
   const [userEmail, setUserEmail] = useState('');
+  const [sponsorLogos, setSponsorLogos] = useState({1: null, 2: null, 3: null});
   const fileInputRef = useRef(null);
 
   // Profile form state
@@ -52,7 +58,77 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     healthStatusColor: 'green'
   });
 
+  const generateQRCode = useCallback(async (url, healthColor = 'green') => {
+    try {
+      const colorMap = {
+        red: '#dc2626',     // Stop - STD warning
+        yellow: '#f59e0b',  // Caution
+        green: '#10b981'    // All clear
+      };
+
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: colorMap[healthColor] || colorMap.green,
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'H'
+      });
+      setQrCodeDataUrl(qrDataUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  }, []);
+
+  const fetchSponsorLogos = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/sponsors`);
+      setSponsorLogos(response.data);
+    } catch (error) {
+      console.error('Failed to fetch sponsor logos:', error);
+    }
+  }, []);
+
+  const fetchUserStatusForId = useCallback(async (id) => {
+    try {
+      const response = await axios.get(`${API}/profiles/${id}`);
+      const profile = response.data;
+      setUserStatus(profile.userStatus || 1);
+      setUserEmail(profile.email || '');
+      setPaymentStatus({
+        paymentStatus: profile.paymentStatus,
+        qrCodeEnabled: profile.qrCodeEnabled
+      });
+    } catch (error) {
+      console.error('Failed to fetch user status:', error);
+    }
+  }, []);
+
+  const loadLocalProfile = useCallback(() => {
+    const saved = localStorage.getItem('cleanCheckDonorProfile');
+    if (saved) {
+      try {
+        const profile = JSON.parse(saved);
+        setLocalProfile(profile);
+        setProfileForm(profile);
+
+        // Load saved link
+        const savedLink = localStorage.getItem('cleanCheckSecureLink');
+        if (savedLink) {
+          setUrlInput(savedLink);
+          generateQRCode(savedLink);
+        }
+      } catch (e) {
+        console.error('Failed to load profile:', e);
+      }
+    }
+  }, [generateQRCode]);
+
   useEffect(() => {
+    // Fetch sponsor logos
+    fetchSponsorLogos();
+    
     // Check URL for profile parameter (partner view)
     const urlParams = new URLSearchParams(window.location.search);
     const profileParam = urlParams.get('profile');
@@ -80,22 +156,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         fetchUserStatusForId(membershipId);
       }
     }
-  }, [membershipId]);
-
-  const fetchUserStatusForId = async (id) => {
-    try {
-      const response = await axios.get(`${API}/profiles/${id}`);
-      const profile = response.data;
-      setUserStatus(profile.userStatus || 1);
-      setUserEmail(profile.email || '');
-      setPaymentStatus({
-        paymentStatus: profile.paymentStatus,
-        qrCodeEnabled: profile.qrCodeEnabled
-      });
-    } catch (error) {
-      console.error('Failed to fetch user status:', error);
-    }
-  };
+  }, [membershipId, fetchSponsorLogos, loadLocalProfile, fetchUserStatusForId]);
 
   const fetchUserStatus = async () => {
     try {
@@ -109,26 +170,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       });
     } catch (error) {
       console.error('Failed to fetch user status:', error);
-    }
-  };
-
-  const loadLocalProfile = () => {
-    const saved = localStorage.getItem('cleanCheckDonorProfile');
-    if (saved) {
-      try {
-        const profile = JSON.parse(saved);
-        setLocalProfile(profile);
-        setProfileForm(profile);
-
-        // Load saved link
-        const savedLink = localStorage.getItem('cleanCheckSecureLink');
-        if (savedLink) {
-          setUrlInput(savedLink);
-          generateQRCode(savedLink);
-        }
-      } catch (e) {
-        console.error('Failed to load profile:', e);
-      }
     }
   };
 
@@ -174,29 +215,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     setUrlInput(shareableUrl);
     localStorage.setItem('cleanCheckSecureLink', shareableUrl);
     generateQRCode(shareableUrl, healthColor);
-  };
-
-  const generateQRCode = async (url, healthColor = 'green') => {
-    try {
-      const colorMap = {
-        red: '#dc2626',     // Stop - STD warning
-        yellow: '#f59e0b',  // Caution
-        green: '#10b981'    // All clear
-      };
-
-      const qrDataUrl = await QRCode.toDataURL(url, {
-        width: 256,
-        margin: 2,
-        color: {
-          dark: colorMap[healthColor] || colorMap.green,
-          light: '#ffffff'
-        },
-        errorCorrectionLevel: 'H'
-      });
-      setQrCodeDataUrl(qrDataUrl);
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-    }
   };
 
   const handleUrlChange = (e) => {
@@ -343,6 +361,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 setProfileForm={setProfileForm}
                 handlePhotoUpload={handlePhotoUpload}
                 handleProfileSubmit={handleProfileSubmit}
+                saveLocalProfile={saveLocalProfile}
               />
             </DialogContent>
           </Dialog>
@@ -355,46 +374,50 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         intimacy.**
       </p>
 
-      {/* Step 1: Payment Section - Show if no membershipId */}
+      {/* Show Payment Section for users without membership */}
       {!membershipId && (
         <>
           {/* Security Seals */}
-          <SecuritySeals />
+          <SecuritySeals sponsorLogos={sponsorLogos} />
           
-          {/* Payment Section with Value Props */}
-          <PaymentSection />
-          
-          {/* Payment Confirmation Form */}
-          <PaymentConfirmationForm 
-            onConfirmationSubmitted={(newMembershipId, email) => {
-              createMembershipId('Pending Member', email, '');
-              setUserEmail(email);
-              // Trigger status fetch after a short delay
-              setTimeout(() => {
-                if (updateMembershipProfile) {
-                  updateMembershipProfile();
-                }
-              }, 1000);
+          {/* Payment Section with PayPal Buttons - Collect name/email inline */}
+          <PaymentSection 
+            membershipId={membershipId}
+            createMembershipId={createMembershipId}
+            onPaymentSuccess={(data) => {
+              toast.success('Payment successful! 🎉 Welcome to Clean Check!');
+              // Update status immediately
+              setUserStatus(3);
+              setPaymentStatus({ paymentStatus: 'confirmed', qrCodeEnabled: true });
+              // Reload user status
+              if (updateMembershipProfile) {
+                updateMembershipProfile();
+              }
             }}
           />
         </>
       )}
 
-      {/* Step 2: Payment Workflow - Show if membershipId exists */}
-      {membershipId && (
+      {/* Show Payment Section for users with membership but not paid */}
+      {membershipId && userStatus !== 3 && (
         <>
-          <PaymentWorkflow
-            membershipId={membershipId}
-            onStatusChange={(status) => setPaymentStatus(status)}
-          />
+          <SecuritySeals sponsorLogos={sponsorLogos} />
           
-          {/* Show payment section again if payment not confirmed */}
-          {(!paymentStatus || paymentStatus.paymentStatus !== 'confirmed') && (
-            <>
-              <SecuritySeals />
-              <PaymentSection />
-            </>
-          )}
+          {/* Payment Section with PayPal Buttons */}
+          <PaymentSection 
+            membershipId={membershipId}
+            createMembershipId={createMembershipId}
+            onPaymentSuccess={(data) => {
+              toast.success('Payment successful! 🎉 Welcome to Clean Check!');
+              // Update status immediately
+              setUserStatus(3);
+              setPaymentStatus({ paymentStatus: 'confirmed', qrCodeEnabled: true });
+              // Reload user status
+              if (updateMembershipProfile) {
+                updateMembershipProfile();
+              }
+            }}
+          />
         </>
       )}
 
@@ -417,6 +440,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 setProfileForm={setProfileForm}
                 handlePhotoUpload={handlePhotoUpload}
                 handleProfileSubmit={handleProfileSubmit}
+                saveLocalProfile={saveLocalProfile}
               />
             </DialogContent>
           </Dialog>
@@ -579,7 +603,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
 };
 
 // Profile Modal Component
-const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleProfileSubmit }) => {
+const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleProfileSubmit, saveLocalProfile }) => {
   return (
     <form onSubmit={handleProfileSubmit} className="space-y-4">
       <DialogHeader>
@@ -917,46 +941,6 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
-      {/* Sponsors Section in Profile Modal */}
-      <div className="mt-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
-        <h4 className="text-xs font-semibold text-center text-gray-700 mb-3">
-          This Month's Sponsors
-        </h4>
-        <div className="flex justify-around items-center space-x-2">
-          {[1, 2, 3].map((num) => {
-            const [logoSrc, setLogoSrc] = React.useState(null);
-            
-            React.useEffect(() => {
-              const saved = localStorage.getItem(`sponsorLogo${num}`);
-              if (saved) setLogoSrc(saved);
-            }, []);
-
-            const colors = [
-              'bg-yellow-50 border-yellow-300',
-              'bg-green-50 border-green-300',
-              'bg-blue-50 border-blue-300'
-            ];
-
-            return (
-              <div key={num} className="w-1/3 p-1 flex justify-center">
-                <div className={`sponsor-slot border ${colors[num - 1]}`}>
-                  <img
-                    src={logoSrc || `https://placehold.co/150x60/${num === 1 ? 'fef3c7/a16207' : num === 2 ? 'd1fae5/065f46' : 'e0e7ff/3730a3'}?text=Logo+${num}`}
-                    alt={`Sponsor ${num}`}
-                    onError={(e) => {
-                      e.target.src = `https://placehold.co/150x60/cccccc/666666?text=Logo+${num}`;
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <p className="mt-2 text-xs text-center text-gray-500 italic">
-          Support partners helping ensure safe and informed intimacy.
-        </p>
-      </div>
-
       <div className="grid grid-cols-2 gap-4 mt-4">
         <Button
           type="button"
@@ -1174,160 +1158,257 @@ const PartnerView = ({ profile, examLink }) => {
   );
 };
 
-// Security Seals Component
-const SecuritySeals = () => (
-  <div className="p-4 bg-gray-100 rounded-xl text-center border-2 border-green-200">
-    <h3 className="text-sm font-bold text-gray-700 mb-3">DIGITAL TRUST & ASSURANCE</h3>
-    <div className="flex justify-around items-center space-x-2">
-      <div className="flex flex-col items-center">
-        <svg
-          className="w-8 h-8 text-green-600 mb-1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        </svg>
-        <p className="text-xs text-gray-600 font-semibold">SSL Secured</p>
-      </div>
-      <div className="flex flex-col items-center">
-        <svg className="w-8 h-8 text-green-600 mb-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8.61l-9 9z" />
-        </svg>
-        <p className="text-xs text-gray-600 font-semibold">Data Verified</p>
-      </div>
-      <div className="flex flex-col items-center">
-        <svg
-          className="w-8 h-8 text-green-600 mb-1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M9 10h6" />
-        </svg>
-        <p className="text-xs text-gray-600 font-semibold">Privacy Assured</p>
-      </div>
-    </div>
-  </div>
-);
-
-// Payment Section Component
-const PaymentSection = () => (
-  <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
-    <h3 className="text-xl font-bold text-red-700 mb-3">Service Contribution (Membership)</h3>
-    <p className="text-sm text-gray-700 mb-2">
-      This is a **Clean Check Membership** with a **recurring charge of $39 every 30 days** per
-      donor to cover secure hosting and verification processing.
-    </p>
-    
-    {/* Nonrefundable Disclaimer */}
-    <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-      <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
-      <ul className="text-xs text-gray-800 space-y-1">
-        <li>• <strong>All membership contributions are non-refundable and final</strong></li>
-        <li>• Recurring $39 charge every 30 days</li>
-        <li>• To cancel: Log into your PayPal account → Settings → Payments → Manage automatic payments → Cancel Clean Check subscription</li>
-        <li>• Cancellation must be done through PayPal directly</li>
-      </ul>
-    </div>
-
-    {/* Value Propositions - Why Join Clean Check */}
-    <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
-      <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
-        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-        Why Join Clean Check?
+// Security Seals Section - Sponsor Logos
+const SecuritySeals = ({ sponsorLogos }) => {
+  return (
+    <div className="p-6 border-2 border-gray-300 rounded-xl bg-gradient-to-br from-gray-50 to-white shadow-lg text-center">
+      <h4 className="text-base font-bold text-gray-800 mb-4 flex items-center justify-center">
+        <span className="text-2xl mr-2">🔒</span>
+        Trusted By Community Sponsors
       </h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">✅</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Verified Health Status</p>
-            <p className="text-xs text-gray-600">Share your clean status with confidence using QR codes</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">🔒</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Private & Secure</p>
-            <p className="text-xs text-gray-600">Your data is encrypted and stored securely on your terms</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">🤝</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Member References</p>
-            <p className="text-xs text-gray-600">Build trust with verified references from other members</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">⚡</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Instant Verification</p>
-            <p className="text-xs text-gray-600">Partners scan your QR code for immediate transparency</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">💜</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Peace of Mind</p>
-            <p className="text-xs text-gray-600">Navigate intimacy with informed consent and mutual safety</p>
-          </div>
-        </div>
-        <div className="flex items-start space-x-2">
-          <span className="text-2xl flex-shrink-0">🌟</span>
-          <div>
-            <p className="font-bold text-sm text-gray-800">Premium Features</p>
-            <p className="text-xs text-gray-600">Photo gallery, social links, and customizable status colors</p>
-          </div>
-        </div>
+      <div className="grid grid-cols-3 gap-4">
+        {[1, 2, 3].map((num) => {
+          const logo = sponsorLogos[num];
+          const colors = [
+            'from-yellow-50 to-yellow-100 border-yellow-300',
+            'from-green-50 to-green-100 border-green-300', 
+            'from-blue-50 to-blue-100 border-blue-300'
+          ];
+          return (
+            <div 
+              key={num} 
+              className={`w-full h-24 bg-gradient-to-br ${colors[num - 1]} rounded-lg border-2 flex items-center justify-center overflow-hidden p-3 shadow-md hover:shadow-lg transition-shadow`}
+            >
+              {logo ? (
+                <img 
+                  src={logo} 
+                  alt={`Sponsor ${num}`} 
+                  className="max-w-full max-h-full object-contain filter drop-shadow-sm"
+                />
+              ) : (
+                <div className="text-xs font-semibold text-gray-400 opacity-50">
+                  Sponsor {num}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <div className="mt-4 p-3 bg-gradient-to-r from-red-100 to-pink-100 rounded-lg border border-red-300">
-        <p className="text-sm font-bold text-red-800">
-          🎯 Join a community committed to transparency, safety, and informed intimacy.
+      <p className="text-xs text-gray-500 mt-3">Supporting community health and transparency</p>
+    </div>
+  );
+};
+
+// Payment Section Component - AUTOMATED with PayPal Smart Buttons
+const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) => {
+  const [selectedAmount, setSelectedAmount] = useState(39);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [showPayment, setShowPayment] = useState(!!membershipId);
+
+  const handleGetStarted = (e) => {
+    e.preventDefault();
+    if (!userName || !userEmail) {
+      toast.error('Please enter your name and email');
+      return;
+    }
+    
+    // Create membership ID
+    createMembershipId(userName, userEmail, '');
+    setShowPayment(true);
+    toast.success('Great! Now complete your payment below.');
+  };
+
+  return (
+    <div className="p-4 border border-red-400 rounded-xl bg-red-50 text-center">
+      <h3 className="text-xl font-bold text-red-700 mb-3">🚀 Complete Your Membership</h3>
+      <p className="text-sm text-gray-700 mb-2">
+        <strong>Automatic Approval!</strong> Your account will be activated instantly after payment.
+      </p>
+      
+      {/* Pricing Information - Prominent Display */}
+      <div className="mb-4 p-4 bg-white rounded-lg border-2 border-red-500 shadow-md">
+        <h4 className="text-lg font-bold text-red-600 mb-3">💳 Membership Pricing</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border-2 border-red-300">
+            <p className="text-3xl font-bold text-red-600">$39</p>
+            <p className="text-sm font-semibold text-gray-800">Single Member</p>
+            <p className="text-xs text-gray-600 mt-1">Per month</p>
+          </div>
+          <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-2 border-purple-300">
+            <p className="text-3xl font-bold text-purple-600">$69</p>
+            <p className="text-sm font-semibold text-gray-800">Joint/Couple</p>
+            <p className="text-xs text-gray-600 mt-1">Per month</p>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-gray-700 font-semibold">
+          ✨ Universal membership - works on all sites employing Clean Check services
         </p>
       </div>
+      
+      {/* Show name/email form if no membership ID yet */}
+      {!showPayment ? (
+        <div className="bg-white p-6 rounded-lg border-2 border-red-300 mb-4">
+          <h4 className="text-lg font-bold text-gray-800 mb-4">Get Started</h4>
+          <p className="text-xs text-gray-600 mb-4">Both fields are required to proceed</p>
+          <form onSubmit={handleGetStarted} className="space-y-4">
+            <div className="text-left">
+              <label className="text-sm font-semibold text-gray-700">
+                Full Name <span className="text-red-600">*</span>
+              </label>
+              <Input 
+                type="text" 
+                placeholder="Enter your full name"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                required
+                minLength={2}
+                className="mt-1"
+              />
+            </div>
+            <div className="text-left">
+              <label className="text-sm font-semibold text-gray-700">
+                Email Address <span className="text-red-600">*</span>
+              </label>
+              <Input 
+                type="email" 
+                placeholder="your.email@example.com"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                required
+                className="mt-1"
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold"
+              disabled={!userName.trim() || !userEmail.trim()}
+            >
+              Continue to Payment →
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <>
+          {/* Recurring Payment Disclaimer */}
+          <div className="mb-3 p-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+            <p className="text-sm font-bold text-yellow-900 mb-2">⚠️ Important Payment Information:</p>
+            <ul className="text-xs text-gray-800 space-y-2 text-left">
+              <li>
+                <strong className="text-red-600">• RECURRING CHARGES:</strong> This is a subscription that automatically charges 
+                every 30 days from your initial payment date. Your membership will renew monthly unless you cancel.
+              </li>
+              <li>
+                <strong>• How to Cancel:</strong> You must cancel through PayPal by going to your PayPal account → 
+                Settings → Payments → Manage automatic payments → Cancel Clean Check subscription.
+              </li>
+              <li>
+                <strong>• Non-Refundable:</strong> All membership contributions are non-refundable and final once processed.
+              </li>
+              <li>
+                <strong>• Instant Activation:</strong> Your account activates immediately upon first payment.
+              </li>
+              <li>• Venmo option available on mobile devices</li>
+            </ul>
+          </div>
+
+          {/* Membership Selection */}
+          <div className="mb-4">
+            <h4 className="text-sm font-bold text-gray-800 mb-3">Select Membership Type:</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedAmount(39)}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedAmount === 39
+                    ? 'border-red-600 bg-red-100'
+                    : 'border-gray-300 bg-white hover:border-red-400'
+                }`}
+              >
+                <p className="text-2xl font-bold text-red-600">$39</p>
+                <p className="text-xs font-semibold text-gray-700">Single</p>
+                <p className="text-xs text-gray-500">Per month</p>
+              </button>
+              <button
+                onClick={() => setSelectedAmount(69)}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedAmount === 69
+                    ? 'border-red-600 bg-red-100'
+                    : 'border-gray-300 bg-white hover:border-red-400'
+                }`}
+              >
+                <p className="text-2xl font-bold text-red-600">$69</p>
+                <p className="text-xs font-semibold text-gray-700">Joint</p>
+                <p className="text-xs text-gray-500">Per month</p>
+              </button>
+            </div>
+          </div>
+
+          {/* PayPal Buttons */}
+          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+            <p className="text-sm font-semibold text-gray-700 mb-3">Complete Payment with PayPal or Venmo:</p>
+            <PayPalPaymentButton 
+              membershipId={membershipId} 
+              amount={selectedAmount}
+              onSuccess={onPaymentSuccess}
+            />
+          </div>
+
+          <p className="mt-3 text-xs text-gray-600">
+            💳 Secure payment powered by PayPal | Mobile users will see Venmo option
+          </p>
+        </>
+      )}
+
+      {/* Value Propositions - Why Join Clean Check */}
+      <div className="mt-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
+        <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
+          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          Why Join Clean Check?
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">✅</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Verified Health Status</p>
+              <p className="text-xs text-gray-600">Share your clean status with confidence</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">🔒</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Private & Secure</p>
+              <p className="text-xs text-gray-600">Your data encrypted and protected</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">⚡</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Instant Activation</p>
+              <p className="text-xs text-gray-600">Account active immediately after payment</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">🌟</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Premium Features</p>
+              <p className="text-xs text-gray-600">QR codes, galleries, and more</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-2">
+            <span className="text-2xl flex-shrink-0">🌐</span>
+            <div>
+              <p className="font-bold text-sm text-gray-800">Universal Membership</p>
+              <p className="text-xs text-gray-600">Works on all other sites that employ Clean Check services</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
-
-    <div className="grid grid-cols-2 gap-3">
-      <a
-        href="https://paypal.me/pitbossent"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-4 font-semibold rounded-lg text-white bg-blue-700 hover:bg-blue-800 flex flex-col items-center justify-center text-center"
-        data-testid="paypal-btn"
-      >
-        <span className="text-3xl mb-2">💳</span>
-        <span className="text-base">Pay by PayPal</span>
-        <span className="text-xs font-normal mt-1 opacity-90">@pitbossent</span>
-      </a>
-
-      <a
-        href="https://venmo.com/u/skisteve007"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-4 font-semibold rounded-lg text-white bg-sky-600 hover:bg-sky-700 flex flex-col items-center justify-center text-center"
-        data-testid="venmo-btn"
-      >
-        <span className="text-3xl mb-2">💰</span>
-        <span className="text-base">Pay by Venmo</span>
-        <span className="text-xs font-normal mt-1 opacity-90">@skisteve007</span>
-      </a>
-    </div>
-
-    <p className="mt-3 text-xs text-center font-medium text-gray-700">
-      Select your amount below: <strong>$39 Single</strong> or <strong>$69 Combined</strong>
-    </p>
-    <p className="mt-2 text-xs text-gray-600 font-semibold">
-      ⏱️ After payment, enter your name and email below to notify admin. Allow up to 5 minutes for verification.
-    </p>
-  </div>
-);
+  );
+};
 
 // Utility Functions
 const b64EncodeUnicode = (str) => {
