@@ -390,6 +390,13 @@ async def confirm_payment(payment: PaymentConfirmation, background_tasks: Backgr
         payment.notes or ""
     )
     
+    # Send confirmation email to member
+    background_tasks.add_task(
+        send_member_payment_confirmation,
+        profile.get("name", "Unknown"),
+        profile.get("email", "")
+    )
+    
     return {"message": "Payment confirmation submitted. Waiting for admin confirmation.", "status": "pending_approval"}
 
 # Admin - Get Pending Payment Confirmations
