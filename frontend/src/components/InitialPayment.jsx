@@ -110,14 +110,18 @@ const InitialPayment = ({ onPaymentSubmitted }) => {
 
           <div>
             <Label htmlFor="amount">Amount Paid *</Label>
-            <Input
-              id="amount"
-              type="text"
-              placeholder="$39 or $69"
+            <Select
               value={paymentForm.amount}
-              onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-              required
-            />
+              onValueChange={(value) => setPaymentForm({ ...paymentForm, amount: value })}
+            >
+              <SelectTrigger id="amount">
+                <SelectValue placeholder="Select amount" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="$39">$39 - Single Membership</SelectItem>
+                <SelectItem value="$69">$69 - Combined/Joint Membership</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
