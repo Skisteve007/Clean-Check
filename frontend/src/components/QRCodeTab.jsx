@@ -75,20 +75,12 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       // Donor view - load from localStorage
       loadLocalProfile();
       
-      // Auto-create membershipId if doesn't exist
-      const storedId = localStorage.getItem('cleanCheckMembershipId');
-      if (storedId) {
-        setMembershipId(storedId);
-        // Fetch user status
-        fetchUserStatusForId(storedId);
-      } else {
-        // Generate new membershipId
-        const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('cleanCheckMembershipId', newId);
-        setMembershipId(newId);
+      // Fetch user status if membershipId exists
+      if (membershipId) {
+        fetchUserStatusForId(membershipId);
       }
     }
-  }, []);
+  }, [membershipId]);
 
   const fetchUserStatusForId = async (id) => {
     try {
