@@ -340,44 +340,57 @@ async def root():
     return {"message": "Clean Check API"}
 
 
-async def send_member_payment_confirmation(name: str, email: str):
-    """Send payment confirmation email to member"""
+async def send_member_payment_confirmation(name: str, email: str, membership_id: str):
+    """Send payment confirmation email to member with link to upload documents"""
     try:
-        subject = f"✅ Payment Received - Clean Check Membership"
+        subject = f"✅ Welcome to Clean Check - You're Now a Member!"
+        
+        # Generate direct link to Clean Check
+        clean_check_link = f"{FRONTEND_URL}?membershipId={membership_id}"
         
         html_content = f"""
         <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background-color: #10b981; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="color: white; margin: 0;">✅ Payment Confirmation Received!</h1>
+                <h1 style="color: white; margin: 0;">🎉 Welcome to Clean Check!</h1>
             </div>
             
             <div style="background-color: #f0fdf4; padding: 30px; border: 1px solid #86efac; border-radius: 0 0 10px 10px;">
-                <h2 style="color: #065f46;">Thank You, {name}!</h2>
+                <h2 style="color: #065f46;">Congratulations, {name}!</h2>
                 
                 <p style="color: #064e3b; font-size: 16px;">
-                    We've received your payment confirmation and are verifying it now.
+                    Your payment has been confirmed and you are now an <strong>active Clean Check member</strong>!
                 </p>
                 
                 <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 25px 0;">
-                    <h3 style="color: #1e40af; margin-top: 0;">⏱️ What Happens Next:</h3>
+                    <h3 style="color: #1e40af; margin-top: 0;">🚀 Next Steps - Complete Your Profile:</h3>
                     <ol style="color: #1e40af; line-height: 1.8; margin: 0;">
-                        <li>Our team verifies your payment (usually within 5 minutes)</li>
-                        <li>You'll receive an approval email with your Member ID</li>
-                        <li>You can then complete your donor profile</li>
-                        <li>Upload your health documents and generate your QR code</li>
+                        <li>Click the button below to access your member dashboard</li>
+                        <li>Complete your donor profile with your photo</li>
+                        <li>Upload your health documents</li>
+                        <li>Generate your personalized QR code</li>
+                        <li>Start sharing safely!</li>
                     </ol>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{clean_check_link}" 
+                       style="display: inline-block; background-color: #dc2626; color: white; padding: 18px 45px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        📋 Complete Your Profile Now
+                    </a>
                 </div>
                 
                 <div style="background-color: #fff7ed; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <p style="margin: 0; color: #9a3412; font-size: 14px;">
-                        <strong>📧 Keep this email!</strong> You'll receive your Member ID and login details soon.
+                        <strong>💡 Important:</strong> Complete your profile within 48 hours to get listed in our verified members directory!
                     </p>
                 </div>
                 
-                <div style="text-align: center; margin: 30px 0;">
-                    <p style="color: #6b7280; font-size: 14px;">
-                        Stay on the Clean Check page - it will automatically update when you're approved!
+                <div style="background-color: white; padding: 20px; border: 2px solid #10b981; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; color: #065f46; font-size: 14px;">
+                        <strong>Your Membership ID:</strong><br>
+                        <code style="background: #f3f4f6; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 8px; font-size: 16px; color: #dc2626;">{membership_id}</code><br>
+                        <span style="font-size: 12px; color: #6b7280;">Keep this ID for your records</span>
                     </p>
                 </div>
                 
