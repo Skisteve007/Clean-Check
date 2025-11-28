@@ -45,7 +45,7 @@ class ManualApprovalWorkflowTester:
             print(f"⚠️ Could not read frontend/.env: {e}")
         
         # Fallback to default
-        return "https://safe-share-1.preview.emergentagent.com"
+        return "https://qrhealth-1.preview.emergentagent.com"
 
     def log_test(self, name, success, details=""):
         """Log test result"""

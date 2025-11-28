@@ -217,7 +217,7 @@ To switch to sandbox (testing) mode:
 **Solution:**
 1. Check browser console for errors
 2. Verify backend is running: `sudo supervisorctl status backend`
-3. Test Client ID endpoint: `curl https://safe-share-1.preview.emergentagent.com/api/payment/paypal/client-id`
+3. Test Client ID endpoint: `curl https://qrhealth-1.preview.emergentagent.com/api/payment/paypal/client-id`
 4. Check backend logs: `tail -n 100 /var/log/supervisor/backend.err.log`
 
 ### Payment Verification Failed
