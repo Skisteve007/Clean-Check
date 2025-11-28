@@ -1226,19 +1226,100 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
         <strong>Automatic Approval!</strong> Your account will be activated instantly after payment.
       </p>
       
-      {/* Nonrefundable Disclaimer */}
-      <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
-        <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
-        <ul className="text-xs text-gray-800 space-y-1 text-left">
-          <li>• <strong>All memberships are non-refundable and final</strong></li>
-          <li>• Recurring monthly charge (cancel anytime via PayPal)</li>
-          <li>• Instant account activation upon payment</li>
-          <li>• Venmo option available on mobile</li>
-        </ul>
-      </div>
+      {/* Show name/email form if no membership ID yet */}
+      {!showPayment ? (
+        <div className="bg-white p-6 rounded-lg border-2 border-red-300 mb-4">
+          <h4 className="text-lg font-bold text-gray-800 mb-4">Get Started</h4>
+          <form onSubmit={handleGetStarted} className="space-y-4">
+            <div className="text-left">
+              <label className="text-sm font-semibold text-gray-700">Full Name</label>
+              <Input 
+                type="text" 
+                placeholder="Enter your full name"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                required
+                className="mt-1"
+              />
+            </div>
+            <div className="text-left">
+              <label className="text-sm font-semibold text-gray-700">Email Address</label>
+              <Input 
+                type="email" 
+                placeholder="your.email@example.com"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                required
+                className="mt-1"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold">
+              Continue to Payment →
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <>
+          {/* Nonrefundable Disclaimer */}
+          <div className="mb-3 p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+            <p className="text-sm font-bold text-yellow-900 mb-1">⚠️ Important Payment Information:</p>
+            <ul className="text-xs text-gray-800 space-y-1 text-left">
+              <li>• <strong>All memberships are non-refundable and final</strong></li>
+              <li>• Recurring monthly charge (cancel anytime via PayPal)</li>
+              <li>• Instant account activation upon payment</li>
+              <li>• Venmo option available on mobile</li>
+            </ul>
+          </div>
+
+          {/* Membership Selection */}
+          <div className="mb-4">
+            <h4 className="text-sm font-bold text-gray-800 mb-3">Select Membership Type:</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedAmount(39)}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedAmount === 39
+                    ? 'border-red-600 bg-red-100'
+                    : 'border-gray-300 bg-white hover:border-red-400'
+                }`}
+              >
+                <p className="text-2xl font-bold text-red-600">$39</p>
+                <p className="text-xs font-semibold text-gray-700">Single</p>
+                <p className="text-xs text-gray-500">Per month</p>
+              </button>
+              <button
+                onClick={() => setSelectedAmount(69)}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  selectedAmount === 69
+                    ? 'border-red-600 bg-red-100'
+                    : 'border-gray-300 bg-white hover:border-red-400'
+                }`}
+              >
+                <p className="text-2xl font-bold text-red-600">$69</p>
+                <p className="text-xs font-semibold text-gray-700">Joint</p>
+                <p className="text-xs text-gray-500">Per month</p>
+              </button>
+            </div>
+          </div>
+
+          {/* PayPal Buttons */}
+          <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+            <p className="text-sm font-semibold text-gray-700 mb-3">Complete Payment with PayPal or Venmo:</p>
+            <PayPalPaymentButton 
+              membershipId={membershipId} 
+              amount={selectedAmount}
+              onSuccess={onPaymentSuccess}
+            />
+          </div>
+
+          <p className="mt-3 text-xs text-gray-600">
+            💳 Secure payment powered by PayPal | Mobile users will see Venmo option
+          </p>
+        </>
+      )}
 
       {/* Value Propositions - Why Join Clean Check */}
-      <div className="mb-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
+      <div className="mt-5 p-4 bg-white rounded-lg border-2 border-red-300 shadow-sm">
         <h4 className="text-lg font-bold text-red-600 mb-3 flex items-center justify-center">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -1276,51 +1357,6 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
           </div>
         </div>
       </div>
-
-      {/* Membership Selection */}
-      <div className="mb-4">
-        <h4 className="text-sm font-bold text-gray-800 mb-3">Select Membership Type:</h4>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setSelectedAmount(39)}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              selectedAmount === 39
-                ? 'border-red-600 bg-red-100'
-                : 'border-gray-300 bg-white hover:border-red-400'
-            }`}
-          >
-            <p className="text-2xl font-bold text-red-600">$39</p>
-            <p className="text-xs font-semibold text-gray-700">Single</p>
-            <p className="text-xs text-gray-500">Per month</p>
-          </button>
-          <button
-            onClick={() => setSelectedAmount(69)}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              selectedAmount === 69
-                ? 'border-red-600 bg-red-100'
-                : 'border-gray-300 bg-white hover:border-red-400'
-            }`}
-          >
-            <p className="text-2xl font-bold text-red-600">$69</p>
-            <p className="text-xs font-semibold text-gray-700">Joint</p>
-            <p className="text-xs text-gray-500">Per month</p>
-          </button>
-        </div>
-      </div>
-
-      {/* PayPal Buttons */}
-      <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
-        <p className="text-sm font-semibold text-gray-700 mb-3">Complete Payment with PayPal or Venmo:</p>
-        <PayPalPaymentButton 
-          membershipId={membershipId} 
-          amount={selectedAmount}
-          onSuccess={onPaymentSuccess}
-        />
-      </div>
-
-      <p className="mt-3 text-xs text-gray-600">
-        💳 Secure payment powered by PayPal | Mobile users will see Venmo option
-      </p>
     </div>
   );
 };
