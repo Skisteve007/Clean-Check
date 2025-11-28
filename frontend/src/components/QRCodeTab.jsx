@@ -1250,20 +1250,26 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
       {!showPayment ? (
         <div className="bg-white p-6 rounded-lg border-2 border-red-300 mb-4">
           <h4 className="text-lg font-bold text-gray-800 mb-4">Get Started</h4>
+          <p className="text-xs text-gray-600 mb-4">Both fields are required to proceed</p>
           <form onSubmit={handleGetStarted} className="space-y-4">
             <div className="text-left">
-              <label className="text-sm font-semibold text-gray-700">Full Name</label>
+              <label className="text-sm font-semibold text-gray-700">
+                Full Name <span className="text-red-600">*</span>
+              </label>
               <Input 
                 type="text" 
                 placeholder="Enter your full name"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 required
+                minLength={2}
                 className="mt-1"
               />
             </div>
             <div className="text-left">
-              <label className="text-sm font-semibold text-gray-700">Email Address</label>
+              <label className="text-sm font-semibold text-gray-700">
+                Email Address <span className="text-red-600">*</span>
+              </label>
               <Input 
                 type="email" 
                 placeholder="your.email@example.com"
@@ -1273,7 +1279,11 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
                 className="mt-1"
               />
             </div>
-            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold">
+            <Button 
+              type="submit" 
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold"
+              disabled={!userName.trim() || !userEmail.trim()}
+            >
               Continue to Payment →
             </Button>
           </form>
