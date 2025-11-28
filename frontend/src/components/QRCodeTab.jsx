@@ -1297,37 +1297,6 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
         </div>
       ) : (
         <>
-          {/* Membership Selection */}
-          <div className="mb-4">
-            <h4 className="text-sm font-bold text-gray-800 mb-3">Select Membership Type:</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setSelectedAmount(39)}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  selectedAmount === 39
-                    ? 'border-red-600 bg-red-100'
-                    : 'border-gray-300 bg-white hover:border-red-400'
-                }`}
-              >
-                <p className="text-2xl font-bold text-red-600">$39</p>
-                <p className="text-xs font-semibold text-gray-700">Single</p>
-                <p className="text-xs text-gray-500">Per month</p>
-              </button>
-              <button
-                onClick={() => setSelectedAmount(69)}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  selectedAmount === 69
-                    ? 'border-red-600 bg-red-100'
-                    : 'border-gray-300 bg-white hover:border-red-400'
-                }`}
-              >
-                <p className="text-2xl font-bold text-red-600">$69</p>
-                <p className="text-xs font-semibold text-gray-700">Joint</p>
-                <p className="text-xs text-gray-500">Per month</p>
-              </button>
-            </div>
-          </div>
-
           {/* PayPal Buttons */}
           <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
             <p className="text-sm font-semibold text-gray-700 mb-3">Complete Payment with PayPal or Venmo:</p>
