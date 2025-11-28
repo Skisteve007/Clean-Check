@@ -339,7 +339,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
         intimacy.**
       </p>
 
-      {/* Step 1: Initial Payment - Show if no membershipId */}
+      {/* Step 1: Payment Section - Show if no membershipId */}
       {!membershipId && (
         <>
           {/* Security Seals */}
@@ -347,17 +347,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           
           {/* Payment Section with Value Props */}
           <PaymentSection />
-          
-          {/* Initial Payment Form */}
-          <InitialPayment 
-            onPaymentSubmitted={(newMembershipId) => {
-              setMembershipId(newMembershipId);
-              // Fetch user status which should now be "In_Review" (Status 2)
-              setTimeout(() => {
-                fetchUserStatus();
-              }, 1000);
-            }}
-          />
         </>
       )}
 
