@@ -257,15 +257,14 @@ class ManualApprovalWorkflowTester:
     def test_create_admin_user(self, name, email, phone, username, password):
         """Test creating a new admin user"""
         success, response, status = self.make_request(
-            'POST', 'admin/users/create',
+            'POST', f'admin/users/create?password={self.admin_password}',
             data={
                 "name": name,
                 "email": email,
                 "phone": phone,
                 "username": username,
                 "password": password
-            },
-            params={'password': self.admin_password}
+            }
         )
         
         if success:
