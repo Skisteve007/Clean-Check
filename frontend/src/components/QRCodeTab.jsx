@@ -74,8 +74,20 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     } else {
       // Donor view - load from localStorage
       loadLocalProfile();
-      // Fetch user status if membershipId exists
-      if (membershipId) {
+      
+      // Auto-create membershipId if doesn't exist
+      if (!membershipId) {
+        const storedId = localStorage.getItem('cleanCheckMembershipId');
+        if (storedId) {
+          setMembershipId(storedId);
+        } else {
+          // Generate new membershipId
+          const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          localStorage.setItem('cleanCheckMembershipId', newId);
+          setMembershipId(newId);
+        }
+      } else {
+        // Fetch user status if membershipId exists
         fetchUserStatus();
       }
     }
