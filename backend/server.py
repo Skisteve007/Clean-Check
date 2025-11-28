@@ -339,6 +339,74 @@ async def send_user_approval_notification(name: str, email: str, assigned_member
 async def root():
     return {"message": "Clean Check API"}
 
+
+async def send_member_payment_confirmation(name: str, email: str):
+    """Send payment confirmation email to member"""
+    try:
+        subject = f"✅ Payment Received - Clean Check Membership"
+        
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background-color: #10b981; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="color: white; margin: 0;">✅ Payment Confirmation Received!</h1>
+            </div>
+            
+            <div style="background-color: #f0fdf4; padding: 30px; border: 1px solid #86efac; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #065f46;">Thank You, {name}!</h2>
+                
+                <p style="color: #064e3b; font-size: 16px;">
+                    We've received your payment confirmation and are verifying it now.
+                </p>
+                
+                <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                    <h3 style="color: #1e40af; margin-top: 0;">⏱️ What Happens Next:</h3>
+                    <ol style="color: #1e40af; line-height: 1.8; margin: 0;">
+                        <li>Our team verifies your payment (usually within 5 minutes)</li>
+                        <li>You'll receive an approval email with your Member ID</li>
+                        <li>You can then complete your donor profile</li>
+                        <li>Upload your health documents and generate your QR code</li>
+                    </ol>
+                </div>
+                
+                <div style="background-color: #fff7ed; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0; color: #9a3412; font-size: 14px;">
+                        <strong>📧 Keep this email!</strong> You'll receive your Member ID and login details soon.
+                    </p>
+                </div>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <p style="color: #6b7280; font-size: 14px;">
+                        Stay on the Clean Check page - it will automatically update when you're approved!
+                    </p>
+                </div>
+                
+                <p style="color: #9ca3af; font-size: 12px; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                    Questions? Contact support at pitbossent@gmail.com<br>
+                    This is an automated confirmation from Clean Check.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        logger.info(f"Member payment confirmation sent to: {email}")
+        
+        # Store email log
+        await db.email_logs.insert_one({
+            "to": email,
+            "subject": subject,
+            "name": name,
+            "sentAt": datetime.now(timezone.utc).isoformat(),
+            "type": "member_payment_confirmation"
+        })
+        
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send member payment confirmation: {str(e)}")
+        return False
+
+
 # Track site visit
 @api_router.post("/track-visit")
 async def track_visit(visit: SiteVisit):
