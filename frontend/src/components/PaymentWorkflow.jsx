@@ -121,7 +121,7 @@ const PaymentWorkflow = ({ membershipId, onStatusChange }) => {
           )}
         </Button>
         <p className="text-xs text-gray-600 mt-3">
-          Click after you've completed your payment via PayPal or Venmo
+          Click after you&apos;ve completed your payment via PayPal or Venmo
         </p>
       </div>
     );
