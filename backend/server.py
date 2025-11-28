@@ -9,6 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
+import random
 
 import hmac
 import hashlib
@@ -20,6 +21,8 @@ import base64
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from passlib.context import CryptContext
+from twilio.rest import Client
 
 
 ROOT_DIR = Path(__file__).parent
