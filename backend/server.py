@@ -543,6 +543,58 @@ async def reject_payment(membership_id: str, password: str, reason: str = ""):
         {"$set": {
             "status": "rejected",
             "rejectedAt": datetime.now(timezone.utc).isoformat(),
+
+
+# ============================================================================
+# SPONSOR LOGOS - Admin Management
+# ============================================================================
+
+@api_router.post("/admin/sponsors/{slot}")
+async def upload_sponsor_logo(slot: int, data: dict, password: str):
+    """Upload sponsor logo for a specific slot (1, 2, or 3)"""
+    verify_admin(password)
+    
+    if slot not in [1, 2, 3]:
+        raise HTTPException(status_code=400, detail="Invalid slot number. Must be 1, 2, or 3")
+    
+    logo_data = data.get("logo", "")
+    if not logo_data:
+        raise HTTPException(status_code=400, detail="No logo data provided")
+    
+    # Store or update sponsor logo
+    await db.sponsors.update_one(
+        {"slot": slot},
+        {"$set": {
+            "logo": logo_data,
+            "updatedAt": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    return {"message": f"Sponsor logo uploaded for slot {slot}"}
+
+
+@api_router.delete("/admin/sponsors/{slot}")
+async def remove_sponsor_logo(slot: int, password: str):
+    """Remove sponsor logo from a specific slot"""
+    verify_admin(password)
+    
+    await db.sponsors.delete_one({"slot": slot})
+    return {"message": f"Sponsor logo removed from slot {slot}"}
+
+
+@api_router.get("/sponsors")
+async def get_sponsor_logos():
+    """Get all sponsor logos (public endpoint)"""
+    sponsors = await db.sponsors.find({}, {"_id": 0}).to_list(3)
+    
+    # Create a dict with all slots
+    logo_dict = {1: None, 2: None, 3: None}
+    for sponsor in sponsors:
+        logo_dict[sponsor.get("slot")] = sponsor.get("logo")
+    
+    return logo_dict
+
             "rejectionReason": reason
         }}
     )
