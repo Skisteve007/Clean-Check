@@ -1233,20 +1233,44 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
         </p>
       </div>
       
-      {/* Pricing Information - Prominent Display */}
+      {/* Pricing Information - Clickable */}
       <div className="mb-4 p-4 bg-white rounded-lg border-2 border-red-500 shadow-md">
-        <h4 className="text-lg font-bold text-red-600 mb-3">💳 Membership Pricing</h4>
+        <h4 className="text-lg font-bold text-red-600 mb-3">💳 Membership Pricing - Click to Select</h4>
         <div className="grid grid-cols-2 gap-4">
-          <div className="p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border-2 border-red-300">
+          <button
+            onClick={() => {
+              setSelectedAmount(39);
+              if (!showPayment && userName && userEmail) {
+                setShowPayment(true);
+                toast.success('$39 Single membership selected! Complete payment below.');
+              }
+            }}
+            className={`p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border-2 transition-all cursor-pointer hover:shadow-lg hover:scale-105 ${
+              selectedAmount === 39 ? 'border-red-600 ring-2 ring-red-400' : 'border-red-300'
+            }`}
+          >
             <p className="text-3xl font-bold text-red-600">$39</p>
             <p className="text-sm font-semibold text-gray-800">Single Member</p>
             <p className="text-xs text-gray-600 mt-1">Per month</p>
-          </div>
-          <div className="p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-2 border-purple-300">
+            {selectedAmount === 39 && <p className="text-xs text-red-600 font-bold mt-1">✓ Selected</p>}
+          </button>
+          <button
+            onClick={() => {
+              setSelectedAmount(69);
+              if (!showPayment && userName && userEmail) {
+                setShowPayment(true);
+                toast.success('$69 Joint membership selected! Complete payment below.');
+              }
+            }}
+            className={`p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border-2 transition-all cursor-pointer hover:shadow-lg hover:scale-105 ${
+              selectedAmount === 69 ? 'border-purple-600 ring-2 ring-purple-400' : 'border-purple-300'
+            }`}
+          >
             <p className="text-3xl font-bold text-purple-600">$69</p>
             <p className="text-sm font-semibold text-gray-800">Joint/Couple</p>
             <p className="text-xs text-gray-600 mt-1">Per month</p>
-          </div>
+            {selectedAmount === 69 && <p className="text-xs text-purple-600 font-bold mt-1">✓ Selected</p>}
+          </button>
         </div>
         <p className="mt-3 text-xs text-gray-700 font-semibold">
           ✨ Universal membership - works on all sites employing Clean Check services
