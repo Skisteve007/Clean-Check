@@ -1192,7 +1192,7 @@ const PartnerView = ({ profile, examLink }) => {
 };
 
 // Security Seals Section - Sponsor Logos
-const SecuritySeals = () => {
+const SecuritySeals = ({ sponsorLogos }) => {
   return (
     <div className="p-6 border-2 border-gray-300 rounded-xl bg-gradient-to-br from-gray-50 to-white shadow-lg text-center">
       <h4 className="text-base font-bold text-gray-800 mb-4 flex items-center justify-center">
