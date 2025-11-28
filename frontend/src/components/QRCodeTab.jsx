@@ -1191,46 +1191,46 @@ const PartnerView = ({ profile, examLink }) => {
   );
 };
 
-// Security Seals Component
-const SecuritySeals = () => (
-  <div className="p-4 bg-gray-100 rounded-xl text-center border-2 border-green-200">
-    <h3 className="text-sm font-bold text-gray-700 mb-3">DIGITAL TRUST & ASSURANCE</h3>
-    <div className="flex justify-around items-center space-x-2">
-      <div className="flex flex-col items-center">
-        <svg
-          className="w-8 h-8 text-green-600 mb-1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        </svg>
-        <p className="text-xs text-gray-600 font-semibold">SSL Secured</p>
+// Security Seals Section - Sponsor Logos
+const SecuritySeals = () => {
+  return (
+    <div className="p-6 border-2 border-gray-300 rounded-xl bg-gradient-to-br from-gray-50 to-white shadow-lg text-center">
+      <h4 className="text-base font-bold text-gray-800 mb-4 flex items-center justify-center">
+        <span className="text-2xl mr-2">🔒</span>
+        Trusted By Community Sponsors
+      </h4>
+      <div className="grid grid-cols-3 gap-4">
+        {[1, 2, 3].map((num) => {
+          const logo = sponsorLogos[num];
+          const colors = [
+            'from-yellow-50 to-yellow-100 border-yellow-300',
+            'from-green-50 to-green-100 border-green-300', 
+            'from-blue-50 to-blue-100 border-blue-300'
+          ];
+          return (
+            <div 
+              key={num} 
+              className={`w-full h-24 bg-gradient-to-br ${colors[num - 1]} rounded-lg border-2 flex items-center justify-center overflow-hidden p-3 shadow-md hover:shadow-lg transition-shadow`}
+            >
+              {logo ? (
+                <img 
+                  src={logo} 
+                  alt={`Sponsor ${num}`} 
+                  className="max-w-full max-h-full object-contain filter drop-shadow-sm"
+                />
+              ) : (
+                <div className="text-xs font-semibold text-gray-400 opacity-50">
+                  Sponsor {num}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <div className="flex flex-col items-center">
-        <svg className="w-8 h-8 text-green-600 mb-1" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8.61l-9 9z" />
-        </svg>
-        <p className="text-xs text-gray-600 font-semibold">Data Verified</p>
-      </div>
-      <div className="flex flex-col items-center">
-        <svg
-          className="w-8 h-8 text-green-600 mb-1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M9 10h6" />
-        </svg>
-        <p className="text-xs text-gray-600 font-semibold">Privacy Assured</p>
-      </div>
+      <p className="text-xs text-gray-500 mt-3">Supporting community health and transparency</p>
     </div>
-  </div>
-);
+  );
+};
 
 // Payment Section Component
 const PaymentSection = () => (
