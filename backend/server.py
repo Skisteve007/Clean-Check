@@ -48,6 +48,8 @@ TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', '')
 PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', '')
 PAYPAL_SECRET = os.environ.get('PAYPAL_SECRET', '')
 PAYPAL_MODE = os.environ.get('PAYPAL_MODE', 'live')  # 'sandbox' or 'live'
+PAYPAL_PLAN_ID_39 = os.environ.get('PAYPAL_PLAN_ID_39', '')  # Subscription plan for $39
+PAYPAL_PLAN_ID_69 = os.environ.get('PAYPAL_PLAN_ID_69', '')  # Subscription plan for $69
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
