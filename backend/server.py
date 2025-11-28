@@ -1131,6 +1131,107 @@ async def create_indexes():
     except Exception as e:
         logger.warning(f"Index creation warning (may already exist): {e}")
 
+
+# ============================================================================
+# ADMIN USER MANAGEMENT
+# ============================================================================
+
+@api_router.post("/admin/users/create")
+async def create_admin_user(admin_data: AdminUserCreate, password: str):
+    """Create a new admin user (requires existing admin authentication)"""
+    verify_admin(password)
+    
+    # Check if username already exists
+    existing = await db.admin_users.find_one({"username": admin_data.username})
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Check if email already exists
+    existing_email = await db.admin_users.find_one({"email": admin_data.email})
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Email already exists")
+    
+    # Hash password
+    hashed_password = pwd_context.hash(admin_data.password)
+    
+    # Create admin user
+    admin_user = {
+        "name": admin_data.name,
+        "email": admin_data.email,
+        "phone": admin_data.phone,
+        "username": admin_data.username,
+        "password": hashed_password,
+        "createdAt": datetime.now(timezone.utc).isoformat(),
+        "updatedAt": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.admin_users.insert_one(admin_user)
+    
+    return {"message": "Admin user created successfully", "username": admin_data.username}
+
+@api_router.post("/admin/users/login")
+async def admin_user_login(login_data: AdminUserLogin):
+    """Login for admin users with individual credentials"""
+    admin = await verify_admin_user(login_data.username, login_data.password)
+    
+    return {
+        "message": "Login successful",
+        "admin": {
+            "username": admin['username'],
+            "name": admin['name'],
+            "email": admin['email'],
+            "phone": admin.get('phone', '')
+        }
+    }
+
+@api_router.get("/admin/users")
+async def get_all_admin_users(password: str):
+    """Get all admin users (requires authentication)"""
+    verify_admin(password)
+    
+    admins = await db.admin_users.find({}, {"_id": 0, "password": 0}).to_list(100)
+    return admins
+
+@api_router.put("/admin/users/{username}")
+async def update_admin_user(username: str, update_data: AdminUserUpdate, password: str):
+    """Update admin user profile"""
+    verify_admin(password)
+    
+    admin = await db.admin_users.find_one({"username": username})
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin user not found")
+    
+    update_fields = {}
+    if update_data.name:
+        update_fields["name"] = update_data.name
+    if update_data.email:
+        update_fields["email"] = update_data.email
+    if update_data.phone:
+        update_fields["phone"] = update_data.phone
+    if update_data.password:
+        update_fields["password"] = pwd_context.hash(update_data.password)
+    
+    update_fields["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.admin_users.update_one(
+        {"username": username},
+        {"$set": update_fields}
+    )
+    
+    return {"message": "Admin user updated successfully"}
+
+@api_router.delete("/admin/users/{username}")
+async def delete_admin_user(username: str, password: str):
+    """Delete an admin user"""
+    verify_admin(password)
+    
+    result = await db.admin_users.delete_one({"username": username})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Admin user not found")
+    
+    return {"message": "Admin user deleted successfully"}
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
