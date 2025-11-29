@@ -1,13 +1,24 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  width: 100%;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .App {
   min-height: 100vh;
   width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
@@ -16,32 +27,91 @@ body {
   body, html, #root {
     max-width: 100vw;
     overflow-x: hidden;
+    width: 100%;
   }
   
   .App {
     padding: 0;
     margin: 0;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Constrain all major containers */
+  .container,
+  [class*="container"],
+  [class*="max-w-"],
+  div[class*="grid"],
+  div[class*="flex"] {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Fix cards and content boxes */
+  [class*="rounded"],
+  [class*="card"],
+  [class*="bg-"] {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Ensure proper padding for all content */
+  main, section, article {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100vw !important;
   }
   
   /* Footer mobile fixes */
   footer {
     width: 100% !important;
+    max-width: 100vw !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    overflow-x: hidden !important;
   }
   
   footer .container {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+    max-width: 100vw !important;
   }
   
   /* Ensure all text elements wrap properly */
   footer p,
   footer h3,
   footer h4,
-  footer button {
+  footer button,
+  p, h1, h2, h3, h4, h5, h6 {
     word-wrap: break-word;
     overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  
+  /* Fix images */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Fix buttons */
+  button {
+    max-width: 100% !important;
+  }
+  
+  /* Fix specific Tailwind classes that might cause overflow */
+  .w-screen {
+    width: 100vw !important;
+  }
+  
+  .min-w-0 {
+    min-width: 0 !important;
+  }
+  
+  /* Prevent any element from being wider than viewport */
+  * {
+    max-width: 100vw;
   }
 }
 
