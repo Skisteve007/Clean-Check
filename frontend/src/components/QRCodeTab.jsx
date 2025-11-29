@@ -283,6 +283,50 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     reader.readAsDataURL(file);
   };
 
+  // Handle health document upload with automatic timestamp
+  const handleDocumentUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const uploadDate = new Date().toISOString();
+      setProfileForm({ 
+        ...profileForm, 
+        healthDocument: event.target.result,
+        documentUploadDate: uploadDate
+      });
+      toast.success(`Document uploaded! Date: ${new Date(uploadDate).toLocaleDateString()}`);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Calculate QR code border color based on document upload date
+  const calculateQRCodeColor = (uploadDate) => {
+    if (!uploadDate) return 'green'; // Default to green if no upload date
+    
+    const now = new Date();
+    const uploaded = new Date(uploadDate);
+    const daysDiff = Math.floor((now - uploaded) / (1000 * 60 * 60 * 24));
+    
+    if (daysDiff <= 30) {
+      return 'green'; // 0-30 days: Fresh/Valid
+    } else if (daysDiff <= 60) {
+      return 'yellow'; // 31-60 days: Expiring Soon
+    } else {
+      return 'red'; // 60+ days: Expired
+    }
+  };
+
+  // Get days since document upload
+  const getDaysSinceUpload = (uploadDate) => {
+    if (!uploadDate) return null;
+    
+    const now = new Date();
+    const uploaded = new Date(uploadDate);
+    return Math.floor((now - uploaded) / (1000 * 60 * 60 * 24));
+  };
+
   const handleProfileSubmit = (e) => {
     e.preventDefault();
 
