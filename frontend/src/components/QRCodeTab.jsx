@@ -778,9 +778,9 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleDo
         />
       </div>
 
-      {/* Current Home */}
+      {/* Where You From */}
       <div>
-        <Label htmlFor="currentHome">🏠 Current Home</Label>
+        <Label htmlFor="currentHome">🏠 Where You From</Label>
         <Input
           id="currentHome"
           type="text"
@@ -790,9 +790,9 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleDo
         />
       </div>
 
-      {/* Second Home */}
+      {/* Current Home City */}
       <div>
-        <Label htmlFor="secondHome">🌍 Second Home</Label>
+        <Label htmlFor="secondHome">🌍 Current Home City</Label>
         <Input
           id="secondHome"
           type="text"
