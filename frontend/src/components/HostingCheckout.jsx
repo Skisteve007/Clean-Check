@@ -8,14 +8,8 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 // Custom PayPal Button Component for $39 Single Plan
 const CustomPayPalButton39 = () => {
   useEffect(() => {
-    // Load PayPal SDK script
-    const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AZpc4v1QC4916Cb-DLblo4KTA_VCERfYPHQp-tPcVr_yiSAIQEixT7t-BT8yO594ZApGdIDGHPZtyVKm&vault=true&intent=subscription';
-    script.setAttribute('data-sdk-integration-source', 'button-factory');
-    script.async = true;
-    
-    script.onload = () => {
-      // Render PayPal button once SDK is loaded
+    // Wait for PayPal SDK to be loaded, then render button
+    const renderButton = () => {
       if (window.paypal) {
         window.paypal.Buttons({
           style: {
@@ -31,26 +25,31 @@ const CustomPayPalButton39 = () => {
           },
           onApprove: function(data, actions) {
             alert('Subscription successful! ID: ' + data.subscriptionID + '\n\nRedirecting to your account...');
-            // Redirect to main site after successful payment
             window.location.href = '/';
           }
-        }).render('#paypal-button-container-P-4GM67810JD052114PNEVEVNA');
+        }).render('#paypal-button-container-39');
       }
     };
-    
-    document.body.appendChild(script);
-    
-    // Cleanup
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
+
+    // Check if PayPal is already loaded
+    if (window.paypal) {
+      renderButton();
+    } else {
+      // Wait for PayPal SDK to load
+      const checkPayPal = setInterval(() => {
+        if (window.paypal) {
+          clearInterval(checkPayPal);
+          renderButton();
+        }
+      }, 100);
+
+      return () => clearInterval(checkPayPal);
+    }
   }, []);
 
   return (
     <div className="w-full flex justify-center py-4">
-      <div id="paypal-button-container-P-4GM67810JD052114PNEVEVNA" className="w-full max-w-sm"></div>
+      <div id="paypal-button-container-39" className="w-full max-w-sm"></div>
     </div>
   );
 };
@@ -58,14 +57,8 @@ const CustomPayPalButton39 = () => {
 // Custom PayPal Button Component for $69 Joint/Couple Plan
 const CustomPayPalButton69 = () => {
   useEffect(() => {
-    // Load PayPal SDK script
-    const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AZpc4v1QC4916Cb-DLblo4KTA_VCERfYPHQp-tPcVr_yiSAIQEixT7t-BT8yO594ZApGdIDGHPZtyVKm&vault=true&intent=subscription';
-    script.setAttribute('data-sdk-integration-source', 'button-factory');
-    script.async = true;
-    
-    script.onload = () => {
-      // Render PayPal button once SDK is loaded
+    // Wait for PayPal SDK to be loaded, then render button
+    const renderButton = () => {
       if (window.paypal) {
         window.paypal.Buttons({
           style: {
@@ -81,26 +74,31 @@ const CustomPayPalButton69 = () => {
           },
           onApprove: function(data, actions) {
             alert('Subscription successful! ID: ' + data.subscriptionID + '\n\nRedirecting to your account...');
-            // Redirect to main site after successful payment
             window.location.href = '/';
           }
-        }).render('#paypal-button-container-P-8NN95916CD553070DNEVE35I');
+        }).render('#paypal-button-container-69');
       }
     };
-    
-    document.body.appendChild(script);
-    
-    // Cleanup
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
+
+    // Check if PayPal is already loaded
+    if (window.paypal) {
+      renderButton();
+    } else {
+      // Wait for PayPal SDK to load
+      const checkPayPal = setInterval(() => {
+        if (window.paypal) {
+          clearInterval(checkPayPal);
+          renderButton();
+        }
+      }, 100);
+
+      return () => clearInterval(checkPayPal);
+    }
   }, []);
 
   return (
     <div className="w-full flex justify-center py-4">
-      <div id="paypal-button-container-P-8NN95916CD553070DNEVE35I" className="w-full max-w-sm"></div>
+      <div id="paypal-button-container-69" className="w-full max-w-sm"></div>
     </div>
   );
 };
