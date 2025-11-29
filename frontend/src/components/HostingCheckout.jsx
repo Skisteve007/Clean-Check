@@ -163,44 +163,10 @@ const HostingCheckout = () => {
                 </li>
               </ul>
               
-              {/* PayPal Button for Individual */}
-              {config && config.clientId && (
-                <div className="mt-4">
-                  <PayPalScriptProvider options={{ 
-                    clientId: config.clientId,
-                    vault: true,
-                    intent: 'subscription'
-                  }}>
-                    <PayPalButtons
-                      style={{
-                        layout: 'vertical',
-                        color: 'blue',
-                        shape: 'rect',
-                        label: 'subscribe'
-                      }}
-                      createSubscription={(data, actions) => {
-                        if (config.plans && config.plans['39']) {
-                          return actions.subscription.create({
-                            plan_id: config.plans['39']
-                          });
-                        } else {
-                          alert('Subscription plan not available. Please contact support.');
-                          throw new Error('Plan ID not configured');
-                        }
-                      }}
-                      onApprove={(data, actions) => {
-                        alert('Subscription successful! Redirecting to your account...');
-                        // Redirect back to main site after successful payment
-                        window.location.href = '/';
-                      }}
-                      onError={(err) => {
-                        console.error('PayPal error:', err);
-                        alert('Payment failed. Please try again or contact support.');
-                      }}
-                    />
-                  </PayPalScriptProvider>
-                </div>
-              )}
+              {/* PayPal Button for Individual - Custom $39 Plan */}
+              <div className="mt-4">
+                <CustomPayPalButton39 />
+              </div>
             </CardContent>
           </Card>
 
