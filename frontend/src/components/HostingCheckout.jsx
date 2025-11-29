@@ -129,7 +129,7 @@ const HostingCheckout = () => {
                 </li>
               </ul>
               
-              {/* PayPal Button for TEST - $1 */}
+              {/* PayPal Button for TEST - $1 Monthly */}
               <div style={{textAlign: 'center', marginTop: '20px'}}>
                 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
                   <input type="hidden" name="cmd" value="_xclick-subscriptions" />
@@ -139,7 +139,7 @@ const HostingCheckout = () => {
                   <input type="hidden" name="no_shipping" value="1" />
                   <input type="hidden" name="a3" value="1.00" />
                   <input type="hidden" name="p3" value="1" />
-                  <input type="hidden" name="t3" value="Y" />
+                  <input type="hidden" name="t3" value="M" />
                   <input type="hidden" name="src" value="1" />
                   <input type="hidden" name="sra" value="1" />
                   <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
