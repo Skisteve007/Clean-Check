@@ -35,9 +35,59 @@ const CustomPayPalButton39 = () => {
                   plan_id: 'P-4GM67810JD052114PNEVEVNA'
                 });
               },
-              onApprove: function(data, actions) {
-                alert('Subscription successful! ID: ' + data.subscriptionID + '\\n\\nRedirecting to your account...');
-                window.location.href = '/';
+              onApprove: async function(data, actions) {
+                try {
+                  // Get stored user data
+                  const userName = localStorage.getItem('pendingUserName');
+                  const userEmail = localStorage.getItem('pendingUserEmail');
+                  let membershipId = localStorage.getItem('pendingMembershipId');
+
+                  // Create profile with payment info if we have user data
+                  if (userEmail) {
+                    // If no membershipId, create one
+                    if (!membershipId) {
+                      membershipId = 'MEM-' + Date.now();
+                    }
+
+                    // Send to backend to create/update profile
+                    const response = await fetch('${BACKEND_URL}/api/payment/paypal/verify-subscription', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        membershipId: membershipId,
+                        subscriptionId: data.subscriptionID,
+                        email: userEmail,
+                        name: userName,
+                        amount: 39
+                      })
+                    });
+
+                    if (response.ok) {
+                      // Store membership ID for main app
+                      localStorage.setItem('membershipId', membershipId);
+                      localStorage.setItem('paymentComplete', 'true');
+                      
+                      // Clear pending data
+                      localStorage.removeItem('pendingUserName');
+                      localStorage.removeItem('pendingUserEmail');
+                      localStorage.removeItem('pendingMembershipId');
+                      
+                      alert('Payment successful! Subscription ID: ' + data.subscriptionID + '\\n\\nRedirecting to complete your profile...');
+                      window.location.href = '/?payment=success';
+                    } else {
+                      alert('Payment received but profile setup failed. Please contact support with Subscription ID: ' + data.subscriptionID);
+                      window.location.href = '/';
+                    }
+                  } else {
+                    // No user data stored, just redirect
+                    alert('Payment successful! Subscription ID: ' + data.subscriptionID);
+                    window.location.href = '/';
+                  }
+                } catch (error) {
+                  console.error('Error processing payment:', error);
+                  alert('Payment successful! Subscription ID: ' + data.subscriptionID + '\\n\\nPlease contact support if you need assistance.');
+                  window.location.href = '/';
+                }
               }
             }).render('#paypal-button-container-P-4GM67810JD052114PNEVEVNA');
           } else {
