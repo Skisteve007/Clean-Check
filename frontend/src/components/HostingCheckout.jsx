@@ -56,10 +56,19 @@ const CustomPayPalButton39 = () => {
 
 // Custom PayPal Button Component for $69 Joint/Couple Plan
 const CustomPayPalButton69 = () => {
+  const [rendered, setRendered] = React.useState(false);
+
   useEffect(() => {
+    // Prevent multiple renders
+    if (rendered) return;
+
     // Wait for PayPal SDK to be loaded, then render button
     const renderButton = () => {
-      if (window.paypal) {
+      const container = document.getElementById('paypal-button-container-69');
+      if (window.paypal && container && !rendered) {
+        // Clear container first
+        container.innerHTML = '';
+        
         window.paypal.Buttons({
           style: {
             shape: 'rect',
@@ -75,26 +84,34 @@ const CustomPayPalButton69 = () => {
           onApprove: function(data, actions) {
             alert('Subscription successful! ID: ' + data.subscriptionID + '\n\nRedirecting to your account...');
             window.location.href = '/';
+          },
+          onError: function(err) {
+            console.error('PayPal Error:', err);
+            alert('Payment error. Please try again.');
           }
-        }).render('#paypal-button-container-69');
+        }).render('#paypal-button-container-69').then(() => {
+          setRendered(true);
+        }).catch((err) => {
+          console.error('PayPal render error:', err);
+        });
       }
     };
 
     // Check if PayPal is already loaded
     if (window.paypal) {
-      renderButton();
+      setTimeout(renderButton, 100); // Small delay to ensure $39 button renders first
     } else {
       // Wait for PayPal SDK to load
       const checkPayPal = setInterval(() => {
         if (window.paypal) {
           clearInterval(checkPayPal);
-          renderButton();
+          setTimeout(renderButton, 100);
         }
       }, 100);
 
       return () => clearInterval(checkPayPal);
     }
-  }, []);
+  }, [rendered]);
 
   return (
     <div className="w-full flex justify-center py-4">
