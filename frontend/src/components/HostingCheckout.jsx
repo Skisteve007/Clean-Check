@@ -7,10 +7,19 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 // Custom PayPal Button Component for $39 Single Plan
 const CustomPayPalButton39 = () => {
+  const [rendered, setRendered] = React.useState(false);
+
   useEffect(() => {
+    // Prevent multiple renders
+    if (rendered) return;
+
     // Wait for PayPal SDK to be loaded, then render button
     const renderButton = () => {
-      if (window.paypal) {
+      const container = document.getElementById('paypal-button-container-39');
+      if (window.paypal && container && !rendered) {
+        // Clear container first
+        container.innerHTML = '';
+        
         window.paypal.Buttons({
           style: {
             shape: 'rect',
@@ -26,8 +35,16 @@ const CustomPayPalButton39 = () => {
           onApprove: function(data, actions) {
             alert('Subscription successful! ID: ' + data.subscriptionID + '\n\nRedirecting to your account...');
             window.location.href = '/';
+          },
+          onError: function(err) {
+            console.error('PayPal Error:', err);
+            alert('Payment error. Please try again.');
           }
-        }).render('#paypal-button-container-39');
+        }).render('#paypal-button-container-39').then(() => {
+          setRendered(true);
+        }).catch((err) => {
+          console.error('PayPal render error:', err);
+        });
       }
     };
 
@@ -45,7 +62,7 @@ const CustomPayPalButton39 = () => {
 
       return () => clearInterval(checkPayPal);
     }
-  }, []);
+  }, [rendered]);
 
   return (
     <div className="w-full flex justify-center py-4">
