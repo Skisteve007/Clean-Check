@@ -47,6 +47,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     sexualOrientation: '',
     partnerPreferences: [],
     isCovidVaccinated: false,
+    isCircumcised: false,
+    isSmoker: false,
     instagramUrl: '',
     tiktokUrl: '',
     facebookUrl: '',
