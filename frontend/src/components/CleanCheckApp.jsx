@@ -243,6 +243,9 @@ const CleanCheckApp = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer - Visible on all pages */}
+      <Footer />
     </div>
   );
 };
