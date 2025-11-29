@@ -1516,6 +1516,11 @@ const PaymentSection = ({ membershipId, createMembershipId, onPaymentSuccess }) 
             
             <Button 
               onClick={() => {
+                // Store user data in localStorage before redirecting
+                localStorage.setItem('pendingUserName', userName);
+                localStorage.setItem('pendingUserEmail', userEmail);
+                localStorage.setItem('pendingMembershipId', membershipId);
+                
                 // Open checkout page in same window
                 window.location.href = '/hosting-checkout';
               }}
