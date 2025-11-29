@@ -303,6 +303,12 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
       return;
     }
 
+    // MANDATORY: Disclaimer acceptance check
+    if (!profileForm.disclaimerAccepted) {
+      toast.error('You must accept the disclaimer to generate your QR code. Please check the box at the bottom of the form.');
+      return;
+    }
+
     saveLocalProfile(profileForm);
     setProfileModalOpen(false);
   };
