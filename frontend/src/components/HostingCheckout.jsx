@@ -64,68 +64,62 @@ const CustomPayPalButton39 = () => {
   );
 };
 
-// Custom PayPal Button Component for $69 Joint/Couple Plan
+// Custom PayPal Button Component for $69 Joint/Couple Plan - Using direct script injection
 const CustomPayPalButton69 = () => {
-  const [rendered, setRendered] = React.useState(false);
+  const containerRef = React.useRef(null);
 
   useEffect(() => {
-    // Prevent multiple renders
-    if (rendered) return;
+    if (!containerRef.current) return;
 
-    // Wait for PayPal SDK to be loaded, then render button
-    const renderButton = () => {
-      const container = document.getElementById('paypal-button-container-69');
-      if (window.paypal && container && !rendered) {
-        // Clear container first
-        container.innerHTML = '';
-        
-        window.paypal.Buttons({
-          style: {
-            shape: 'rect',
-            color: 'gold',
-            layout: 'vertical',
-            label: 'subscribe'
-          },
-          createSubscription: function(data, actions) {
-            return actions.subscription.create({
-              plan_id: 'P-8NN95916CD553070DNEVE35I'
-            });
-          },
-          onApprove: function(data, actions) {
-            alert('Subscription successful! ID: ' + data.subscriptionID + '\n\nRedirecting to your account...');
-            window.location.href = '/';
-          },
-          onError: function(err) {
-            console.error('PayPal Error:', err);
-            alert('Payment error. Please try again.');
+    // Create the button container div
+    const buttonContainer = document.createElement('div');
+    buttonContainer.id = 'paypal-button-container-P-8NN95916CD553070DNEVE35I';
+    containerRef.current.appendChild(buttonContainer);
+
+    // Create and inject the PayPal script with delay
+    const script = document.createElement('script');
+    script.innerHTML = `
+      (function() {
+        function initButton69() {
+          if (window.paypal) {
+            window.paypal.Buttons({
+              style: {
+                shape: 'rect',
+                color: 'gold',
+                layout: 'vertical',
+                label: 'subscribe'
+              },
+              createSubscription: function(data, actions) {
+                return actions.subscription.create({
+                  plan_id: 'P-8NN95916CD553070DNEVE35I'
+                });
+              },
+              onApprove: function(data, actions) {
+                alert('Subscription successful! ID: ' + data.subscriptionID + '\\n\\nRedirecting to your account...');
+                window.location.href = '/';
+              }
+            }).render('#paypal-button-container-P-8NN95916CD553070DNEVE35I');
+          } else {
+            setTimeout(initButton69, 100);
           }
-        }).render('#paypal-button-container-69').then(() => {
-          setRendered(true);
-        }).catch((err) => {
-          console.error('PayPal render error:', err);
-        });
+        }
+        // Small delay to let $39 button render first
+        setTimeout(initButton69, 200);
+      })();
+    `;
+    containerRef.current.appendChild(script);
+
+    return () => {
+      // Cleanup
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
     };
-
-    // Check if PayPal is already loaded
-    if (window.paypal) {
-      setTimeout(renderButton, 100); // Small delay to ensure $39 button renders first
-    } else {
-      // Wait for PayPal SDK to load
-      const checkPayPal = setInterval(() => {
-        if (window.paypal) {
-          clearInterval(checkPayPal);
-          setTimeout(renderButton, 100);
-        }
-      }, 100);
-
-      return () => clearInterval(checkPayPal);
-    }
-  }, [rendered]);
+  }, []);
 
   return (
     <div className="w-full flex justify-center py-4">
-      <div id="paypal-button-container-69" className="w-full max-w-sm"></div>
+      <div ref={containerRef} className="w-full max-w-sm"></div>
     </div>
   );
 };
