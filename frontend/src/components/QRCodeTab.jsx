@@ -709,7 +709,6 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
               Share QR Code Link
             </Button>
           </>
-          </div>
         </div>
       )}
     </div>
