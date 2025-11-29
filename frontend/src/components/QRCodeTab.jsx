@@ -1054,6 +1054,45 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleDo
         />
       </div>
 
+      {/* Health Document Upload with Timestamp */}
+      <div className="border-4 border-blue-600 p-6 rounded-lg bg-blue-50 mt-4">
+        <Label htmlFor="healthDocument" className="font-bold text-blue-900 text-lg mb-2 block">
+          📋 Health Document Upload *
+        </Label>
+        <p className="text-sm text-blue-800 mb-3">
+          Upload your health verification document (test results, vaccination records, etc.). 
+          <strong className="block mt-1">⏱️ Upload date will be automatically stamped and used to determine QR code color.</strong>
+        </p>
+        <Input
+          id="healthDocument"
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg"
+          onChange={handleDocumentUpload}
+          className="border-blue-400"
+        />
+        {profileForm.documentUploadDate && (
+          <div className="mt-3 p-3 bg-white rounded border border-blue-300">
+            <p className="text-sm font-semibold text-green-700">
+              ✅ Document Uploaded: {new Date(profileForm.documentUploadDate).toLocaleDateString()}
+            </p>
+            <p className="text-xs text-gray-600 mt-1">
+              ({getDaysSinceUpload(profileForm.documentUploadDate)} days ago)
+            </p>
+            <div className="mt-2 text-xs">
+              <p className="font-semibold text-gray-700">QR Code Color Status:</p>
+              <p>
+                {(() => {
+                  const color = calculateQRCodeColor(profileForm.documentUploadDate);
+                  if (color === 'green') return '🟢 GREEN: Valid (0-30 days)';
+                  if (color === 'yellow') return '🟡 YELLOW: Expiring (31-60 days)';
+                  return '🔴 RED: Expired (60+ days)';
+                })()}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* MANDATORY DISCLAIMER ACCEPTANCE */}
       <div className="border-4 border-red-600 p-6 rounded-lg bg-red-50 mt-6">
         <div className="flex items-start space-x-3">
