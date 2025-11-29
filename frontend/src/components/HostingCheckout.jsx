@@ -129,15 +129,15 @@ const HostingCheckout = () => {
                 </li>
               </ul>
               
-              {/* PayPal Button for $39 Plan */}
+              {/* PayPal Button for TEST - $1 */}
               <div style={{textAlign: 'center', marginTop: '20px'}}>
                 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
                   <input type="hidden" name="cmd" value="_xclick-subscriptions" />
                   <input type="hidden" name="business" value="Steve@bigtexasroof.com" />
-                  <input type="hidden" name="item_name" value="Cloud Hosting Service - Individual Plan" />
+                  <input type="hidden" name="item_name" value="TEST - Cloud Hosting Service - Individual Plan" />
                   <input type="hidden" name="currency_code" value="USD" />
                   <input type="hidden" name="no_shipping" value="1" />
-                  <input type="hidden" name="a3" value="39.00" />
+                  <input type="hidden" name="a3" value="1.00" />
                   <input type="hidden" name="p3" value="1" />
                   <input type="hidden" name="t3" value="Y" />
                   <input type="hidden" name="src" value="1" />
