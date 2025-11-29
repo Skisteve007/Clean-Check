@@ -127,8 +127,8 @@ const CleanCheckApp = () => {
   }
 
   return (
-    <div className="bg-gray-900 min-h-screen p-4 flex items-center justify-center">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl border border-red-100">
+    <div className="bg-gray-900 min-h-screen p-2 sm:p-4 flex items-center justify-center overflow-x-hidden">
+      <div className="w-full max-w-md bg-white p-4 sm:p-8 rounded-xl shadow-2xl border border-red-100">
         {/* Header */}
         <div className="mb-4 flex items-center justify-center space-x-2">
           <svg
