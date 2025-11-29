@@ -36,7 +36,7 @@ Your Clean Check application is now configured for **FREE PayPal Sandbox testing
 
 ### Step 2: Test the Complete Payment Flow
 
-1. **Open Your App:** https://qrhealth-1.preview.emergentagent.com
+1. **Open Your App:** https://healthqr-3.preview.emergentagent.com
 
 2. **Age Consent:**
    - Check the checkbox
@@ -134,7 +134,7 @@ Your Clean Check application is now configured for **FREE PayPal Sandbox testing
 5. Enter your LIVE credentials when prompted
 6. Create LIVE subscription plans:
    ```bash
-   curl -X POST "https://qrhealth-1.preview.emergentagent.com/api/payment/paypal/create-subscription-plans"
+   curl -X POST "https://healthqr-3.preview.emergentagent.com/api/payment/paypal/create-subscription-plans"
    ```
 7. Copy the LIVE Plan IDs and add to `/app/backend/.env`
 8. Restart: `sudo supervisorctl restart backend`

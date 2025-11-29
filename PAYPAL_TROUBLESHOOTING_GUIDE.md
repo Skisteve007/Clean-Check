@@ -108,7 +108,7 @@ Follow the prompts to enter your LIVE PayPal credentials.
 
 3. **Check PayPal API Endpoint**
    ```bash
-   curl https://qrhealth-1.preview.emergentagent.com/api/payment/paypal/subscription-plans
+   curl https://healthqr-3.preview.emergentagent.com/api/payment/paypal/subscription-plans
    ```
    Should return JSON with clientId and plans
 
@@ -210,7 +210,7 @@ tail -n 100 /var/log/supervisor/backend.err.log
 
 **Test PayPal Configuration:**
 ```bash
-curl -s https://qrhealth-1.preview.emergentagent.com/api/payment/paypal/subscription-plans | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin), indent=2))"
+curl -s https://healthqr-3.preview.emergentagent.com/api/payment/paypal/subscription-plans | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin), indent=2))"
 ```
 
 **Verify PayPal Mode:**

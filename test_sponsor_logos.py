@@ -9,7 +9,7 @@ import json
 import base64
 
 class SponsorLogoTester:
-    def __init__(self, base_url="https://qrhealth-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://healthqr-3.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.admin_password = "admin123"  # From backend/.env

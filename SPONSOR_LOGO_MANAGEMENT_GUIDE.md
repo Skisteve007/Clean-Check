@@ -26,7 +26,7 @@ When no logo is uploaded, each slot shows placeholder text: "Sponsor 1", "Sponso
 
 ### Step 1: Access the Admin Panel
 
-1. Navigate to: `https://qrhealth-1.preview.emergentagent.com/admin`
+1. Navigate to: `https://healthqr-3.preview.emergentagent.com/admin`
 2. Enter admin password: `admin123`
 3. Click "Login"
 
@@ -75,7 +75,7 @@ When no logo is uploaded, each slot shows placeholder text: "Sponsor 1", "Sponso
 
 ### On the Main Page:
 
-1. Visit: `https://qrhealth-1.preview.emergentagent.com`
+1. Visit: `https://healthqr-3.preview.emergentagent.com`
 2. Complete age consent
 3. Click "Enter Clean Check"
 4. Scroll down to find the **"🔒 Trusted By Community Sponsors"** section

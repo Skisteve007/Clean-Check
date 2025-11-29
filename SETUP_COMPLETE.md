@@ -69,7 +69,7 @@ This guide contains:
 
 ### Quick Test Steps:
 1. Get your Sandbox test buyer credentials from https://developer.paypal.com/dashboard/
-2. Open your app: https://qrhealth-1.preview.emergentagent.com
+2. Open your app: https://healthqr-3.preview.emergentagent.com
 3. Complete age consent
 4. Enter name and email
 5. Click a pricing box ($39 or $69)
@@ -97,7 +97,7 @@ Follow the prompts to enter your LIVE PayPal credentials.
    ```
 2. Create live plans:
    ```bash
-   curl -X POST "https://qrhealth-1.preview.emergentagent.com/api/payment/paypal/create-subscription-plans"
+   curl -X POST "https://healthqr-3.preview.emergentagent.com/api/payment/paypal/create-subscription-plans"
    ```
 3. Copy the returned Plan IDs
 4. Add to `.env`:
