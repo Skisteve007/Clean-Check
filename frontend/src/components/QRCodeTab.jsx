@@ -714,7 +714,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
 };
 
 // Profile Modal Component
-const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleProfileSubmit, saveLocalProfile }) => {
+const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleDocumentUpload, handleProfileSubmit, saveLocalProfile }) => {
   return (
     <form onSubmit={handleProfileSubmit} className="space-y-4">
       <DialogHeader>
