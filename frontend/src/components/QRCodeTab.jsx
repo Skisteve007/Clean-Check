@@ -968,6 +968,38 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handleDo
         </div>
       </div>
 
+      {/* Circumcised */}
+      <div className="border border-red-200 p-3 rounded-lg bg-red-50">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="circumcisedCheck"
+            checked={profileForm.isCircumcised}
+            onCheckedChange={(checked) =>
+              setProfileForm({ ...profileForm, isCircumcised: checked })
+            }
+          />
+          <Label htmlFor="circumcisedCheck" className="text-sm font-bold text-red-700">
+            Circumcised: {profileForm.isCircumcised ? 'Yes' : 'No'}
+          </Label>
+        </div>
+      </div>
+
+      {/* Smoker */}
+      <div className="border border-red-200 p-3 rounded-lg bg-red-50">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="smokerCheck"
+            checked={profileForm.isSmoker}
+            onCheckedChange={(checked) =>
+              setProfileForm({ ...profileForm, isSmoker: checked })
+            }
+          />
+          <Label htmlFor="smokerCheck" className="text-sm font-bold text-red-700">
+            Smoker: {profileForm.isSmoker ? 'Yes' : 'No'}
+          </Label>
+        </div>
+      </div>
+
       {/* Social Media Links - OPTIONAL */}
       <h3 className="text-lg font-bold text-gray-700 pt-2 border-t border-gray-200">
         Social Media Links (Optional for Verification)
