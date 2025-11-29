@@ -55,6 +55,56 @@ const CustomPayPalButton39 = () => {
   );
 };
 
+// Custom PayPal Button Component for $69 Joint/Couple Plan
+const CustomPayPalButton69 = () => {
+  useEffect(() => {
+    // Load PayPal SDK script
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AZpc4v1QC4916Cb-DLblo4KTA_VCERfYPHQp-tPcVr_yiSAIQEixT7t-BT8yO594ZApGdIDGHPZtyVKm&vault=true&intent=subscription';
+    script.setAttribute('data-sdk-integration-source', 'button-factory');
+    script.async = true;
+    
+    script.onload = () => {
+      // Render PayPal button once SDK is loaded
+      if (window.paypal) {
+        window.paypal.Buttons({
+          style: {
+            shape: 'rect',
+            color: 'gold',
+            layout: 'vertical',
+            label: 'subscribe'
+          },
+          createSubscription: function(data, actions) {
+            return actions.subscription.create({
+              plan_id: 'P-8NN95916CD553070DNEVE35I'
+            });
+          },
+          onApprove: function(data, actions) {
+            alert('Subscription successful! ID: ' + data.subscriptionID + '\n\nRedirecting to your account...');
+            // Redirect to main site after successful payment
+            window.location.href = '/';
+          }
+        }).render('#paypal-button-container-P-8NN95916CD553070DNEVE35I');
+      }
+    };
+    
+    document.body.appendChild(script);
+    
+    // Cleanup
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="w-full flex justify-center py-4">
+      <div id="paypal-button-container-P-8NN95916CD553070DNEVE35I" className="w-full max-w-sm"></div>
+    </div>
+  );
+};
+
 const HostingCheckout = () => {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
