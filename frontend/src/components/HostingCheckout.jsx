@@ -232,7 +232,7 @@ const HostingCheckout = () => {
   useEffect(() => {
     // Load PayPal SDK once for the entire page
     const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AZpc4v1QC4916Cb-DLblo4KTA_VCERfYPHQp-tPcVr_yiSAIQEixT7t-BT8yO594ZApGdIDGHPZtyVKm&vault=true&intent=subscription';
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AfOnTm-Hkl6dr5uF1TrOzs6_XXl6gNufBsVtTZEW8_3M95nJ0XhJnDO9EuMTcb5WBXlcJxZJhIV2hWuX&vault=true&intent=subscription';
     script.setAttribute('data-sdk-integration-source', 'button-factory');
     script.async = true;
     
