@@ -152,15 +152,15 @@ const HostingCheckout = () => {
           <Card className="shadow-lg border-2 border-purple-200 hover:border-purple-400 transition-colors">
             <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white relative">
               <div className="absolute top-0 right-0 bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-bl-lg">
-                BEST VALUE
+                TEST MODE
               </div>
               <CardTitle className="text-center">
-                <div className="text-3xl font-bold mb-2">$69</div>
-                <div className="text-sm font-normal">per year</div>
+                <div className="text-3xl font-bold mb-2">$1</div>
+                <div className="text-sm font-normal">TEST - per year</div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Premium Plan</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Premium Plan (TEST)</h3>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
