@@ -947,6 +947,33 @@ const ProfileModal = ({ profileForm, setProfileForm, handlePhotoUpload, handlePr
         />
       </div>
 
+      {/* MANDATORY DISCLAIMER ACCEPTANCE */}
+      <div className="border-4 border-red-600 p-6 rounded-lg bg-red-50 mt-6">
+        <div className="flex items-start space-x-3">
+          <Checkbox
+            id="disclaimerAccepted"
+            checked={profileForm.disclaimerAccepted || false}
+            onCheckedChange={(checked) =>
+              setProfileForm({ ...profileForm, disclaimerAccepted: checked })
+            }
+            className="mt-1 h-6 w-6 border-2 border-red-600"
+            required
+          />
+          <div className="flex-1">
+            <Label 
+              htmlFor="disclaimerAccepted" 
+              className="text-sm font-bold text-red-900 cursor-pointer leading-relaxed"
+            >
+              <span className="text-red-600 text-xl mr-1">*</span>
+              REQUIRED: I certify that the information provided is accurate. I understand Clean Check is a document storage tool only and does not medically verify results. I agree to hold Clean Check harmless for any interactions resulting from sharing this profile.
+            </Label>
+            <p className="text-xs text-red-700 mt-2 font-semibold">
+              ⚠️ You must accept this disclaimer before generating your QR code
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 mt-4">
         <Button
           type="button"
