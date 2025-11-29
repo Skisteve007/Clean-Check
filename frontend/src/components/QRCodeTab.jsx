@@ -413,6 +413,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 profileForm={profileForm}
                 setProfileForm={setProfileForm}
                 handlePhotoUpload={handlePhotoUpload}
+                handleDocumentUpload={handleDocumentUpload}
                 handleProfileSubmit={handleProfileSubmit}
                 saveLocalProfile={saveLocalProfile}
               />
@@ -492,6 +493,7 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 profileForm={profileForm}
                 setProfileForm={setProfileForm}
                 handlePhotoUpload={handlePhotoUpload}
+                handleDocumentUpload={handleDocumentUpload}
                 handleProfileSubmit={handleProfileSubmit}
                 saveLocalProfile={saveLocalProfile}
               />
