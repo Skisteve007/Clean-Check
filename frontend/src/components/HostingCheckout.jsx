@@ -96,12 +96,12 @@ const HostingCheckout = () => {
           <Card className="shadow-lg border-2 border-blue-200 hover:border-blue-400 transition-colors">
             <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <CardTitle className="text-center">
-                <div className="text-3xl font-bold mb-2">$39</div>
-                <div className="text-sm font-normal">per year</div>
+                <div className="text-3xl font-bold mb-2">$1</div>
+                <div className="text-sm font-normal">TEST - per year</div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Individual Plan</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">Individual Plan (TEST)</h3>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
