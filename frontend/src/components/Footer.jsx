@@ -521,45 +521,45 @@ const Footer = () => {
 
   return (
     <>
-      <footer className="bg-gray-900 text-white py-8 mt-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <footer className="bg-gray-900 text-white py-8 mt-12 w-full">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {/* Brand Section */}
-            <div>
-              <h3 className="text-xl font-bold text-red-500 mb-2">✅ Clean Check</h3>
-              <p className="text-gray-400 text-sm">
+            <div className="text-center md:text-left">
+              <h3 className="text-xl md:text-2xl font-bold text-red-500 mb-2">✅ Clean Check</h3>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed">
                 Elevating Intimacy through Verified Transparency and Mutual Trust
               </p>
-              <p className="text-gray-500 text-xs mt-2">
+              <p className="text-gray-500 text-xs md:text-sm mt-2">
                 © 2025 Clean Check. All rights reserved.
               </p>
             </div>
 
             {/* Legal Links */}
-            <div>
-              <h4 className="font-bold text-gray-300 mb-3">Legal & Compliance</h4>
+            <div className="text-center md:text-left">
+              <h4 className="font-bold text-gray-300 mb-3 text-base md:text-lg">Legal & Compliance</h4>
               <div className="space-y-2">
                 <button
                   onClick={() => setOpenPolicy('terms')}
-                  className="block text-gray-400 hover:text-white text-sm transition-colors"
+                  className="block w-full md:w-auto text-left text-gray-400 hover:text-white text-sm md:text-base transition-colors py-1"
                 >
                   Terms of Service
                 </button>
                 <button
                   onClick={() => setOpenPolicy('privacy')}
-                  className="block text-gray-400 hover:text-white text-sm transition-colors"
+                  className="block w-full md:w-auto text-left text-gray-400 hover:text-white text-sm md:text-base transition-colors py-1"
                 >
                   Privacy Policy
                 </button>
                 <button
                   onClick={() => setOpenPolicy('refund')}
-                  className="block text-gray-400 hover:text-white text-sm transition-colors"
+                  className="block w-full md:w-auto text-left text-gray-400 hover:text-white text-sm md:text-base transition-colors py-1"
                 >
                   Refund Policy
                 </button>
                 <button
                   onClick={() => setOpenPolicy('compliance2257')}
-                  className="block text-gray-400 hover:text-white text-sm transition-colors"
+                  className="block w-full md:w-auto text-left text-gray-400 hover:text-white text-sm md:text-base transition-colors py-1"
                 >
                   18 U.S.C. § 2257 Compliance
                 </button>
@@ -569,7 +569,7 @@ const Footer = () => {
 
           {/* Age Disclaimer */}
           <div className="mt-6 pt-6 border-t border-gray-700">
-            <p className="text-center text-gray-400 text-sm font-semibold">
+            <p className="text-center text-gray-400 text-sm md:text-base font-semibold px-4">
               🔞 All models/users appearing on this site are 18 years of age or older.
             </p>
           </div>
