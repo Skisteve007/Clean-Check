@@ -695,17 +695,18 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
               </div>
             );
           })()}
-            <Button
-              onClick={handleShareLink}
-              variant="destructive"
-              className="w-full max-w-xs"
-              data-testid="share-btn"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.88 12.753 9 12.175 9 11.5c0-1.415-.221-2.812-.647-4.103M19 11.5a7.5 7.5 0 01-15 0M4.5 11.5h15" />
-              </svg>
-              Share QR Code Link
-            </Button>
+          
+          <Button
+            onClick={handleShareLink}
+            variant="destructive"
+            className="w-full max-w-xs"
+            data-testid="share-btn"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.88 12.753 9 12.175 9 11.5c0-1.415-.221-2.812-.647-4.103M19 11.5a7.5 7.5 0 01-15 0M4.5 11.5h15" />
+            </svg>
+            Share QR Code Link
+          </Button>
           </div>
         </div>
       )}
