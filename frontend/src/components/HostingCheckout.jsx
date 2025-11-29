@@ -1,283 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import axios from 'axios';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
-// Custom PayPal Button Component for $39 Single Plan - Using direct script injection
-const CustomPayPalButton39 = () => {
-  const containerRef = React.useRef(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Create the button container div
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = 'paypal-button-container-P-4GM67810JD052114PNEVEVNA';
-    containerRef.current.appendChild(buttonContainer);
-
-    // Create and inject the PayPal script
-    const script = document.createElement('script');
-    script.innerHTML = `
-      (function() {
-        function initButton39() {
-          if (window.paypal) {
-            window.paypal.Buttons({
-              style: {
-                shape: 'rect',
-                color: 'gold',
-                layout: 'vertical',
-                label: 'subscribe'
-              },
-              createSubscription: function(data, actions) {
-                return actions.subscription.create({
-                  plan_id: 'P-4GM67810JD052114PNEVEVNA'
-                });
-              },
-              onApprove: async function(data, actions) {
-                try {
-                  // Get stored user data
-                  const userName = localStorage.getItem('pendingUserName');
-                  const userEmail = localStorage.getItem('pendingUserEmail');
-                  let membershipId = localStorage.getItem('pendingMembershipId');
-
-                  // Create profile with payment info if we have user data
-                  if (userEmail) {
-                    // If no membershipId, create one
-                    if (!membershipId) {
-                      membershipId = 'MEM-' + Date.now();
-                    }
-
-                    // Send to backend to create/update profile
-                    const response = await fetch('${BACKEND_URL}/api/payment/paypal/verify-subscription', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        membershipId: membershipId,
-                        subscriptionId: data.subscriptionID,
-                        email: userEmail,
-                        name: userName,
-                        amount: 39
-                      })
-                    });
-
-                    if (response.ok) {
-                      // Store membership ID for main app
-                      localStorage.setItem('membershipId', membershipId);
-                      localStorage.setItem('paymentComplete', 'true');
-                      
-                      // Clear pending data
-                      localStorage.removeItem('pendingUserName');
-                      localStorage.removeItem('pendingUserEmail');
-                      localStorage.removeItem('pendingMembershipId');
-                      
-                      alert('Payment successful! Subscription ID: ' + data.subscriptionID + '\\n\\nRedirecting to complete your profile...');
-                      window.location.href = '/?payment=success';
-                    } else {
-                      alert('Payment received but profile setup failed. Please contact support with Subscription ID: ' + data.subscriptionID);
-                      window.location.href = '/';
-                    }
-                  } else {
-                    // No user data stored, just redirect
-                    alert('Payment successful! Subscription ID: ' + data.subscriptionID);
-                    window.location.href = '/';
-                  }
-                } catch (error) {
-                  console.error('Error processing payment:', error);
-                  alert('Payment successful! Subscription ID: ' + data.subscriptionID + '\\n\\nPlease contact support if you need assistance.');
-                  window.location.href = '/';
-                }
-              }
-            }).render('#paypal-button-container-P-4GM67810JD052114PNEVEVNA');
-          } else {
-            setTimeout(initButton39, 100);
-          }
-        }
-        initButton39();
-      })();
-    `;
-    containerRef.current.appendChild(script);
-
-    return () => {
-      // Cleanup
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-    };
-  }, []);
-
-  return (
-    <div className="w-full flex justify-center py-4">
-      <div ref={containerRef} className="w-full max-w-sm"></div>
-    </div>
-  );
-};
-
-// Custom PayPal Button Component for $69 Joint/Couple Plan - Using direct script injection
-const CustomPayPalButton69 = () => {
-  const containerRef = React.useRef(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Create the button container div
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = 'paypal-button-container-P-8NN95916CD553070DNEVE35I';
-    containerRef.current.appendChild(buttonContainer);
-
-    // Create and inject the PayPal script with delay
-    const script = document.createElement('script');
-    script.innerHTML = `
-      (function() {
-        function initButton69() {
-          if (window.paypal) {
-            window.paypal.Buttons({
-              style: {
-                shape: 'rect',
-                color: 'gold',
-                layout: 'vertical',
-                label: 'subscribe'
-              },
-              createSubscription: function(data, actions) {
-                return actions.subscription.create({
-                  plan_id: 'P-8NN95916CD553070DNEVE35I'
-                });
-              },
-              onApprove: async function(data, actions) {
-                try {
-                  // Get stored user data
-                  const userName = localStorage.getItem('pendingUserName');
-                  const userEmail = localStorage.getItem('pendingUserEmail');
-                  let membershipId = localStorage.getItem('pendingMembershipId');
-
-                  // Create profile with payment info if we have user data
-                  if (userEmail) {
-                    // If no membershipId, create one
-                    if (!membershipId) {
-                      membershipId = 'MEM-' + Date.now();
-                    }
-
-                    // Send to backend to create/update profile
-                    const response = await fetch('${BACKEND_URL}/api/payment/paypal/verify-subscription', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        membershipId: membershipId,
-                        subscriptionId: data.subscriptionID,
-                        email: userEmail,
-                        name: userName,
-                        amount: 69
-                      })
-                    });
-
-                    if (response.ok) {
-                      // Store membership ID for main app
-                      localStorage.setItem('membershipId', membershipId);
-                      localStorage.setItem('paymentComplete', 'true');
-                      
-                      // Clear pending data
-                      localStorage.removeItem('pendingUserName');
-                      localStorage.removeItem('pendingUserEmail');
-                      localStorage.removeItem('pendingMembershipId');
-                      
-                      alert('Payment successful! Subscription ID: ' + data.subscriptionID + '\\n\\nRedirecting to complete your profile...');
-                      window.location.href = '/?payment=success';
-                    } else {
-                      alert('Payment received but profile setup failed. Please contact support with Subscription ID: ' + data.subscriptionID);
-                      window.location.href = '/';
-                    }
-                  } else {
-                    // No user data stored, just redirect
-                    alert('Payment successful! Subscription ID: ' + data.subscriptionID);
-                    window.location.href = '/';
-                  }
-                } catch (error) {
-                  console.error('Error processing payment:', error);
-                  alert('Payment successful! Subscription ID: ' + data.subscriptionID + '\\n\\nPlease contact support if you need assistance.');
-                  window.location.href = '/';
-                }
-              }
-            }).render('#paypal-button-container-P-8NN95916CD553070DNEVE35I');
-          } else {
-            setTimeout(initButton69, 100);
-          }
-        }
-        // Small delay to let $39 button render first
-        setTimeout(initButton69, 200);
-      })();
-    `;
-    containerRef.current.appendChild(script);
-
-    return () => {
-      // Cleanup
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-    };
-  }, []);
-
-  return (
-    <div className="w-full flex justify-center py-4">
-      <div ref={containerRef} className="w-full max-w-sm"></div>
-    </div>
-  );
-};
 
 const HostingCheckout = () => {
-  const [config, setConfig] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [sdkLoaded, setSdkLoaded] = useState(false);
-
-  useEffect(() => {
-    // Load PayPal SDK once for the entire page
-    const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AfOnTm-Hkl6dr5uF1TrOzs6_XXl6gNufBsVtTZEW8_3M95nJ0XhJnDO9EuMTcb5WBXlcJxZJhIV2hWuX&vault=true&intent=subscription';
-    script.setAttribute('data-sdk-integration-source', 'button-factory');
-    script.async = true;
-    
-    script.onload = () => {
-      setSdkLoaded(true);
-    };
-    
-    // Check if already loaded
-    if (window.paypal) {
-      setSdkLoaded(true);
-    } else {
-      document.body.appendChild(script);
-    }
-
-    // Fetch PayPal configuration
-    const fetchConfig = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/api/payment/paypal/subscription-plans`);
-        setConfig(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching configuration:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchConfig();
-
-    // Cleanup
-    return () => {
-      // Don't remove script as both buttons need it
-    };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading secure payment options...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 py-12 px-4">
       <div className="container mx-auto max-w-4xl">
@@ -368,12 +92,12 @@ const HostingCheckout = () => {
 
         {/* Pricing Section */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {/* Individual Plan */}
+          {/* Individual Plan - $39 */}
           <Card className="shadow-lg border-2 border-blue-200 hover:border-blue-400 transition-colors">
             <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <CardTitle className="text-center">
                 <div className="text-3xl font-bold mb-2">$39</div>
-                <div className="text-sm font-normal">per month</div>
+                <div className="text-sm font-normal">per year</div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -405,14 +129,26 @@ const HostingCheckout = () => {
                 </li>
               </ul>
               
-              {/* PayPal Button for Individual - Custom $39 Plan */}
-              <div className="mt-4">
-                <CustomPayPalButton39 />
+              {/* PayPal Button for $39 Plan */}
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                  <input type="hidden" name="cmd" value="_xclick-subscriptions" />
+                  <input type="hidden" name="business" value="Steve@bigtexasroof.com" />
+                  <input type="hidden" name="item_name" value="Cloud Hosting Service - Individual Plan" />
+                  <input type="hidden" name="currency_code" value="USD" />
+                  <input type="hidden" name="no_shipping" value="1" />
+                  <input type="hidden" name="a3" value="39.00" />
+                  <input type="hidden" name="p3" value="1" />
+                  <input type="hidden" name="t3" value="Y" />
+                  <input type="hidden" name="src" value="1" />
+                  <input type="hidden" name="sra" value="1" />
+                  <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+                </form>
               </div>
             </CardContent>
           </Card>
 
-          {/* Premium Plan */}
+          {/* Premium Plan - $69 */}
           <Card className="shadow-lg border-2 border-purple-200 hover:border-purple-400 transition-colors">
             <CardHeader className="bg-gradient-to-r from-purple-500 to-purple-600 text-white relative">
               <div className="absolute top-0 right-0 bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-bl-lg">
@@ -420,7 +156,7 @@ const HostingCheckout = () => {
               </div>
               <CardTitle className="text-center">
                 <div className="text-3xl font-bold mb-2">$69</div>
-                <div className="text-sm font-normal">per month</div>
+                <div className="text-sm font-normal">per year</div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -452,9 +188,21 @@ const HostingCheckout = () => {
                 </li>
               </ul>
               
-              {/* PayPal Button for Premium - Custom $69 Plan */}
-              <div className="mt-4">
-                <CustomPayPalButton69 />
+              {/* PayPal Button for $69 Plan */}
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                  <input type="hidden" name="cmd" value="_xclick-subscriptions" />
+                  <input type="hidden" name="business" value="Steve@bigtexasroof.com" />
+                  <input type="hidden" name="item_name" value="Cloud Hosting Service - Premium Plan" />
+                  <input type="hidden" name="currency_code" value="USD" />
+                  <input type="hidden" name="no_shipping" value="1" />
+                  <input type="hidden" name="a3" value="69.00" />
+                  <input type="hidden" name="p3" value="1" />
+                  <input type="hidden" name="t3" value="Y" />
+                  <input type="hidden" name="src" value="1" />
+                  <input type="hidden" name="sra" value="1" />
+                  <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+                </form>
               </div>
             </CardContent>
           </Card>
