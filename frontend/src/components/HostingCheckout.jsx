@@ -106,8 +106,26 @@ const CustomPayPalButton69 = () => {
 const HostingCheckout = () => {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
 
   useEffect(() => {
+    // Load PayPal SDK once for the entire page
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AZpc4v1QC4916Cb-DLblo4KTA_VCERfYPHQp-tPcVr_yiSAIQEixT7t-BT8yO594ZApGdIDGHPZtyVKm&vault=true&intent=subscription';
+    script.setAttribute('data-sdk-integration-source', 'button-factory');
+    script.async = true;
+    
+    script.onload = () => {
+      setSdkLoaded(true);
+    };
+    
+    // Check if already loaded
+    if (window.paypal) {
+      setSdkLoaded(true);
+    } else {
+      document.body.appendChild(script);
+    }
+
     // Fetch PayPal configuration
     const fetchConfig = async () => {
       try {
@@ -121,6 +139,11 @@ const HostingCheckout = () => {
     };
 
     fetchConfig();
+
+    // Cleanup
+    return () => {
+      // Don't remove script as both buttons need it
+    };
   }, []);
 
   if (loading) {
