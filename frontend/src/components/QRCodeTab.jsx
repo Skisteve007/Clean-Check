@@ -416,6 +416,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 handleDocumentUpload={handleDocumentUpload}
                 handleProfileSubmit={handleProfileSubmit}
                 saveLocalProfile={saveLocalProfile}
+                calculateQRCodeColor={calculateQRCodeColor}
+                getDaysSinceUpload={getDaysSinceUpload}
               />
             </DialogContent>
           </Dialog>
@@ -496,6 +498,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
                 handleDocumentUpload={handleDocumentUpload}
                 handleProfileSubmit={handleProfileSubmit}
                 saveLocalProfile={saveLocalProfile}
+                calculateQRCodeColor={calculateQRCodeColor}
+                getDaysSinceUpload={getDaysSinceUpload}
               />
             </DialogContent>
           </Dialog>
