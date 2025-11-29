@@ -55,7 +55,8 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
     acknowledgedStds: '',
     recentReferences: [],
     preferences: '',
-    healthStatusColor: 'green'
+    healthStatusColor: 'green',
+    disclaimerAccepted: false
   });
 
   const generateQRCode = useCallback(async (url, healthColor = 'green') => {
