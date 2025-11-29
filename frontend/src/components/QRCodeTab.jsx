@@ -623,90 +623,92 @@ const QRCodeTab = ({ membershipId, createMembershipId, updateMembershipProfile }
           </div>
 
           {/* QR Code Display with Automatic Color Based on Document Age */}
-          {(() => {
-            const autoColor = calculateQRCodeColor(localProfile?.documentUploadDate);
-            const daysSinceUpload = getDaysSinceUpload(localProfile?.documentUploadDate);
-            const borderColor = autoColor === 'red' ? '#dc2626' : autoColor === 'yellow' ? '#f59e0b' : '#10b981';
-            const bgColor = autoColor === 'red' ? '#fee2e2' : autoColor === 'yellow' ? '#fef3c7' : '#d1fae5';
-            const textColor = autoColor === 'red' ? '#991b1b' : autoColor === 'yellow' ? '#92400e' : '#065f46';
-            const statusIcon = autoColor === 'red' ? '🛑' : autoColor === 'yellow' ? '⚠️' : '✅';
-            const statusText = autoColor === 'red' 
-              ? 'EXPIRED - Document Over 60 Days Old' 
-              : autoColor === 'yellow' 
-                ? 'EXPIRING SOON - 31-60 Days Old' 
-                : 'VALID - Document Fresh (0-30 Days)';
-            
-            return (
-              <div className="flex flex-col items-center space-y-4 p-6 bg-white border-4 rounded-lg" style={{borderColor}}>
-                <h3 className="text-xl font-bold text-gray-800">Your Shareable QR Code</h3>
-                
-                {/* Document Upload Date Info */}
-                {localProfile?.documentUploadDate && (
-                  <div className="text-center text-sm">
-                    <p className="font-semibold text-gray-700">
-                      📅 Document Uploaded: {new Date(localProfile.documentUploadDate).toLocaleDateString()}
-                    </p>
-                    <p className="text-gray-600">
-                      ({daysSinceUpload} {daysSinceUpload === 1 ? 'day' : 'days'} ago)
-                    </p>
-                  </div>
-                )}
-                
-                {/* QR Code with PURE WHITE background for optimal scanning */}
-                <div 
-                  className="p-6 rounded-lg qr-code-container" 
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    filter: 'brightness(1.2)', // Maximum brightness
-                    boxShadow: '0 0 20px rgba(255, 255, 255, 0.9)', // White glow
-                    border: '3px solid #FFFFFF'
-                  }}
-                >
-                  <img 
-                    src={qrCodeDataUrl} 
-                    alt="QR Code" 
-                    data-testid="qr-code-image"
+          <>
+            {(() => {
+              const autoColor = calculateQRCodeColor(localProfile?.documentUploadDate);
+              const daysSinceUpload = getDaysSinceUpload(localProfile?.documentUploadDate);
+              const borderColor = autoColor === 'red' ? '#dc2626' : autoColor === 'yellow' ? '#f59e0b' : '#10b981';
+              const bgColor = autoColor === 'red' ? '#fee2e2' : autoColor === 'yellow' ? '#fef3c7' : '#d1fae5';
+              const textColor = autoColor === 'red' ? '#991b1b' : autoColor === 'yellow' ? '#92400e' : '#065f46';
+              const statusIcon = autoColor === 'red' ? '🛑' : autoColor === 'yellow' ? '⚠️' : '✅';
+              const statusText = autoColor === 'red' 
+                ? 'EXPIRED - Document Over 60 Days Old' 
+                : autoColor === 'yellow' 
+                  ? 'EXPIRING SOON - 31-60 Days Old' 
+                  : 'VALID - Document Fresh (0-30 Days)';
+              
+              return (
+                <div className="flex flex-col items-center space-y-4 p-6 bg-white border-4 rounded-lg" style={{borderColor}}>
+                  <h3 className="text-xl font-bold text-gray-800">Your Shareable QR Code</h3>
+                  
+                  {/* Document Upload Date Info */}
+                  {localProfile?.documentUploadDate && (
+                    <div className="text-center text-sm">
+                      <p className="font-semibold text-gray-700">
+                        📅 Document Uploaded: {new Date(localProfile.documentUploadDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-gray-600">
+                        ({daysSinceUpload} {daysSinceUpload === 1 ? 'day' : 'days'} ago)
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* QR Code with PURE WHITE background for optimal scanning */}
+                  <div 
+                    className="p-6 rounded-lg qr-code-container" 
                     style={{
-                      backgroundColor: '#FFFFFF', // Force white background
-                      display: 'block'
+                      backgroundColor: '#FFFFFF',
+                      filter: 'brightness(1.2)', // Maximum brightness
+                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.9)', // White glow
+                      border: '3px solid #FFFFFF'
                     }}
-                  />
+                  >
+                    <img 
+                      src={qrCodeDataUrl} 
+                      alt="QR Code" 
+                      data-testid="qr-code-image"
+                      style={{
+                        backgroundColor: '#FFFFFF', // Force white background
+                        display: 'block'
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Automatic Status Indicator */}
+                  <div className="flex items-center space-x-2 px-4 py-2 rounded-full" style={{backgroundColor: bgColor}}>
+                    <span className="text-2xl">{statusIcon}</span>
+                    <span className="font-bold text-sm" style={{color: textColor}}>
+                      {statusText}
+                    </span>
+                  </div>
+                  
+                  {/* Color Legend */}
+                  <div className="text-xs text-gray-600 text-center max-w-md space-y-1">
+                    <p className="font-semibold">Border Color Meaning:</p>
+                    <p>🟢 <span className="font-bold text-green-700">Green</span>: 0-30 days (Valid)</p>
+                    <p>🟡 <span className="font-bold text-yellow-700">Yellow</span>: 31-60 days (Expiring)</p>
+                    <p>🔴 <span className="font-bold text-red-700">Red</span>: 60+ days (Expired)</p>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 text-center max-w-sm">
+                    Partners can scan this QR code to view your health verification and profile information
+                  </p>
                 </div>
-                
-                {/* Automatic Status Indicator */}
-                <div className="flex items-center space-x-2 px-4 py-2 rounded-full" style={{backgroundColor: bgColor}}>
-                  <span className="text-2xl">{statusIcon}</span>
-                  <span className="font-bold text-sm" style={{color: textColor}}>
-                    {statusText}
-                  </span>
-                </div>
-                
-                {/* Color Legend */}
-                <div className="text-xs text-gray-600 text-center max-w-md space-y-1">
-                  <p className="font-semibold">Border Color Meaning:</p>
-                  <p>🟢 <span className="font-bold text-green-700">Green</span>: 0-30 days (Valid)</p>
-                  <p>🟡 <span className="font-bold text-yellow-700">Yellow</span>: 31-60 days (Expiring)</p>
-                  <p>🔴 <span className="font-bold text-red-700">Red</span>: 60+ days (Expired)</p>
-                </div>
-                
-                <p className="text-sm text-gray-600 text-center max-w-sm">
-                  Partners can scan this QR code to view your health verification and profile information
-                </p>
-              </div>
-            );
-          })()}
-          
-          <Button
-            onClick={handleShareLink}
-            variant="destructive"
-            className="w-full max-w-xs"
-            data-testid="share-btn"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.88 12.753 9 12.175 9 11.5c0-1.415-.221-2.812-.647-4.103M19 11.5a7.5 7.5 0 01-15 0M4.5 11.5h15" />
-            </svg>
-            Share QR Code Link
-          </Button>
+              );
+            })()}
+            
+            <Button
+              onClick={handleShareLink}
+              variant="destructive"
+              className="w-full max-w-xs"
+              data-testid="share-btn"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.88 12.753 9 12.175 9 11.5c0-1.415-.221-2.812-.647-4.103M19 11.5a7.5 7.5 0 01-15 0M4.5 11.5h15" />
+              </svg>
+              Share QR Code Link
+            </Button>
+          </>
           </div>
         </div>
       )}
