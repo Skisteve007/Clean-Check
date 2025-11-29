@@ -156,7 +156,7 @@ const HostingCheckout = () => {
               </div>
               <CardTitle className="text-center">
                 <div className="text-3xl font-bold mb-2">$1</div>
-                <div className="text-sm font-normal">TEST - per year</div>
+                <div className="text-sm font-normal">TEST - per month</div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
