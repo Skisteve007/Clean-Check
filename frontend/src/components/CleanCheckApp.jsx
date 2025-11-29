@@ -4,6 +4,7 @@ import QRCodeTab from './QRCodeTab';
 import ProfileManagementTab from './ProfileManagementTab';
 import AgeConsent from './AgeConsent';
 import BiometricSetup from './BiometricSetup';
+import Footer from './Footer';
 import { useBiometricAuth } from '@/hooks/useBiometricAuth';
 import axios from 'axios';
 
